@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  neighborhood_db:
+    container_name: neighborhood_db
+    platform: linux/x86_64
+    build: ./database/neighborhood
+    env_file:
+      - ./database/neighborhood/local.env
+    ports:
+      - "3308:3306"
+    # pseudo terminal
+    tty: true
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - '8077:80'
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOSTS=neighborhood_db
+
+  server:
+    build: ./backend/server
+    ports:
+      - "8000:8000"
+    depends_on:
+      - neighborhood_db
+
+  #swagger:
+  #  # download the swagger-ui image from the docker hub
+  #  image: swaggerapi/swagger-ui
+  #  ports:
+  #    - "8080:8080"
