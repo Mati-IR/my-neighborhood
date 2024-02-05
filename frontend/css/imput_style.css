@@ -1,0 +1,98 @@
+#formularz {
+    grid-area: 4 / 2 / 4 / 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(5, 20%);
+    grid-template-rows: 70% 30%;
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+#tekstowe-pole {
+    grid-area: 1 / 2 / 2 / 5;
+    font-size: 1.5vw;
+    padding: 10px 10px;
+    width: 80%;
+    text-align: center;
+    margin: 0 auto;
+    outline: none;
+	background: #000000;
+	color: #FFFFFF;
+	border: 1px solid #FFFFFF;
+	border-radius: 10px;
+	transition: .3s ease;
+}
+#tekstowe-pole:focus {
+	background: #000000;
+	border: 3px solid #e65025;
+	border-radius: 10px;
+}
+#tekstowe-pole::placeholder {
+	color: #E1E1E1;
+}
+#przycisk-czyszczenia {
+    font-size: 1vw;
+    padding: 10px;
+    grid-area: 1 / 1 / 2 / 2;
+    text-align: center;
+    background-color: #e65025;
+    color: #fff;
+    font-style: normal;
+    text-decoration: none;
+    padding: 15px 15px;
+    border: 0px solid #000;
+    border-radius: 10px;
+    display: inline-block;
+    cursor: pointer;
+}
+#przycisk-czyszczenia:hover{
+    background-color: #ce6516;
+}
+#przycisk-czyszczenia:active{
+    transform: scale(0.95);
+}
+#przycisk-enter {
+    grid-area: 1 / 5 / 2 / 6;
+    background-color: #e65025;
+    color: #fff;
+    font-size: 1vw;
+    font-style: normal;
+    text-decoration: none;
+    padding: 15px 15px;
+    border: 0px solid #000;
+    border-radius: 10px;
+    display: inline-block;
+    cursor: pointer;
+}
+#przycisk-enter:hover{
+    background-color: #ce6516;
+}
+#przycisk-enter:active{
+    transform: scale(0.95);
+}
+.rodzaj-operacji {
+    grid-area: 2 / 2 / 3 / 5; 
+    text-align: center;
+    color: white;
+}
+input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e65025;
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+input[type="radio"]:checked {
+    background-color: #e65025;
+    border-color: #e65025;
+}
+label {
+    display: inline-block;
+    font-size: 16px;
+}

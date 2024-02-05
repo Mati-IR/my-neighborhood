@@ -1,0 +1,67 @@
+body {
+    background-image: url(../RESOURCES/IMAGE/gate_page_background.jpg);
+  
+    background-position: center center;
+  
+    background-repeat: no-repeat;
+  
+    background-attachment: fixed;
+  
+    background-size: cover;
+  
+}
+.custom_button{
+    grid-area: 1 / 5 / 2 / 6;
+    background-color: #e65025;
+    color: #fff;
+    font-style: normal;
+    text-decoration: none;
+    padding: 10px 10px;
+    border: 0px solid #000;
+    border-radius: 10px;
+    display: inline-block;
+    cursor: pointer;
+}
+.custom_button:hover{
+    color: black;
+}
+.custom_button:active{
+    transform: scale(0.95);
+}
+.custom_div{
+    background: rgba(255, 226, 186, 0);
+    border: 0px;
+}
+a{
+    color: white;
+}
+a:hover{
+    color: #e65025;
+}
+.label-decoration{
+    color: #e65025;
+}
+h1{
+    color: #e65025;
+}
+.text-center{
+    color: #e65025;
+}
+.form-check-label{
+    color: #e65025;
+}
+.text-decoration{
+    color: #e65025;
+}
+.form-decoration:-webkit-autofill,
+.form-decoration:-webkit-autofill:hover, 
+.form-decoration:-webkit-autofill:focus,
+.form-decoration:active,
+.form-decoration:focus,
+.form-decoration{
+  border: 1px solid #e65025;
+  -webkit-text-fill-color: white;
+  -webkit-box-shadow: 0 0 0px 1000px #000 inset;
+  transition: background-color 5000s ease-in-out 0s;
+  background-color: #000;
+}
