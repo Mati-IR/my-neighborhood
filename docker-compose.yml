@@ -8,7 +8,7 @@ services:
     env_file:
       - ./database/neighborhood/local.env
     ports:
-      - "3308:3306"
+      - "3307:3306"
     # pseudo terminal
     tty: true
 
@@ -26,9 +26,5 @@ services:
       - "8000:8000"
     depends_on:
       - neighborhood_db
-
-  #swagger:
-  #  # download the swagger-ui image from the docker hub
-  #  image: swaggerapi/swagger-ui
-  #  ports:
-  #    - "8080:8080"
+    env_file:
+      - ./backend/server/local.env

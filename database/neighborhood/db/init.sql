@@ -183,7 +183,7 @@ CREATE TABLE `owner`
  `full_name`    varchar(100) NOT NULL COMMENT 'Person or a company' ,
  `phone_number` varchar(20) NOT NULL ,
  `full_address` varchar(100) NOT NULL ,
- `email`        varchar(100) NOT NULL ,
+ `email`        varchar(320) NOT NULL ,
  `credentials`  int NOT NULL ,
 
 PRIMARY KEY (`id`),
