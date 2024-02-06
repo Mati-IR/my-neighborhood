@@ -1,0 +1,2 @@
+System wspomagający zarządzenie wspólnotą mieszkaniową<br>
+W ramach tego projektu należy wykonać system do obsługi wspólnot mieszkaniowych. Należy przeanalizować wymagania obecnego rynku mieszkaniowe, przeanalizować dostępne rozwiązania. System powinien na pewno obsługiwać wszystkie sprawy techniczne, rozliczeniowe, umożliwiać głosowanie członków wspólnoty w sprawie uchwał, posiadać moduł aktualności, wynajmu powierzchni wspólnych etc.
