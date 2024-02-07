@@ -20,3 +20,12 @@ class OwnerRegistrationModel(BaseModel):
     full_name: str
     phone_number: str
     full_address: str
+
+
+class BuildingModel(BaseModel):
+    building_name: str
+    city: str
+    street: str
+    building_number: str
+    postal_code: str
+    floors_amount: int

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(swagger_ui_parameters={"syntaxHighlight": False})
 # to access swagger ui, go to http://localhost:8000/docs
 
-app.include_router(users.router)
+app.include_router(users_router.router)
 
 @app.get("/")
 def read_root():
