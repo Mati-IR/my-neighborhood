@@ -85,9 +85,7 @@
       User name
     </div>
     <div class="button-container">
-      <a href="login.html">
-        <button class="btn btn-light">Wyloguj</button>
-      </a>
+        <button class="btn btn-light" onclick="logout()">Wyloguj</button>
     </div>
   </div>
 </div>
@@ -111,6 +109,11 @@
   function toggleSidebar() {
     var sidebar = document.getElementById("sidebar");
     sidebar.classList.toggle("show");
+    console.log(window.globalVariable);
+  }
+  function logout() {
+    localStorage.clear(); // Wyczyszczenie local storage
+    window.location.href = "login.html"; // Przekierowanie do strony logowania
   }
 </script>
 

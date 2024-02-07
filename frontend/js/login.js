@@ -37,19 +37,16 @@ document.addEventListener('DOMContentLoaded', function () {
             login(emailValue, hashedValue)
             .then(response => {
                 console.log('Odpowiedź z serwera:', response);
-            })
-            .then(data => {
-                /*console.log("RESPONSE: ",data)
-                // save login and id to local storage
-                localStorage.setItem('login', emailValue);
-                localStorage.setItem('id', data["id"]);
-                errorElement.textContent = "";
-                window.location.href = 'admin_panel.html'; // Redirect to index.html
-                */
+                if(response.message=="Credentials incorrect"){
+                    errorElement.textContent = "Auroryzacja nie udana";
+                }
+                else{
+                    localStorage.setItem('user', response.user);
+                    localStorage.setItem('admin', response.is_admin);
+                    window.location.href = 'index.html';
+                }
             })
             .catch(error => {
-                // Handle login errors
-                // For demonstration purposes, we'll just show an alert
                 console.error('Wystąpił błąd:', error);
                 errorElement.textContent = "Auroryzacja nie udana";
             });
@@ -80,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function login(email, password) {
-        const url = apiBaseUrl + '/login'; // Adres URL API
+        const url = apiBaseUrl + '/login';
     
         const requestData = {
             email: email,
@@ -92,16 +89,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json' // Ustawienie nagłówka Content-Type na application/json
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(requestData) // Przekonwertowanie danych na format JSON i przekazanie jako ciało żądania
+                body: JSON.stringify(requestData)
             });
     
-            const responseData = await response.json(); // Odczytanie odpowiedzi jako dane JSON
-            return responseData; // Zwrócenie danych odpowiedzi
+            const responseData = await response.json();
+            return responseData;
         } catch (error) {
             console.error('Wystąpił błąd podczas wysyłania żądania:', error);
-            // Obsługa błędu
             return { error: 'Wystąpił błąd podczas wysyłania żądania' };
         }
     }

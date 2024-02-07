@@ -3,7 +3,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form, status
 import logging
 from routers import users_router
-
+from fastapi.middleware.cors import CORSMiddleware
 
 # setup logger
 logging.basicConfig(level=logging.INFO)
@@ -23,3 +23,11 @@ if __name__ == "__main__":
     logger.info("Starting server...")
     logger.info("Starting server...")
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:7999"],  # Ustaw domenę Twojej aplikacji klienta
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],  # Dodaj metody HTTP, które chcesz obsługiwać
+    allow_headers=["*"],  # Ustaw nagłówki, które chcesz zezwolić
+)
