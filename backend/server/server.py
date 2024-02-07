@@ -2,7 +2,7 @@ import httpx
 import uvicorn
 from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form, status
 import logging
-from routers import users
+from routers import users_router
 
 
 # setup logger
