@@ -13,11 +13,14 @@
       display: flex; /* Ustawienie elementów w linii */
       justify-content: space-between; /* Rozłożenie elementów na końcach */
       align-items: center; /* Wyśrodkowanie względem wysokości */
-      transition: margin-left 0.3s ease; /* Animacja przesunięcia treści */
     }
 
+    .logo-container{
+      align-items: center;
+    }
     .logo-container img {
       max-height: 30px; /* Dostosuj wysokość loga według potrzeb */
+      
     }
 
     .name-button-container {
@@ -36,7 +39,7 @@
     .sidebar {
       height: 100vh;
       width: 250px;
-      margin-top: 58px; /* Margines 60px nad paskiem nawigacyjnym */
+      margin-top: 58px; /* Margines 60px po lewej stronie */
       position: fixed;
       top: 0;
       left: -250px;
@@ -63,31 +66,28 @@
       display: block;
     }
 
-    /* Styl dla kontenera z treścią */
     .content-container {
-      padding: 20px; /* Dostosuj wewnętrzny odstęp */
-      transition: margin-left 0.3s ease; /* Animacja przesunięcia treści */
-    }
-
-    /* Dodatkowy styl dla treści, przesuwający ją w lewo wraz z pojawianiem się menu bocznego */
-    .content-container.shifted {
-      margin-left: 250px;
+      padding: 20px;
+      margin-left: 5%;
+      margin-right: 5%;
     }
   </style>
 </head>
 <body>
 
-<div class="custom-bar" id="navbar">
+<div class="custom-bar">
   <button class="btn btn-light" onclick="toggleSidebar()">Menu</button> <!-- Przycisk do otwierania/zamykania menu bocznego -->
   <div class="logo-container">
-    <img src="logo.png" alt="Logo"> <!-- Zmień 'logo.png' na nazwę i ścieżkę do swojego logo -->
+    <img src="../resources/logo.png" alt="Logo"> <!-- Zmień 'logo.png' na nazwę i ścieżkę do swojego logo -->
   </div>
   <div class="name-button-container">
     <div class="name-container">
-      Nazwa Twojej Strony
+      User name
     </div>
     <div class="button-container">
-      <button class="btn btn-light">Przycisk</button>
+      <a href="login.html">
+        <button class="btn btn-light">Wyloguj</button>
+      </a>
     </div>
   </div>
 </div>
@@ -103,18 +103,14 @@
 </div>
 
 <!-- Kontener z treścią -->
-<div class="content-container" id="content">
+<div class="content-container">
   <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at tellus vitae lectus tempor tincidunt. Phasellus non lorem id lorem congue mattis. Pellentesque in tellus quis libero finibus euismod. Ut convallis hendrerit justo, ut condimentum dolor condimentum a. Sed tincidunt eget odio id sollicitudin. Proin vel nisi id arcu luctus hendrerit. Nam ac convallis diam. Sed nec rhoncus mi. Vivamus vel eleifend ligula. Fusce tristique diam vel orci efficitur tempus.</p>
 </div>
 
 <script>
   function toggleSidebar() {
     var sidebar = document.getElementById("sidebar");
-    var navbar = document.getElementById("navbar");
-    var content = document.getElementById("content");
     sidebar.classList.toggle("show");
-    navbar.classList.toggle("show");
-    content.classList.toggle("shifted");
   }
 </script>
 

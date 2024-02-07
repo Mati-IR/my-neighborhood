@@ -34,29 +34,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }*/
 
         if (isValid) {
-            const url = apiBaseUrl + "/user/login/" + emailValue + "/" + hashedValue;
-            //fetch(apiBaseUrl + "/user/login/" + {emailValue}+"/"+{hashedValue})
-            fetch(url, {
-                method: 'POST'
-              })
+            login(emailValue, hashedValue)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.statusText}`);
-                }
-                return response.json();
+                console.log('Odpowiedź z serwera:', response);
             })
             .then(data => {
-                console.log("RESPONSE: ",data)
+                /*console.log("RESPONSE: ",data)
                 // save login and id to local storage
                 localStorage.setItem('login', emailValue);
                 localStorage.setItem('id', data["id"]);
                 errorElement.textContent = "";
                 window.location.href = 'admin_panel.html'; // Redirect to index.html
+                */
             })
             .catch(error => {
                 // Handle login errors
                 // For demonstration purposes, we'll just show an alert
-                console.log('Login failed: ' + error.message);
+                console.error('Wystąpił błąd:', error);
                 errorElement.textContent = "Auroryzacja nie udana";
             });
         }
@@ -84,5 +78,31 @@ document.addEventListener('DOMContentLoaded', function () {
             feedbackElement.textContent = '';
         });
     }
+
+    async function login(email, password) {
+        const url = apiBaseUrl + '/login'; // Adres URL API
     
+        const requestData = {
+            email: email,
+            password_hash: password
+        };
+        console.log(requestData);
+        console.log(url);
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Ustawienie nagłówka Content-Type na application/json
+                },
+                body: JSON.stringify(requestData) // Przekonwertowanie danych na format JSON i przekazanie jako ciało żądania
+            });
+    
+            const responseData = await response.json(); // Odczytanie odpowiedzi jako dane JSON
+            return responseData; // Zwrócenie danych odpowiedzi
+        } catch (error) {
+            console.error('Wystąpił błąd podczas wysyłania żądania:', error);
+            // Obsługa błędu
+            return { error: 'Wystąpił błąd podczas wysyłania żądania' };
+        }
+    }
 });
