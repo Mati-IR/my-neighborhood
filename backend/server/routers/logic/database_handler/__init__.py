@@ -1,2 +1,2 @@
-from .tables_models import Credential, Admin
+from .tables_models import *
 from .util import get_database_session

@@ -5,12 +5,17 @@ from sqlalchemy.orm import relationship
 Base = declarative_base()
 
 
-class Credential(Base):
-    __tablename__ = 'credentials'
-    id = Column(Integer, primary_key=True, autoincrement=True)
+class OwnerCredential(Base):
+    __tablename__ = 'owner_credentials'
+    id = Column(Integer, primary_key=True)
+    email = Column(String(320), nullable=False, unique=True)
     password_hash = Column(String(64), nullable=False)
-    email = Column(String(320), nullable=False)
 
+class AdminCredential(Base):
+    __tablename__ = 'admin_credentials'
+    id = Column(Integer, primary_key=True)
+    password_hash = Column(String(64), nullable=False)
+    email = Column(String(320), nullable=False, unique=True)
 
 class Admin(Base):
     __tablename__ = 'admin'
@@ -18,8 +23,8 @@ class Admin(Base):
     full_name = Column(String(100), nullable=False)
     phone_number = Column(String(220))
     salary = Column(DECIMAL)
-    credentials_id = Column(Integer, ForeignKey('credentials.id'))
-    credentials = relationship("Credential", back_populates="admins")
+    credentials_id = Column(Integer, ForeignKey('admin_credentials.id'), unique=True)
+
 
 
 class Building(Base):
@@ -128,13 +133,11 @@ class OccupantsOfSpace(Base):
 
 class Owner(Base):
     __tablename__ = 'owner'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    full_name = Column(String(100), nullable=False, comment='Person or a company')
+    id = Column(Integer, primary_key=True)
+    full_name = Column(String(100), nullable=False)  # Person or a company
     phone_number = Column(String(20), nullable=False)
     full_address = Column(String(100), nullable=False)
-    email = Column(String(100), nullable=False)
-    credentials = Column(Integer, ForeignKey('credentials.id'))
-    credentials_relation = relationship("Credential", backref="owners")
+    credentials_id = Column(Integer, ForeignKey('owner_credentials.id'), unique=True)
 
 
 class OwnerOfSpace(Base):

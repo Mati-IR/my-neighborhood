@@ -1,7 +1,16 @@
 -- init.sql
 
+CREATE TABLE `owner_credentials`
+(
+ `id`            int NOT NULL AUTO_INCREMENT ,
+ `email`         varchar(320) NOT NULL ,
+ `password_hash` varchar(64) NOT NULL ,
 
-CREATE TABLE `credentials`
+PRIMARY KEY (`id`)
+);
+
+
+CREATE TABLE `admin_credentials`
 (
  `id`            int NOT NULL AUTO_INCREMENT ,
  `password_hash` varchar(64) NOT NULL ,
@@ -10,17 +19,18 @@ CREATE TABLE `credentials`
 PRIMARY KEY (`id`)
 );
 
+
 CREATE TABLE `admin`
 (
  `id`           int NOT NULL AUTO_INCREMENT ,
  `full_name`    varchar(100) NOT NULL ,
  `phone_number` varchar(220) NULL ,
  `salary`       decimal NULL ,
- `credentials`  int NOT NULL ,
+ `credentials_id`  int NOT NULL ,
 
 PRIMARY KEY (`id`),
-KEY `FK_2` (`credentials`),
-CONSTRAINT `FK_15` FOREIGN KEY `FK_2` (`credentials`) REFERENCES `credentials` (`id`)
+KEY `FK_2` (`credentials_id`),
+CONSTRAINT `FK_15` FOREIGN KEY `FK_2` (`credentials_id`) REFERENCES `admin_credentials` (`id`)
 );
 
 
@@ -183,12 +193,11 @@ CREATE TABLE `owner`
  `full_name`    varchar(100) NOT NULL COMMENT 'Person or a company' ,
  `phone_number` varchar(20) NOT NULL ,
  `full_address` varchar(100) NOT NULL ,
- `email`        varchar(320) NOT NULL ,
- `credentials`  int NOT NULL ,
+ `credentials_id`  int NOT NULL ,
 
 PRIMARY KEY (`id`),
-KEY `FK_1` (`credentials`),
-CONSTRAINT `FK_15_1` FOREIGN KEY `FK_1` (`credentials`) REFERENCES `credentials` (`id`)
+KEY `FK_1` (`credentials_id`),
+CONSTRAINT `FK_25_1` FOREIGN KEY `FK_1` (`credentials_id`) REFERENCES `owner_credentials` (`id`)
 );
 
 
