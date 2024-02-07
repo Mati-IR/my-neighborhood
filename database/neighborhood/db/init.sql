@@ -42,7 +42,6 @@ CREATE TABLE `building`
  `street`          varchar(50) NULL ,
  `building_number` varchar(10) NOT NULL ,
  `postal_code`     varchar(10) NOT NULL ,
- `floors`          int NOT NULL ,
  `floors_amount`   int NOT NULL ,
 
 PRIMARY KEY (`id`)

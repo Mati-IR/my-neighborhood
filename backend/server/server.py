@@ -2,7 +2,7 @@ import httpx
 import uvicorn
 from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form, status
 import logging
-from routers import users_router
+from routers import users_router, buildings_router
 from fastapi.middleware.cors import CORSMiddleware
 
 # setup logger
@@ -13,6 +13,7 @@ app = FastAPI(swagger_ui_parameters={"syntaxHighlight": False})
 # to access swagger ui, go to http://localhost:8000/docs
 
 app.include_router(users_router.router)
+app.include_router(buildings_router.router)
 
 @app.get("/")
 def read_root():

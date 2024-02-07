@@ -35,7 +35,6 @@ class Building(Base):
     street = Column(String(50))
     building_number = Column(String(10), nullable=False)
     postal_code = Column(String(10), nullable=False)
-    floors = relationship("FloorForBuilding", back_populates="building")
     floors_amount = Column(Integer, nullable=False)
 
 
@@ -44,7 +43,6 @@ class FloorForBuilding(Base):
     floor_id = Column(Integer, primary_key=True, autoincrement=True)
     floor_number = Column(Integer, nullable=False)
     building_id = Column(Integer, ForeignKey('building.id'))
-    building = relationship("Building", back_populates="floors")
 
 
 class Utility(Base):
