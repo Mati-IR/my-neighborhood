@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pasek z logo, nazwą, przyciskiem i menu bocznym</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .custom-bar {
+      background-color: #007bff; /* Kolor tła paska */
+      color: #ffffff; /* Kolor tekstu */
+      padding: 10px; /* Wewnętrzny odstęp */
+      display: flex; /* Ustawienie elementów w linii */
+      justify-content: space-between; /* Rozłożenie elementów na końcach */
+      align-items: center; /* Wyśrodkowanie względem wysokości */
+      transition: margin-left 0.3s ease; /* Animacja przesunięcia treści */
+    }
+
+    .logo-container img {
+      max-height: 30px; /* Dostosuj wysokość loga według potrzeb */
+    }
+
+    .name-button-container {
+      display: flex; /* Ustawienie elementów w linii */
+      align-items: center; /* Wyśrodkowanie względem wysokości */
+    }
+
+    .name-container {
+      margin-right: 10px; /* Mniejszy odstęp między nazwą a przyciskiem */
+    }
+
+    .button-container {
+      margin-left: 10px; /* Odstęp między przyciskiem a nazwą */
+    }
+
+    .sidebar {
+      height: 100vh;
+      width: 250px;
+      margin-top: 58px; /* Margines 60px nad paskiem nawigacyjnym */
+      position: fixed;
+      top: 0;
+      left: -250px;
+      background-color: #333;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar.show {
+      left: 0;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar ul li {
+      padding: 10px;
+    }
+
+    .sidebar ul li a {
+      color: #fff;
+      text-decoration: none;
+      display: block;
+    }
+
+    /* Styl dla kontenera z treścią */
+    .content-container {
+      padding: 20px; /* Dostosuj wewnętrzny odstęp */
+      transition: margin-left 0.3s ease; /* Animacja przesunięcia treści */
+    }
+
+    /* Dodatkowy styl dla treści, przesuwający ją w lewo wraz z pojawianiem się menu bocznego */
+    .content-container.shifted {
+      margin-left: 250px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="custom-bar" id="navbar">
+  <button class="btn btn-light" onclick="toggleSidebar()">Menu</button> <!-- Przycisk do otwierania/zamykania menu bocznego -->
+  <div class="logo-container">
+    <img src="logo.png" alt="Logo"> <!-- Zmień 'logo.png' na nazwę i ścieżkę do swojego logo -->
+  </div>
+  <div class="name-button-container">
+    <div class="name-container">
+      Nazwa Twojej Strony
+    </div>
+    <div class="button-container">
+      <button class="btn btn-light">Przycisk</button>
+    </div>
+  </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+  <ul>
+    <li><a href="#">Opcja 1</a></li>
+    <li><a href="#">Opcja 2</a></li>
+    <li><a href="#">Opcja 3</a></li>
+    <li><a href="#">Opcja 4</a></li>
+    <li><a href="#">Opcja 5</a></li>
+  </ul>
+</div>
+
+<!-- Kontener z treścią -->
+<div class="content-container" id="content">
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at tellus vitae lectus tempor tincidunt. Phasellus non lorem id lorem congue mattis. Pellentesque in tellus quis libero finibus euismod. Ut convallis hendrerit justo, ut condimentum dolor condimentum a. Sed tincidunt eget odio id sollicitudin. Proin vel nisi id arcu luctus hendrerit. Nam ac convallis diam. Sed nec rhoncus mi. Vivamus vel eleifend ligula. Fusce tristique diam vel orci efficitur tempus.</p>
+</div>
+
+<script>
+  function toggleSidebar() {
+    var sidebar = document.getElementById("sidebar");
+    var navbar = document.getElementById("navbar");
+    var content = document.getElementById("content");
+    sidebar.classList.toggle("show");
+    navbar.classList.toggle("show");
+    content.classList.toggle("shifted");
+  }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
