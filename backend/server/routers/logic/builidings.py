@@ -60,3 +60,17 @@ def create_building(building_model):
         session.add(floor)
     session.commit()
     return code, message
+
+
+def get_buildings():
+    buildings = session.query(Building).all()
+    for building in buildings:
+        yield {
+        "id": building.id,
+        "building_name": building.building_name,
+        "city": building.city,
+        "street": building.street,
+        "building_number": building.building_number,
+        "postal_code": building.postal_code,
+        "floors_amount": building.floors_amount
+    }
