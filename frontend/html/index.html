@@ -20,7 +20,6 @@
     }
     .logo-container img {
       max-height: 30px; /* Dostosuj wysokość loga według potrzeb */
-      
     }
 
     .name-button-container {
@@ -71,6 +70,87 @@
       margin-left: 5%;
       margin-right: 5%;
     }
+
+    .hidden {
+      display: none;
+    }
+    form {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="email"],
+    input[type="password"],
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button[type="button"] {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    button[type="button"]:hover {
+      background-color: #0056b3;
+    }
+
+    .content-container {
+      margin-top: 20px;
+    }
+    .radioDiv {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    #accountHeader {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .accountHeader {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+      font-weight: bold ;
+      font-size: x-large;
+    }
+    
+    .apiInfoResponse{
+      padding: 20px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .levelWarning{
+      background-color: #cf4a4a;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .levelSucces{
+      background-color: #33cf33;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -81,42 +161,29 @@
     <img src="../resources/logo.png" alt="Logo"> <!-- Zmień 'logo.png' na nazwę i ścieżkę do swojego logo -->
   </div>
   <div class="name-button-container">
-    <div class="name-container">
+    <div class="name-container" id="username">
       User name
     </div>
     <div class="button-container">
-        <button class="btn btn-light" onclick="logout()">Wyloguj</button>
+      <button class="btn btn-light" onclick="logout()">Wyloguj</button>
     </div>
   </div>
 </div>
 
 <div class="sidebar" id="sidebar">
   <ul>
-    <li><a href="#">Opcja 1</a></li>
-    <li><a href="#">Opcja 2</a></li>
-    <li><a href="#">Opcja 3</a></li>
-    <li><a href="#">Opcja 4</a></li>
-    <li><a href="#">Opcja 5</a></li>
+    <li><a href="#" onclick="generateForm()">Utwórz konto</a></li>
   </ul>
 </div>
 
 <!-- Kontener z treścią -->
-<div class="content-container">
-  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at tellus vitae lectus tempor tincidunt. Phasellus non lorem id lorem congue mattis. Pellentesque in tellus quis libero finibus euismod. Ut convallis hendrerit justo, ut condimentum dolor condimentum a. Sed tincidunt eget odio id sollicitudin. Proin vel nisi id arcu luctus hendrerit. Nam ac convallis diam. Sed nec rhoncus mi. Vivamus vel eleifend ligula. Fusce tristique diam vel orci efficitur tempus.</p>
+<div class="content-container" id="content">
 </div>
 
-<script>
-  function toggleSidebar() {
-    var sidebar = document.getElementById("sidebar");
-    sidebar.classList.toggle("show");
-    console.log(window.globalVariable);
-  }
-  function logout() {
-    localStorage.clear(); // Wyczyszczenie local storage
-    window.location.href = "login.html"; // Przekierowanie do strony logowania
-  }
-</script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-sha256"></script>
+<script src="../js/userCreate.js"></script>
+<script src="../js/utility.js"></script>
+<script src="../js/global.js"></script>
 </body>
 </html>
