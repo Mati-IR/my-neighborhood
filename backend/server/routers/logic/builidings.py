@@ -74,3 +74,44 @@ def get_buildings():
         "postal_code": building.postal_code,
         "floors_amount": building.floors_amount
     }
+
+
+def get_building(building_id):
+    building = session.query(Building).filter(Building.id == building_id).first()
+    if building is not None:
+        return {
+            "id": building.id,
+            "building_name": building.building_name,
+            "city": building.city,
+            "street": building.street,
+            "building_number": building.building_number,
+            "postal_code": building.postal_code,
+            "floors_amount": building.floors_amount
+        }
+    else:
+        return None
+
+
+def remove_building(building_id):
+    # Query for any floors associated with the building
+    floors = session.query(FloorForBuilding).filter(FloorForBuilding.building_id == building_id).all()
+
+    # If there are associated floors, delete them first
+    if floors:
+        for floor in floors:
+            session.delete(floor)
+        session.commit()
+
+    # Now, try to delete the building
+    building = session.query(Building).filter(Building.id == building_id).first()
+    if building:
+        session.delete(building)
+        try:
+            session.commit()
+            return RETURN_SUCCESS, 'Building and associated floors removed'
+        except Exception as e:
+            session.rollback()
+            return RETURN_FAILURE, f'Failed to remove building: {str(e)}'
+    else:
+        return RETURN_FAILURE, 'Building not found'
+
