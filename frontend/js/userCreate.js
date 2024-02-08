@@ -1,4 +1,4 @@
-function generateForm() {
+function generateNewUserRadio() {
     var contentContainer = document.getElementById("content");
     contentContainer.innerHTML = '';
 
@@ -27,7 +27,7 @@ function generateForm() {
     radioAdmin.setAttribute("name", "userType");
     radioAdmin.setAttribute("value", "admin");
     radioAdmin.setAttribute("id", "adminRadio");
-    radioAdmin.setAttribute("onclick", "generateImputForm()");
+    radioAdmin.setAttribute("onclick", "generateNewUserForm()");
     var labelAdmin = document.createElement("label");
     labelAdmin.textContent = "Admin";
     labelAdmin.setAttribute("for", "adminRadio");
@@ -39,7 +39,7 @@ function generateForm() {
     radioUser.setAttribute("name", "userType");
     radioUser.setAttribute("value", "user");
     radioUser.setAttribute("id", "userRadio");
-    radioUser.setAttribute("onclick", "generateImputForm()");
+    radioUser.setAttribute("onclick", "generateNewUserForm()");
     var labelUser = document.createElement("label");
     labelUser.textContent = "User";
     labelUser.setAttribute("for", "userRadio");
@@ -55,7 +55,8 @@ function generateForm() {
     contentContainer.appendChild(ImputForm);
 }
 
-function generateImputForm() {
+function generateNewUserForm() {
+    hideApiResponse("apiInfoResponse");
 
     var contentContainer = document.getElementById("ImputForm");
     contentContainer.innerHTML = '';
@@ -144,22 +145,6 @@ function generateImputForm() {
   
     adminForm.appendChild(form);
     contentContainer.appendChild(adminForm);
-}
-
-function showAdminForm() {
-    var adminForm = document.getElementById("adminForm");
-    var userForm = document.getElementById("userForm");
-    userForm.classList.add("hidden");
-    adminForm.classList.remove("hidden");
-    console.log(document.querySelector('input[name="userType"]:checked').value);
-}
-
-function showUserForm() {
-    var adminForm = document.getElementById("adminForm");
-    var userForm = document.getElementById("userForm");
-    adminForm.classList.add("hidden");
-    userForm.classList.remove("hidden");
-    console.log(document.querySelector('input[name="userType"]:checked').value);
 }
 
 function validateForm() {

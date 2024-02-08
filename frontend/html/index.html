@@ -6,9 +6,24 @@
   <title>Pasek z logo, nazwą, przyciskiem i menu bocznym</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    .buttonDecoration{
+      background-color: #43b652;
+      color: white;
+      border-color: #43b652;
+    }
+    .buttonDecoration:hover{
+      background-color: #1b562b;
+      color: white;
+      border-color: #1b562b;
+    }
+    .buttonDecoration:active{
+      background-color: #43b652;
+      color: white;
+      border-color: #43b652;
+    }
     .custom-bar {
-      background-color: #007bff; /* Kolor tła paska */
-      color: #ffffff; /* Kolor tekstu */
+      border-bottom: 1px solid #43b652;
+      color: #1b562b; /* Kolor tekstu */
       padding: 10px; /* Wewnętrzny odstęp */
       display: flex; /* Ustawienie elementów w linii */
       justify-content: space-between; /* Rozłożenie elementów na końcach */
@@ -19,7 +34,7 @@
       align-items: center;
     }
     .logo-container img {
-      max-height: 30px; /* Dostosuj wysokość loga według potrzeb */
+      max-height: 60px; /* Dostosuj wysokość loga według potrzeb */
     }
 
     .name-button-container {
@@ -38,11 +53,11 @@
     .sidebar {
       height: 100vh;
       width: 250px;
-      margin-top: 58px; /* Margines 60px po lewej stronie */
+      margin-top: 80px; /* Margines 60px po lewej stronie */
       position: fixed;
       top: 0;
       left: -250px;
-      background-color: #333;
+      background-color: #43b652;
       transition: all 0.3s ease;
     }
 
@@ -146,17 +161,19 @@
     .levelWarning{
       background-color: #cf4a4a;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      color: white;
     }
     .levelSucces{
-      background-color: #33cf33;
+      background-color: #43b652;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      color: white;
     }
   </style>
 </head>
 <body>
 
 <div class="custom-bar">
-  <button class="btn btn-light" onclick="toggleSidebar()">Menu</button> <!-- Przycisk do otwierania/zamykania menu bocznego -->
+  <button class="btn btn-light buttonDecoration" onclick="toggleSidebar()">Menu</button> <!-- Przycisk do otwierania/zamykania menu bocznego -->
   <div class="logo-container">
     <img src="../resources/logo.png" alt="Logo"> <!-- Zmień 'logo.png' na nazwę i ścieżkę do swojego logo -->
   </div>
@@ -165,13 +182,14 @@
       User name
     </div>
     <div class="button-container">
-      <button class="btn btn-light" onclick="logout()">Wyloguj</button>
+      <button class="btn btn-light buttonDecoration" onclick="logout()">Wyloguj</button>
     </div>
   </div>
 </div>
 
 <div class="sidebar" id="sidebar">
   <ul>
+    <li><a href="#" onclick="generateNewUserRadio()">Utwórz konto</a></li>
     <li><a href="#" onclick="generateForm()">Utwórz konto</a></li>
   </ul>
 </div>

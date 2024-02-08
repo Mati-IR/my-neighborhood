@@ -19,9 +19,22 @@ function loadFromLocalStorage(){
 }
 
 function printApiResponse(elementId,message,messageLevel){
+    
     var apiInfoResponse = document.getElementById(elementId);
     apiInfoResponse.classList.add("apiInfoResponse");
-    apiInfoResponse.classList.add(messageLevel);
+    var classList = apiInfoResponse.classList;
+
+    for (var i = 0; i < messageLevelClassArray.length; i++) {
+        if (classList.contains(messageLevelClassArray[i])) {
+            classList.remove(messageLevelClassArray[i]);
+        }
+    }
+    classList.add(messageLevel);
+    console.log(apiInfoResponse.classList);
     apiInfoResponse.textContent = message;
 }
-  loadFromLocalStorage();
+function hideApiResponse(elementId){
+    var apiInfoResponse = document.getElementById(elementId);
+    apiInfoResponse.classList.add("d-none");
+}
+loadFromLocalStorage();
