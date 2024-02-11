@@ -325,3 +325,6 @@ CONSTRAINT `FK_3` FOREIGN KEY `FK_1` (`serviceman_id`) REFERENCES `serviceman` (
 KEY `FK_2` (`incident_id`),
 CONSTRAINT `FK_4` FOREIGN KEY `FK_2` (`incident_id`) REFERENCES `incident` (`id`)
 );
+
+INSERT INTO `space_type` (`type_name`) VALUES ('Apartment'), ('Office'), ('Storage'), ('Garage'),
+                                              ('Gym'), ('Commercial'), ('Other');
