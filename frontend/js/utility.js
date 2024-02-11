@@ -14,8 +14,12 @@ function loadFromLocalStorage(){
     if(user==null){
         window.location.href = 'login.html';
     }
-    var username = document.getElementById("username");
-    username.textContent = user;
+    else{
+        var username = document.getElementById("username");
+        var message = "Witaj "+user;
+        headerTextChange(message);
+        username.textContent = user;
+    }
 }
 
 function printApiResponse(elementId,message,messageLevel){
@@ -29,12 +33,26 @@ function printApiResponse(elementId,message,messageLevel){
             classList.remove(messageLevelClassArray[i]);
         }
     }
+
     classList.add(messageLevel);
     console.log(apiInfoResponse.classList);
     apiInfoResponse.textContent = message;
 }
 function hideApiResponse(elementId){
     var apiInfoResponse = document.getElementById(elementId);
-    apiInfoResponse.classList.add("d-none");
+    if(apiInfoResponse!=null){
+        apiInfoResponse.classList.add("d-none");
+    }
+}
+function clearDivContent(element_id) {
+    var contentContainer = document.getElementById(element_id);
+    contentContainer.innerHTML = '';
+}
+function headerTextChange(message){
+    var Header = document.getElementById("MenuHeader");
+    Header.textContent = message;
+}
+function navigateToHomePage() {
+    window.location.href = homepageUrl;
 }
 loadFromLocalStorage();

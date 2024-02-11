@@ -6,10 +6,7 @@ function generateNewUserRadio() {
     apiInfoResponse.setAttribute("id", "apiInfoResponse");
     contentContainer.appendChild(apiInfoResponse);
 
-    var createHeader = document.createElement("p");
-    createHeader.textContent = "Tworzenie nowego konta";
-    createHeader.classList.add("accountHeader");
-    contentContainer.appendChild(createHeader);
+    headerTextChange("Tworzenie nowego konta")
 
     var header = document.createElement("p");
     header.textContent = "Wybierz typ konta do utworzenia";
@@ -233,7 +230,7 @@ async function registerAdmin(adminData) {
         printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
         console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
     }
-  }
+}
   
 async function registerOwner(ownerData) {
     try {
