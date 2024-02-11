@@ -55,8 +55,8 @@ def create_building(building_model):
     session.flush()
 
     floors = building_model.floors_amount
-    for i in range(floors):
-        floor = FloorForBuilding(floor_number=i + 1, building_id=building.id)
+    for i in range(floors + 1):
+        floor = FloorForBuilding(floor_number=i, building_id=building.id)
         session.add(floor)
     session.commit()
     return code, message
