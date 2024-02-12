@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from .models import SignInRequestModel, AdminRegistrationModel, OwnerRegistrationModel
-from .logic import login, register_admin, register_owner
+from .logic import login, register_admin, register_owner, get_all_owners
 import logging
 
 router = APIRouter()
@@ -28,3 +28,9 @@ def register_adm(admin: AdminRegistrationModel):
 def register_own(owner: OwnerRegistrationModel):
     code, message = register_owner(owner)
     return JSONResponse(status_code=code, content={'message': message})
+
+
+@router.get('/get_all_owners')
+def get_all():
+    message = list(get_all_owners())
+    return JSONResponse(status_code=200, content={'message': message})

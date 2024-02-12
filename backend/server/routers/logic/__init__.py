@@ -1,3 +1,3 @@
-from .auth import login, register_admin, register_owner
+from .auth import *
 from .builidings import *
 from .spaces import *
