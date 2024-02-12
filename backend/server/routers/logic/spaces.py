@@ -90,7 +90,7 @@ def create_space(space: SpaceModel):
     
     return code, message
 
-def get_space_by_id(space_id):
+def get_space_by_id(space_id, short=False):
     session = get_database_session()
     space = session.query(Space).filter(Space.id == space_id).first()
     floor_id = session.query(SpacesForFloor.floor_id).filter(SpacesForFloor.space == space_id).first()[0]
@@ -99,14 +99,20 @@ def get_space_by_id(space_id):
 
     if space is None:
         return RETURN_NOT_FOUND, "Space not found"
-
-    message = {
-        "space_number": space.space_number,
-        "area": float(space.area),
-        "space_type": space.space_type,
-        "floor": floor_id,
-        "building_id": building_id
-    }
+    if not short:
+        message = {
+            "space_number": space.space_number,
+            "area": float(space.area),
+            "space_type": space.space_type,
+            "floor": floor_id,
+            "building_id": building_id
+        }
+    else:
+        message = {
+            "space_number": space.space_number,
+            "area": float(space.area),
+            "space_type": space.space_type
+        }
     logger.info(message)
     return RETURN_SUCCESS, message
 

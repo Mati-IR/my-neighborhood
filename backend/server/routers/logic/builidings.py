@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import Building, FloorForBuilding
+from .database_handler.tables_models import Building, FloorForBuilding,SpacesForFloor
 from .database_handler.util import get_database_session
+from .spaces import get_space_by_id
 import os
 import logging
 
@@ -115,3 +116,72 @@ def remove_building(building_id):
     else:
         return RETURN_FAILURE, 'Building not found'
 
+
+def get_building_details(building_id):
+    # {
+    #     "piętra": [
+    #         {
+    #             "numer_piętra": 1,
+    #             "liczba_mieszkań": 4,
+    #             "mieszkania": [
+    #                 {
+    #                     "numer_mieszkania": 101,
+    #                     "powierzchnia": 80,
+    #                     "liczba_pokoi": 3,
+    #                     "czy_wolne": true
+    #                 },
+    #                 {
+    #                     "numer_mieszkania": 102,
+    #                     "powierzchnia": 75,
+    #                     "liczba_pokoi": 2,
+    #                     "czy_wolne": false
+    #                 },
+    #                 {
+    #                     "numer_mieszkania": 103,
+    #                     "powierzchnia": 90,
+    #                     "liczba_pokoi": 4,
+    #                     "czy_wolne": true
+    #                 },
+    #                 {
+    #                     "numer_mieszkania": 104,
+    #                     "powierzchnia": 60,
+    #                     "liczba_pokoi": 2,
+    #                     "czy_wolne": false
+    #                 }
+    #             ]
+    #         },
+    #         {
+    #             "numer_piętra": 2,
+    #             "liczba_mieszkań": 3,
+    #             "mieszkania": [
+    #                 {
+    #                     "numer_mieszkania": 201,
+    #                     "powierzchnia": 70,
+    #                     "liczba_pokoi": 3,
+    #                     "czy_wolne": true
+    #                 },
+    building = session.query(Building).filter(Building.id == building_id).first()
+    floors = session.query(FloorForBuilding).filter(FloorForBuilding.building_id == building_id).all()
+    floors_details = []
+    logger.info("Floors: ")
+    for floor in floors:
+        logger.info(floor.__dict__)
+    for floor in floors:
+        floor_details = {
+            "floor_number": floor.floor_number,
+            "number_of_spaces": len([x for x in session.query(SpacesForFloor).filter(SpacesForFloor.floor_id == floor.floor_id).all()]),
+            "spaces": []
+        }
+        # get ids of all spaces on this floor
+        spaces_id = [x.space for x in session.query(SpacesForFloor).filter(SpacesForFloor.floor_id == floor.floor_id).all()]
+        logger.warn("Spaces: ")
+        for id in spaces_id:
+            logger.warn(f"Space id: {id}")
+            _, space_details = get_space_by_id(id, short=True)
+            floor_details["spaces"].append(space_details)
+
+        floors_details.append(floor_details)
+    return {
+        "building_name": building.building_name,
+        "floors": floors_details
+    }

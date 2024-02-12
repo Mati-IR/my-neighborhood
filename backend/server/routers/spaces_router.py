@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from .models import SpaceModel
-from .logic import create_space as new_space, get_space_by_id, get_spaces_by_floor, get_spaces_by_building
+from .logic import create_space as new_space, get_space_by_id
 import logging
 import json
 

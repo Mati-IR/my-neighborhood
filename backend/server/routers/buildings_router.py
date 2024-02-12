@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from .models import BuildingModel
-from .logic import create_building as new_building, get_buildings, get_building as get_building_by_id, remove_building
+from .logic import create_building as new_building, get_buildings, get_building as get_building_by_id, remove_building, get_building_details as get_building_details_by_id
 import logging
 import json
 
@@ -38,3 +38,8 @@ def get_building(building_id: int):
 def delete_building(building_id: int):
     code, message = remove_building(building_id)
     return JSONResponse(status_code=code, content={"message": message})
+
+@router.get("/building_details/{building_id}")
+def get_building_details(building_id: int):
+    building_details = get_building_details_by_id(building_id)
+    return JSONResponse(status_code=200, content={"building_details": building_details})
