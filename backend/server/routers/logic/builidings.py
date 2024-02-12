@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import Building, FloorForBuilding,SpacesForFloor
+from .database_handler.tables_models import Building, FloorForBuilding, SpacesForFloor, Space
 from .database_handler.util import get_database_session
 from .spaces import get_space_by_id
 import os

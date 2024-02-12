@@ -95,6 +95,7 @@ def get_space_by_id(space_id, short=False):
             }
         else:
             message = {
+                "id": space.id,
                 "space_number": space.space_number,
                 "area": float(space.area),
                 "space_type": space.space_type
@@ -170,3 +171,15 @@ def get_space_categories():
             message.append({ "id": space_type.id, "name": space_type.type_name })
         session.close()
         return RETURN_SUCCESS, message
+
+def remove_space(space_id):
+    with get_database_session() as session:
+        # Attempt to retrieve the space to ensure it exists
+        space = session.query(Space).filter_by(id=space_id).first()
+        if space:
+            # Delete the space. Related records with ON DELETE CASCADE will be automatically removed.
+            session.delete(space)
+            session.commit()
+            print(f"Space with ID {space_id} and all related records have been removed.")
+        else:
+            print(f"No space found with ID {space_id}.")
