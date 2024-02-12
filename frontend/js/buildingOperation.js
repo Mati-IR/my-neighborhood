@@ -90,7 +90,6 @@ function generateNewBuildingForm() {
     contentContainer.appendChild(buildingForm);
     buildingForm.scrollIntoView({ behavior: 'smooth' });
 }
-
 async function getAllBuildings() {
     try {
         const response = await fetch(apiBaseUrl+'/all_buildings', {
@@ -104,7 +103,6 @@ async function getAllBuildings() {
         throw error;
     }
 }
-
 async function displayBuildings() {
     try {
         const buildingsData = await getAllBuildings(); // Oczekiwanie na dane budynków
@@ -117,7 +115,7 @@ async function displayBuildings() {
         var tbody = document.createElement("tbody");
 
         // Tworzenie nagłówków tabeli
-        var headers = ["ID", "Nazwa budynku", "Miasto", "Ulica", "Nr. budynku", "Kod pocztowy", "Liczba pięter","",""];
+        var headers = ["ID", "Nazwa budynku", "Miasto", "Ulica", "Nr. budynku", "Kod pocztowy", "Liczba pięter", "", "", ""];
         var headerRow = document.createElement("tr");
         headers.forEach(function(headerText) {
             var headerCell = document.createElement("th");
@@ -130,6 +128,9 @@ async function displayBuildings() {
         // Wypełnianie danych tabeli
         buildingsData.buildings.forEach(function(building) {
             var buildingRow = document.createElement("tr");
+            buildingRow.dataset.buildingId = building.id;
+            buildingRow.classList.add("building-row");
+
             buildingRow.innerHTML = `
                 <td>${building.id}</td>
                 <td>${building.building_name}</td>
@@ -138,10 +139,28 @@ async function displayBuildings() {
                 <td>${building.building_number}</td>
                 <td>${building.postal_code}</td>
                 <td>${building.floors_amount}</td>
-                <td><button class = "btn btn-light buttonDecoration" onclick="hideSpacesForm(${building.id})">Dodaj przestrzeń</button></td>
-                <td><button class = "btn btn-light buttonDecoration" onclick="deleteBuildingById(${building.id})">Usuń</button></td>
+                <td><button class="btn btn-light buttonDecoration" onclick="hideSpacesForm(${building.id})"><i class="bi bi-plus-circle"></i></button></td>
+                <td><button class="btn btn-light buttonDecoration" onclick="deleteBuildingById(${building.id})"><i class="bi bi-trash-fill" style="color:#cf4a4a"></i></button></td>
+                <td><button class="btn btn-light buttonDecoration" onclick="showBuildingDetails(${building.id})"><i class="bi bi-caret-down-fill"></i></button></td>
             `;
+
             tbody.appendChild(buildingRow);
+
+            /*// Dodanie wiersza szczegółów
+            var detailsRow = document.createElement("tr");
+            detailsRow.classList.add("building-details-row");
+            detailsRow.style.display = "none"; // Domyślnie ukryte szczegóły
+
+            var detailsCell = document.createElement("td");
+            detailsCell.setAttribute("colspan", headers.length);
+            var detailsContent = document.createElement("div");
+            detailsContent.classList.add("building-details");
+
+            // Tutaj można dodać dodatkowe szczegóły, na przykład tabelę z przestrzeniami
+
+            detailsCell.appendChild(detailsContent);
+            detailsRow.appendChild(detailsCell);
+            tbody.appendChild(detailsRow);*/
         });
 
         table.appendChild(tbody);
@@ -150,7 +169,6 @@ async function displayBuildings() {
         console.error('Wystąpił błąd podczas wyświetlania budynków:', error.message);
     }
 }
-
 async function deleteBuildingById(building_id){
     try {
         printApiResponse("apiInfoResponse", " ","levelACHTUNG");
@@ -203,7 +221,6 @@ async function deleteBuildingById(building_id){
         throw error;
     }
 }
-
 function generateBuildingPanel(){
     var contentContainer = document.getElementById("content");
         contentContainer.innerHTML = '';
@@ -224,6 +241,14 @@ function hideBuildingForm(){
         buildingForm.remove();
     }else{
         generateNewBuildingForm()
+    }
+}
+function hideSpacesForm(building_id){
+    var spacesForm = document.getElementById("spaceForm");
+    if(spacesForm != null){
+        spacesForm.remove();
+    }else{
+        generateNewSpaceForm(building_id);
     }
 }
 function hideSpacesForm(building_id){
@@ -294,7 +319,7 @@ async function addBuilding(buildingData){
           console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
       }
 }
-function generateNewSpaceForm(buildingId) {
+async function generateNewSpaceForm(buildingId) {
     hideApiResponse("apiInfoResponse");
 
     var contentContainer = document.getElementById("content");
@@ -337,11 +362,24 @@ function generateNewSpaceForm(buildingId) {
     labelSpaceType.textContent = "Typ przestrzeni:";
     form.appendChild(labelSpaceType);
   
-    var inputSpaceType = document.createElement("input");
-    inputSpaceType.setAttribute("type", "number");
-    inputSpaceType.setAttribute("id", "createSpaceType");
-    inputSpaceType.setAttribute("placeholder", "Typ przestrzeni");
-    form.appendChild(inputSpaceType);
+    var selectSpaceType = document.createElement("select");
+    selectSpaceType.setAttribute("id", "createSpaceType");
+
+    // Pobierz kategorie przestrzeni
+    const spaceCategories = await getSpaceCategories();
+
+    // Utwórz opcje dla każdej kategorii przestrzeni
+    spaceCategories.message.forEach(category => {
+        var option = document.createElement("option");
+        option.value = category.id;
+        option.textContent = category.name;
+        selectSpaceType.appendChild(option);
+    });
+
+    form.appendChild(selectSpaceType);
+
+    // Nowa linia dla pola "Piętro"
+    form.appendChild(document.createElement("br"));
   
     var labelFloor = document.createElement("label");
     labelFloor.setAttribute("for", "createFloor");
@@ -379,6 +417,7 @@ function generateNewSpaceForm(buildingId) {
     contentContainer.appendChild(spaceForm);
     spaceForm.scrollIntoView({ behavior: 'smooth' });
 }
+
 function validateSpaceForm(buildingId) {
     var spaceNumber = document.getElementById("createSpaceNumber").value;
     var area = document.getElementById("createArea").value;
@@ -448,4 +487,70 @@ async function addSpace(spaceData){
           printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
           console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
       }
+}
+async function getBuildingsSpaces(building_id){
+    try {
+        const response = await fetch(apiBaseUrl+'/building_details/'+building_id, {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        console.log(responseData);
+        return responseData;
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas wysyłania żądania: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+        throw error;
+    }
+}
+async function showBuildingDetails(buildingId) {
+    // Znajdź wiersz budynku odpowiadający danemu ID
+    var buildingRow = document.querySelector(`.building-row[data-building-id="${buildingId}"]`);
+    
+    // Znajdź wiersz szczegółów dla tego budynku
+    var detailsRow = buildingRow.nextElementSibling;
+    
+    // Znajdź div do wstawienia szczegółów
+    var detailsContent = detailsRow.querySelector(".building-details");
+    
+    // Pobierz szczegóły budynku za pomocą odpowiedniej funkcji (np. z API lub innej)
+    var buildingDetails = await getBuildingsSpaces(buildingId);
+    
+    // Wygeneruj tabelę szczegółów budynku
+    var detailsTableHTML = generateBuildingDetailsTable(buildingDetails);
+    
+    // Wstaw tabelę do diva ze szczegółami
+    detailsContent.innerHTML = detailsTableHTML;
+    
+    // Wyświetl wiersz szczegółów
+    detailsRow.style.display = "table-row";
+}
+function generateBuildingDetailsTable(buildingDetails) {
+    let detailsHTML = '<table border="1">';
+    detailsHTML += '<thead><tr><th>Piętro</th><th>Numer</th><th>Metraż</th><th>Typ</th></tr></thead>';
+    detailsHTML += '<tbody>';
+    console.log(buildingDetails)
+    buildingDetails.building_details.floors.forEach(floor => {
+        floor.spaces.forEach(space => {
+            detailsHTML += `<tr><td>${floor.floor_number}</td><td>${space.space_number}</td><td>${space.area}</td><td>${space.space_type}</td></tr>`;
+        });
+    });
+
+    detailsHTML += '</tbody>';
+    detailsHTML += '</table>';
+
+    return detailsHTML;
+}
+async function getSpaceCategories(){
+    try {
+        const response = await fetch(apiBaseUrl+'/get_space_categories', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        console.log(responseData);
+        return responseData;
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas wysyłania żądania: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+        throw error;
+    }
 }
