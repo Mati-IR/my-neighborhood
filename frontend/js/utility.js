@@ -22,8 +22,7 @@ function loadFromLocalStorage(){
     }
 }
 
-function printApiResponse(elementId,message,messageLevel){
-    
+function printApiResponse(elementId, message, messageLevel) {
     var apiInfoResponse = document.getElementById(elementId);
     apiInfoResponse.classList.add("apiInfoResponse");
     var classList = apiInfoResponse.classList;
@@ -35,9 +34,13 @@ function printApiResponse(elementId,message,messageLevel){
     }
 
     classList.add(messageLevel);
-    console.log(apiInfoResponse.classList);
     apiInfoResponse.textContent = message;
+
+    var sound = new Audio('../resources/mp3/' + messageLevel + '.mp3');
+    sound.play();
+    window.scrollTo({ top: 0, behavior: 'auto' });
 }
+
 function hideApiResponse(elementId){
     var apiInfoResponse = document.getElementById(elementId);
     if(apiInfoResponse!=null){

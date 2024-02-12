@@ -120,6 +120,11 @@ function generateNewUserForm() {
         inputSalary.setAttribute("id", "createSalary");
         inputSalary.setAttribute("placeholder", "Salary");
         form.appendChild(inputSalary);
+
+        var header = document.createElement("h2");
+        header.textContent = "Formularz nowgo administratora";
+        header.classList.add("MenuHeader");
+        adminForm.appendChild(header);
     }
     else if(userType.value == "user"){
         var labelFullAddress = document.createElement("label");
@@ -132,6 +137,11 @@ function generateNewUserForm() {
         inputFullAddress.setAttribute("id", "createFullAddress");
         inputFullAddress.setAttribute("placeholder", "Full Address");
         form.appendChild(inputFullAddress);
+
+        var header = document.createElement("h2");
+        header.textContent = "Formularz nowgo użytkownika";
+        header.classList.add("MenuHeader");
+        adminForm.appendChild(header);
     }
     
     var submitButton = document.createElement("button");
@@ -142,6 +152,7 @@ function generateNewUserForm() {
   
     adminForm.appendChild(form);
     contentContainer.appendChild(adminForm);
+    adminForm.scrollIntoView({ behavior: 'smooth' });
 }
 
 function validateForm() {

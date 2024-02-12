@@ -10,18 +10,12 @@
 <body>
 
 <div class="custom-bar">
-  <button class="btn btn-light buttonDecoration" onclick="toggleSidebar()">Menu</button> <!-- Przycisk do otwierania/zamykania menu bocznego -->
+  <button class="btn btn-light buttonDecoration" onclick="toggleSidebar()">Menu</button>
   <div class="logo-container" onclick="navigateToHomePage()">
-    <img src="../resources/logo.png" alt="Logo"> <!-- Zmień 'logo.png' na nazwę i ścieżkę do swojego logo -->
+    <img src="../resources/logo.png" alt="Logo">
   </div>
-  <div class="name-button-container">
-    <div class="name-container" id="username">
-      User name
-    </div>
-    <div class="button-container">
-      <button class="btn btn-light buttonDecoration" onclick="logout()">Wyloguj</button>
-    </div>
-  </div>
+
+  <button class="btn btn-light buttonDecoration" onclick="logout()">Wyloguj</button>
 </div>
 
 <div class="sidebar" id="sidebar">
@@ -34,7 +28,11 @@
 
 <!-- Kontener z treścią -->
 <div class="content-container ">
-  <p id="apiInfoResponse" onclick="hideApiResponse('apiInfoResponse')"></p>
+  <div>
+    <p id="apiInfoResponse" onclick="hideApiResponse('apiInfoResponse')"></p>
+    <div class="apiDiv">
+    </div>
+  </div>
   <h2 class="accountHeader" id="MenuHeader"></h2>
   <div class="content-container" id="content">
   </div>

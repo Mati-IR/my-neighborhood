@@ -17,13 +17,18 @@
 }
 
 .custom-bar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: white;
       border-bottom: 1px solid #43b652;
-      color: #1b562b; 
-      padding: 10px; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-}
+      color: #1b562b;
+      padding: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+    }
 
 .logo-container{
       align-items: center;
@@ -81,7 +86,7 @@
       padding: 20px;
       margin-left: 5%;
       margin-right: 5%;
-      margin-top: 20px;
+      margin-top: 80px;
 }
 
 .hidden {
@@ -112,13 +117,13 @@ button[type="button"] {
       padding: 10px;
       border: none;
       border-radius: 5px;
-      background-color: #007bff;
+      background-color: #43b652;
       color: #fff;
       cursor: pointer;
 }
 
 button[type="button"]:hover {
-      background-color: #0056b3;
+      background-color: #1b562b;
 }
 
 .radioDiv {
@@ -127,6 +132,27 @@ button[type="button"]:hover {
       align-items: center;
       justify-content: center;
       gap: 10px;
+}
+
+.radioDiv input[type="radio"] {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid #43b652;
+      background-color: transparent;
+      background-color: rgba(67, 182, 82, 0);
+}
+.radioDiv input[type="radio"]:checked::before {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: #43b652;
+      content: '';
+      display: block;
+      margin: 2px;
 }
 
 #accountHeader {
@@ -170,6 +196,12 @@ button[type="button"]:hover {
       color: white;
 }
 
+.levelACHTUNG{
+      background-color: #FFC107;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      color: black;
+}
+
 .building-table {
     width: 100%;
     border-collapse: collapse;
@@ -192,4 +224,50 @@ button[type="button"]:hover {
 
 .building-table tbody tr:hover {
     background-color: #ddd;
+}
+
+.apiDiv {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+}
+
+.achtungButtonYes{
+      background-color: #cf4a4a;
+      color: black;
+      border-color: #cf4a4a;
+      margin: 5px;
+}
+
+.achtungButtonYes:hover{
+      background-color: #8F5757;
+      color: black;
+      border-color: #8F5757;
+}
+
+.achtungButtonYes:active{
+      background-color: #43b652;
+      color: black;
+      border-color: #43b652;
+}
+
+.achtungButtonNo{
+      background-color: #43b652;
+      color: white;
+      border-color: #43b652;
+      margin: 5px;
+}
+
+.achtungButtonNo:hover{
+      background-color: #1b562b;
+      color: white;
+      border-color: #1b562b;
+}
+
+.achtungButtonNo:active{
+      background-color: #43b652;
+      color: white;
+      border-color: #43b652;
 }
