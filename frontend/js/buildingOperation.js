@@ -141,26 +141,10 @@ async function displayBuildings() {
                 <td>${building.floors_amount}</td>
                 <td><button class="btn btn-light buttonDecoration" onclick="hideSpacesForm(${building.id})"><i class="bi bi-plus-circle"></i></button></td>
                 <td><button class="btn btn-light buttonDecoration" onclick="deleteBuildingById(${building.id})"><i class="bi bi-trash-fill" style="color:#cf4a4a"></i></button></td>
-                <td><button class="btn btn-light buttonDecoration" onclick="showBuildingDetails(${building.id})"><i class="bi bi-caret-down-fill"></i></button></td>
+                <td><button class="btn btn-light buttonDecoration" onclick="hideBuildingDetails(${building.id})"><i class="bi bi-caret-down-fill"></i></button></td>
             `;
 
             tbody.appendChild(buildingRow);
-
-            /*// Dodanie wiersza szczegółów
-            var detailsRow = document.createElement("tr");
-            detailsRow.classList.add("building-details-row");
-            detailsRow.style.display = "none"; // Domyślnie ukryte szczegóły
-
-            var detailsCell = document.createElement("td");
-            detailsCell.setAttribute("colspan", headers.length);
-            var detailsContent = document.createElement("div");
-            detailsContent.classList.add("building-details");
-
-            // Tutaj można dodać dodatkowe szczegóły, na przykład tabelę z przestrzeniami
-
-            detailsCell.appendChild(detailsContent);
-            detailsRow.appendChild(detailsCell);
-            tbody.appendChild(detailsRow);*/
         });
 
         table.appendChild(tbody);
@@ -251,12 +235,12 @@ function hideSpacesForm(building_id){
         generateNewSpaceForm(building_id);
     }
 }
-function hideSpacesForm(building_id){
-    var spacesForm = document.getElementById("spaceForm");
-    if(spacesForm != null){
-        spacesForm.remove();
+function hideBuildingDetails(building_id){
+    var buildingDetailsRow = document.querySelector(`.building-details-row[data-building-details-id="${building_id}"]`);
+    if(buildingDetailsRow != null){
+        buildingDetailsRow.remove();
     }else{
-        generateNewSpaceForm(building_id);
+        showBuildingDetails(building_id)
     }
 }
 function validateBuildingForm() {
@@ -417,7 +401,6 @@ async function generateNewSpaceForm(buildingId) {
     contentContainer.appendChild(spaceForm);
     spaceForm.scrollIntoView({ behavior: 'smooth' });
 }
-
 function validateSpaceForm(buildingId) {
     var spaceNumber = document.getElementById("createSpaceNumber").value;
     var area = document.getElementById("createArea").value;
@@ -503,6 +486,7 @@ async function getBuildingsSpaces(building_id){
     }
 }
 async function showBuildingDetails(buildingId) {
+    addBuildingDetailsRow(buildingId);
     // Znajdź wiersz budynku odpowiadający danemu ID
     var buildingRow = document.querySelector(`.building-row[data-building-id="${buildingId}"]`);
     
@@ -553,4 +537,26 @@ async function getSpaceCategories(){
         console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
         throw error;
     }
+}
+function addBuildingDetailsRow(buildingId) {
+    var buildingRow = document.querySelector(`.building-row[data-building-id="${buildingId}"]`);
+
+    if (buildingRow.nextElementSibling && buildingRow.nextElementSibling.classList.contains('building-details-row')) {
+        return;
+    }
+
+    // Utwórz nowy wiersz szczegółów
+    var detailsRow = document.createElement("tr");
+    detailsRow.classList.add("building-details-row");
+    detailsRow.setAttribute("data-building-details-id", buildingId);
+
+    var detailsCell = document.createElement("td");
+    detailsCell.setAttribute("colspan", headersBuildings.length);
+    var detailsContent = document.createElement("div");
+    detailsContent.classList.add("building-details");
+
+    detailsCell.appendChild(detailsContent);
+    detailsRow.appendChild(detailsCell);
+
+    buildingRow.parentNode.insertBefore(detailsRow, buildingRow.nextSibling);
 }
