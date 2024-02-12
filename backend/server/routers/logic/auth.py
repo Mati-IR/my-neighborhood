@@ -103,3 +103,13 @@ def register_owner(owner_registration_model):
         credentials_id=new_credential.id))  # Use the ID directly
     session.commit()
     return RETURN_SUCCESS, 'Owner registered'
+
+def get_all_owners():
+    users = session.query(Owner).all()
+    for user in users:
+        yield {
+            "id": user.id,
+            "full_name": user.full_name,
+            "phone_number": user.phone_number,
+            "full_address": user.full_address
+        }
