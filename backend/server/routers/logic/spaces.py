@@ -1,11 +1,13 @@
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from ..models import SpaceModel
+from ..models import SpaceModel, SpaceToOwnerModel
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import SpacesForFloor, Space, SpaceType, FloorForBuilding
+from .database_handler.tables_models import SpacesForFloor, Space, SpaceType, FloorForBuilding, OwnerOfSpace, Owner
 from .database_handler.util import get_database_session
 
 LENGTH_OF_SHA256 = 64
@@ -117,3 +119,61 @@ def get_space_by_id(space_id, short=False):
     return RETURN_SUCCESS, message
 
 
+def assign_space_to_owner(space_to_owner: SpaceToOwnerModel):
+    session = get_database_session()
+    code = RETURN_SUCCESS
+    message = "Space assigned to owner"
+
+    if None in space_to_owner.__dict__.values():
+        code = RETURN_FAILURE
+        message = "Message corrupted"
+        return code, message
+
+    if space_to_owner.share < 0 or space_to_owner.share > 1:
+        code = RETURN_FAILURE
+        message = "Share must be between 0 and 1"
+        return code, message
+
+    # if owner does not exist
+    if session.query(Owner).filter(Owner.id == space_to_owner.owner_id).first() is None:
+        code = RETURN_NOT_FOUND
+        message = "Owner not found"
+        return code, message
+
+    # if space does not exist
+    if session.query(Space).filter(Space.id == space_to_owner.space_id).first() is None:
+        code = RETURN_NOT_FOUND
+        message = "Space not found"
+        return code, message
+
+    if session.query(OwnerOfSpace).filter(OwnerOfSpace.space_id == space_to_owner.space_id).first() is not None:
+        code = RETURN_USER_ALREADY_EXISTS
+        message = "Space already assigned to owner"
+        return code, message
+
+    if session.query(OwnerOfSpace).filter(OwnerOfSpace.owner_id == space_to_owner.owner_id).first() is not None:
+        code = RETURN_USER_ALREADY_EXISTS
+        message = "Owner already assigned to space"
+        return code, message
+
+    # if date is in the future
+    if space_to_owner.purchase_date > datetime.now(timezone.utc):
+        code = RETURN_FAILURE
+        message = "Purchase date is in the future"
+        return code, message
+
+    logger.info(f"Space to owner: {space_to_owner}")
+
+    new_owner_of_space = OwnerOfSpace(space_id=space_to_owner.space_id, share=space_to_owner.share,
+                                      purchase_date=space_to_owner.purchase_date, owner_id=space_to_owner.owner_id)
+    session.add(new_owner_of_space)
+    session.commit()
+    return code, message
+
+def get_space_categories():
+    session = get_database_session()
+    space_types = session.query(SpaceType).all()
+    message = []
+    for space_type in space_types:
+        message.append({ "id": space_type.id, "name": space_type.type_name })
+    return RETURN_SUCCESS, message
