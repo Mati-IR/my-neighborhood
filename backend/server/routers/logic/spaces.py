@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from decimal import Decimal, ROUND_HALF_UP
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
@@ -124,10 +125,15 @@ def assign_space_to_owner(space_to_owner: SpaceToOwnerModel):
             return code, message
 
         sum_of_share = session.query(OwnerOfSpace.share).filter(OwnerOfSpace.space_id == space_to_owner.space_id).all()
-        sum_of_share = sum([x[0] for x in sum_of_share]) + space_to_owner.share
-        if sum_of_share + space_to_owner.share > 1:
+        sum_of_share = sum([x[0] for x in sum_of_share])
+        sum_of_share = Decimal(sum_of_share).quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
+
+        owner_share = Decimal(space_to_owner.share).quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
+        
+        if sum_of_share + owner_share > 1:
             code = RETURN_FAILURE
             message = "Sum of shares cannot be greater than 1"
+            logger.info(f"Sum of shares:{owner_share} + {sum_of_share} = {sum_of_share + owner_share}")
             session.close()
             return code, message
 
@@ -159,7 +165,7 @@ def assign_space_to_owner(space_to_owner: SpaceToOwnerModel):
 
         logger.info(f"Space to owner: {space_to_owner}")
 
-        new_owner_of_space = OwnerOfSpace(space_id=space_to_owner.space_id, share=space_to_owner.share,
+        new_owner_of_space = OwnerOfSpace(space_id=space_to_owner.space_id, share=owner_share,
                                           purchase_date=space_to_owner.purchase_date, owner_id=space_to_owner.owner_id)
         session.add(new_owner_of_space)
         session.commit()

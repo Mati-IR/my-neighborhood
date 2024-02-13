@@ -142,7 +142,7 @@ class OwnerOfSpace(Base):
     __tablename__ = 'owner_of_space'
     id = Column(Integer, primary_key=True, autoincrement=True)
     space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))
-    share =  Column(DECIMAL(precision=5, scale=2), nullable=False)
+    share = Column(DECIMAL(precision=5, scale=2), nullable=False)
     purchase_date = Column(DateTime, nullable=False)
     owner_id = Column(Integer, ForeignKey('owner.id', ondelete='CASCADE'))
     owner = relationship("Owner", backref="owner_of_spaces")

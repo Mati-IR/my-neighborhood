@@ -204,7 +204,7 @@ CREATE TABLE `owner_of_space`
 (
  `id`            int NOT NULL AUTO_INCREMENT ,
  `space_id`      int NOT NULL ,
- `share`         decimal NOT NULL ,
+ `share`         decimal(5, 2) NOT NULL ,
  `purchase_date` datetime NOT NULL ,
  `owner_id`      int NOT NULL ,
 
