@@ -125,7 +125,7 @@ async function displayBuildings() {
         var tbody = document.createElement("tbody");
 
         // Tworzenie nagłówków tabeli
-        var headers = ["ID", "Nazwa budynku", "Miasto", "Ulica", "Nr. budynku", "Kod pocztowy", "Liczba pięter", "", "", ""];
+        var headers = ["ID", "Nazwa budynku", "Miasto", "Ulica", "Nr. budynku", "Kod pocztowy", "Liczba pięter", "Dodaj", "Usuń", "Pokaż"];
         var headerRow = document.createElement("tr");
         headers.forEach(function(headerText) {
             var headerCell = document.createElement("th");
@@ -532,7 +532,7 @@ async function generateBuildingDetailsTable(buildingDetails) {
     }
 
     let detailsHTML = '<div class="table-responsive"><table class="table table-bordered table-striped">';
-    detailsHTML += '<thead><tr><th>Piętro</th><th>Numer</th><th>Metraż</th><th>Typ</th></tr></thead>';
+    detailsHTML += '<thead><tr><th>Piętro</th><th>Numer</th><th>Metraż</th><th>Typ</th><th>Usuń</th><th>Dodaj właściciela</th><th>Usuń właściciela</th></tr></thead>';
     detailsHTML += '<tbody>';
 
     buildingDetails.building_details.floors.forEach(floor => {
