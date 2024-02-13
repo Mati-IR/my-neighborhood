@@ -321,3 +321,7 @@ button[type="button"]:hover {
       min-width: 3rem;
       text-align: center;
   }
+
+  .list-group-item {
+      position: static;
+  }
