@@ -136,13 +136,7 @@ def assign_space_to_owner(space_to_owner: SpaceToOwnerModel):
             session.close()
             return code, message
 
-        if session.query(OwnerOfSpace).filter(OwnerOfSpace.space_id == space_to_owner.space_id).first() is not None:
-            code = RETURN_USER_ALREADY_EXISTS
-            message = "Space already assigned to owner"
-            session.close()
-            return code, message
-
-        if session.query(OwnerOfSpace).filter(OwnerOfSpace.owner_id == space_to_owner.owner_id).first() is not None:
+        if session.query(OwnerOfSpace).filter(OwnerOfSpace.owner_id == space_to_owner.owner_id, OwnerOfSpace.space_id == space_to_owner.space_id).first() is not None:
             code = RETURN_USER_ALREADY_EXISTS
             message = "Owner already assigned to space"
             session.close()
