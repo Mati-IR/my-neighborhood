@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-02-11T19:01:02.650Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="ABOTepNktso_n867-fL-" version="23.1.2" type="device">
+<mxfile host="app.diagrams.net" modified="2024-02-13T16:38:27.717Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="DeI6vM-rvRhbHQsF-Jbv" version="23.1.2" type="device">
   <diagram name="Strona-1" id="-Ldg9SIxWEaMv2h-fhzh">
     <mxGraphModel dx="3088" dy="746" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -95,7 +95,7 @@
         <mxCell id="-0zjHkO4cwcMO9rpGIld-11" value="Kreator budynku/edycja" style="whiteSpace=wrap;html=1;rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="-170" y="310" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="-0zjHkO4cwcMO9rpGIld-13" value="Podgląd budynku" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="-0zjHkO4cwcMO9rpGIld-13" value="Podgląd budynku" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="-30" y="310" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="-0zjHkO4cwcMO9rpGIld-15" value="Ustalanie stawek" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -131,10 +131,10 @@
         <mxCell id="-0zjHkO4cwcMO9rpGIld-30" value="Raporty" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="-810" y="310" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="-0zjHkO4cwcMO9rpGIld-32" value="Zmiana hasła" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="-0zjHkO4cwcMO9rpGIld-32" value="Zmiana hasła" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="-970" y="310" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="-0zjHkO4cwcMO9rpGIld-34" value="Zmiana hasła" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="-0zjHkO4cwcMO9rpGIld-34" value="Zmiana hasła" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="520" y="280" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="-0zjHkO4cwcMO9rpGIld-37" value="Udział w głosowaniach" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -158,7 +158,7 @@
         <mxCell id="xKl3YeKgHJPGubothBde-1" value="formularz budynku" style="whiteSpace=wrap;html=1;rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="-170" y="490" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="xKl3YeKgHJPGubothBde-5" value="formularz mieszkania" style="whiteSpace=wrap;html=1;rounded=0;" parent="1" vertex="1">
+        <mxCell id="xKl3YeKgHJPGubothBde-5" value="formularz mieszkania" style="whiteSpace=wrap;html=1;rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
           <mxGeometry x="-170" y="585" width="120" height="60" as="geometry" />
         </mxCell>
       </root>

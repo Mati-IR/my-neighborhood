@@ -26,7 +26,7 @@ function generateNewUserRadio() {
     radioAdmin.setAttribute("id", "adminRadio");
     radioAdmin.setAttribute("onclick", "generateNewUserForm()");
     var labelAdmin = document.createElement("label");
-    labelAdmin.textContent = "Admin";
+    labelAdmin.textContent = "Administrator";
     labelAdmin.setAttribute("for", "adminRadio");
     radioDiv.appendChild(radioAdmin);
     radioDiv.appendChild(labelAdmin);
@@ -38,7 +38,7 @@ function generateNewUserRadio() {
     radioUser.setAttribute("id", "userRadio");
     radioUser.setAttribute("onclick", "generateNewUserForm()");
     var labelUser = document.createElement("label");
-    labelUser.textContent = "User";
+    labelUser.textContent = "Użytkownik";
     labelUser.setAttribute("for", "userRadio");
     radioDiv.appendChild(radioUser);
     radioDiv.appendChild(labelUser);
@@ -51,7 +51,6 @@ function generateNewUserRadio() {
     ImputForm.setAttribute("id", "ImputForm");
     contentContainer.appendChild(ImputForm);
 }
-
 function generateNewUserForm() {
     hideApiResponse("apiInfoResponse");
 
@@ -77,48 +76,48 @@ function generateNewUserForm() {
   
     var labelPassword = document.createElement("label");
     labelPassword.setAttribute("for", "createPassword");
-    labelPassword.textContent = "Password:";
+    labelPassword.textContent = "Hasło:";
     form.appendChild(labelPassword);
   
     var inputPassword = document.createElement("input");
     inputPassword.setAttribute("type", "password");
     inputPassword.setAttribute("id", "createPassword");
-    inputPassword.setAttribute("placeholder", "Password");
+    inputPassword.setAttribute("placeholder", "Hasło");
     form.appendChild(inputPassword);
   
     var labelFullName = document.createElement("label");
     labelFullName.setAttribute("for", "createFullName");
-    labelFullName.textContent = "Full Name:";
+    labelFullName.textContent = "Pełna nazwa:";
     form.appendChild(labelFullName);
   
     var inputFullName = document.createElement("input");
     inputFullName.setAttribute("type", "text");
     inputFullName.setAttribute("id", "createFullName");
-    inputFullName.setAttribute("placeholder", "Full Name");
+    inputFullName.setAttribute("placeholder", "Pełna nazwa");
     form.appendChild(inputFullName);
   
     var labelPhoneNumber = document.createElement("label");
     labelPhoneNumber.setAttribute("for", "createPhoneNumber");
-    labelPhoneNumber.textContent = "Phone Number:";
+    labelPhoneNumber.textContent = "Numer telefonu:";
     form.appendChild(labelPhoneNumber);
   
     var inputPhoneNumber = document.createElement("input");
     inputPhoneNumber.setAttribute("type", "text");
     inputPhoneNumber.setAttribute("id", "createPhoneNumber");
-    inputPhoneNumber.setAttribute("placeholder", "Phone Number");
+    inputPhoneNumber.setAttribute("placeholder", "Numer telefonu");
     form.appendChild(inputPhoneNumber);
   
     var userType = document.querySelector('input[name="userType"]:checked');
     if(userType.value == "admin"){
         var labelSalary = document.createElement("label");
         labelSalary.setAttribute("for", "createSalary");
-        labelSalary.textContent = "Salary:";
+        labelSalary.textContent = "Wynagrodzenie:";
         form.appendChild(labelSalary);
     
         var inputSalary = document.createElement("input");
         inputSalary.setAttribute("type", "number");
         inputSalary.setAttribute("id", "createSalary");
-        inputSalary.setAttribute("placeholder", "Salary");
+        inputSalary.setAttribute("placeholder", "Wynagrodzenie");
         form.appendChild(inputSalary);
 
         var header = document.createElement("h2");
@@ -129,13 +128,13 @@ function generateNewUserForm() {
     else if(userType.value == "user"){
         var labelFullAddress = document.createElement("label");
         labelFullAddress.setAttribute("for", "createFullAddress");
-        labelFullAddress.textContent = "Full Address:";
+        labelFullAddress.textContent = "Adres:";
         form.appendChild(labelFullAddress);
     
         var inputFullAddress = document.createElement("input");
         inputFullAddress.setAttribute("type", "text");
         inputFullAddress.setAttribute("id", "createFullAddress");
-        inputFullAddress.setAttribute("placeholder", "Full Address");
+        inputFullAddress.setAttribute("placeholder", "Adres");
         form.appendChild(inputFullAddress);
 
         var header = document.createElement("h2");
@@ -146,7 +145,7 @@ function generateNewUserForm() {
     
     var submitButton = document.createElement("button");
     submitButton.setAttribute("type", "button");
-    submitButton.textContent = "Submit";
+    submitButton.textContent = "Dodaj";
     submitButton.onclick = validateForm;
     form.appendChild(submitButton);
   
@@ -154,7 +153,6 @@ function generateNewUserForm() {
     contentContainer.appendChild(adminForm);
     adminForm.scrollIntoView({ behavior: 'smooth' });
 }
-
 function validateForm() {
     var userType = document.querySelector('input[name="userType"]:checked');
     var userTypeValue = userType.value;
@@ -214,9 +212,7 @@ function validateForm() {
     }
 
     return true;
-  }
-  
-  
+}
 async function registerAdmin(adminData) {
     try {
       const response = await fetch(apiBaseUrl+'/register_admin', {
@@ -230,7 +226,6 @@ async function registerAdmin(adminData) {
       const responseData = await response.json();
   
       if (response.ok) {
-        console.log('Administrator zarejestrowany pomyślnie:', responseData.message);
         printApiResponse("apiInfoResponse","Administrator zarejestrowany pomyślnie:","levelSucces")
         
       } else {
@@ -242,7 +237,6 @@ async function registerAdmin(adminData) {
         console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
     }
 }
-  
 async function registerOwner(ownerData) {
     try {
         const response = await fetch(apiBaseUrl+'/register_owner', {
@@ -256,7 +250,6 @@ async function registerOwner(ownerData) {
         const responseData = await response.json();
         
         if (response.ok) {
-            console.log('Właściciel zarejestrowany pomyślnie:', responseData.message);
             printApiResponse("apiInfoResponse","Właściciel zarejestrowany pomyślnie:","levelSucces")
             
           } else {

@@ -85,6 +85,16 @@ function generateNewBuildingForm() {
     submitButton.textContent = "Dodaj";
     submitButton.onclick = validateBuildingForm;
     form.appendChild(submitButton);
+
+    var removeButton = document.createElement("button");
+    removeButton.setAttribute("type", "button");
+    removeButton.textContent = "Zamknij formularz";
+    removeButton.onclick = function() {
+        buildingForm.remove();
+    };
+    removeButton.style.backgroundColor = "#cf4a4a";
+    removeButton.style.color = "black";
+    form.appendChild(removeButton);
   
     buildingForm.appendChild(form);
     contentContainer.appendChild(buildingForm);
@@ -163,6 +173,7 @@ async function deleteBuildingById(building_id){
             apiInfoResponse.textContent = 'Czy napewno chcesz usunąć budynek?';
             
             var apiDiv = document.querySelector('.apiDiv');
+            apiDiv.innerHTML = ``;
             var yesButton = document.createElement("button");
             yesButton.classList.add("btn","btn-light","achtungButtonYes");
             yesButton.textContent = "Tak";
@@ -188,16 +199,13 @@ async function deleteBuildingById(building_id){
 
         var state = await statePromise;
 
-        console.log(state)
         if(state==true){
-            console.log(building_id);
             const response = await fetch(apiBaseUrl+'/building/'+building_id, {
               method: 'DELETE'
             });
             const responseData = await response.json();
             printApiResponse("apiInfoResponse", 'Usunięto budynek o id: ' + building_id, "levelSucces");
             generateBuildingPanel();
-            console.log(responseData.message);
         }
     } catch (error) {
         printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas wysyłania żądania: ' + error.message, "levelWarning");
@@ -243,6 +251,14 @@ function hideBuildingDetails(building_id){
         showBuildingDetails(building_id)
     }
 }
+function hideOwnerForm(spaceId){
+    var ownerForm= document.getElementById("ownerForm");
+    if(ownerForm != null){
+        ownerForm.remove();
+    }else{
+        asignOwnerFormGenerate(spaceId)
+    }
+}
 function validateBuildingForm() {
     var buildingName = document.getElementById("createBuildingName").value;
     var city = document.getElementById("createCity").value;
@@ -276,7 +292,6 @@ function validateBuildingForm() {
     return true;
 }
 async function addBuilding(buildingData){
-    console.log(buildingData);
     try {
         const response = await fetch(apiBaseUrl+'/building', {
           method: 'POST',
@@ -289,7 +304,6 @@ async function addBuilding(buildingData){
         const responseData = await response.json();
     
         if (response.ok) {
-          console.log('Budynek dodano pomyślnie:', responseData.message);
           printApiResponse("apiInfoResponse","Budynek dodano pomyślnie.","levelSucces")
           hideBuildingForm();
           generateBuildingPanel();
@@ -396,6 +410,16 @@ async function generateNewSpaceForm(buildingId) {
         validateSpaceForm(buildingId);
     };
     form.appendChild(submitButton);
+
+    var removeButton = document.createElement("button");
+    removeButton.setAttribute("type", "button");
+    removeButton.textContent = "Zamknij formularz";
+    removeButton.onclick = function() {
+        spaceForm.remove();
+    };
+    removeButton.style.backgroundColor = "#cf4a4a";
+    removeButton.style.color = "black";
+    form.appendChild(removeButton);
   
     spaceForm.appendChild(form);
     contentContainer.appendChild(spaceForm);
@@ -438,13 +462,11 @@ function validateSpaceForm(buildingId) {
         floor: floor,
         building_id: buildingId
     };
-    console.log(spaceData)
     addSpace(spaceData);
 
     return true;
 }
 async function addSpace(spaceData){
-    console.log(spaceData);
     try {
         const response = await fetch(apiBaseUrl+'/create_space', {
           method: 'POST',
@@ -457,7 +479,6 @@ async function addSpace(spaceData){
         const responseData = await response.json();
     
         if (response.ok) {
-          console.log('Przestrzeń dodano pomyślnie:', responseData.message);
           printApiResponse("apiInfoResponse","Przestrzeń dodano pomyślnie.","levelSucces")
           hideSpacesForm();
           generateBuildingPanel();
@@ -477,7 +498,6 @@ async function getBuildingsSpaces(building_id){
             method: 'GET'
         });
         const responseData = await response.json();
-        console.log(responseData);
         return responseData;
     } catch (error) {
         printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas wysyłania żądania: ' + error.message, "levelWarning");
@@ -487,40 +507,46 @@ async function getBuildingsSpaces(building_id){
 }
 async function showBuildingDetails(buildingId) {
     addBuildingDetailsRow(buildingId);
-    // Znajdź wiersz budynku odpowiadający danemu ID
     var buildingRow = document.querySelector(`.building-row[data-building-id="${buildingId}"]`);
     
-    // Znajdź wiersz szczegółów dla tego budynku
     var detailsRow = buildingRow.nextElementSibling;
     
-    // Znajdź div do wstawienia szczegółów
     var detailsContent = detailsRow.querySelector(".building-details");
     
-    // Pobierz szczegóły budynku za pomocą odpowiedniej funkcji (np. z API lub innej)
     var buildingDetails = await getBuildingsSpaces(buildingId);
     
-    // Wygeneruj tabelę szczegółów budynku
-    var detailsTableHTML = generateBuildingDetailsTable(buildingDetails);
+    var detailsTableHTML = await generateBuildingDetailsTable(buildingDetails);
     
-    // Wstaw tabelę do diva ze szczegółami
     detailsContent.innerHTML = detailsTableHTML;
     
-    // Wyświetl wiersz szczegółów
     detailsRow.style.display = "table-row";
 }
-function generateBuildingDetailsTable(buildingDetails) {
-    let detailsHTML = '<table border="1">';
+async function generateBuildingDetailsTable(buildingDetails) {
+    // Pobierz kategorie przestrzeni
+    const spaceCategoriesResponse = await getSpaceCategories();
+    const spaceCategories = new Map(spaceCategoriesResponse.message.map(category => [category.id, category.name]));
+
+    // Sprawdź, czy buildingDetails jest puste
+    if (!buildingDetails || Object.keys(buildingDetails).length === 0) {
+        return '<p>Brak mieszkań w budynku.</p>';
+    }
+
+    let detailsHTML = '<div class="table-responsive"><table class="table table-bordered table-striped">';
     detailsHTML += '<thead><tr><th>Piętro</th><th>Numer</th><th>Metraż</th><th>Typ</th></tr></thead>';
     detailsHTML += '<tbody>';
-    console.log(buildingDetails)
+
     buildingDetails.building_details.floors.forEach(floor => {
         floor.spaces.forEach(space => {
-            detailsHTML += `<tr><td>${floor.floor_number}</td><td>${space.space_number}</td><td>${space.area}</td><td>${space.space_type}</td></tr>`;
+            const spaceTypeName = spaceCategories.get(space.space_type) || '';
+            detailsHTML += `<tr><td>${floor.floor_number}</td><td>${space.space_number}</td><td>${space.area}</td><td>${spaceTypeName}</td>
+            <td><button class="btn btn-light buttonDecoration" onclick="deleteSpaceById(${space.id})"><i class="bi bi-trash-fill" style="color:#cf4a4a"></i></button></td>
+            <td><button class="btn btn-light buttonDecoration" onclick="hideOwnerForm(${space.id})"><i class="bi bi-person-fill-add"></i></button></td>
+            <td><button class="btn btn-light buttonDecoration" onclick="test("remove")"><i class="bi bi-person-fill-dash" style="color:#cf4a4a"></i></button></td></tr>`;
         });
     });
 
     detailsHTML += '</tbody>';
-    detailsHTML += '</table>';
+    detailsHTML += '</table></div>';
 
     return detailsHTML;
 }
@@ -530,7 +556,6 @@ async function getSpaceCategories(){
             method: 'GET'
         });
         const responseData = await response.json();
-        console.log(responseData);
         return responseData;
     } catch (error) {
         printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas wysyłania żądania: ' + error.message, "levelWarning");
@@ -559,4 +584,251 @@ function addBuildingDetailsRow(buildingId) {
     detailsRow.appendChild(detailsCell);
 
     buildingRow.parentNode.insertBefore(detailsRow, buildingRow.nextSibling);
+}
+async function asignOwnerFormGenerate(spaceId){
+    hideApiResponse("apiInfoResponse");
+
+    var contentContainer = document.getElementById("content");
+
+    var ownerForm = document.createElement("div");
+    ownerForm.classList.add("content-container");
+    ownerForm.id = "ownerForm";
+
+    var header = document.createElement("h2");
+    header.textContent = "Formularz przypisania właściciela";
+    header.classList.add("MenuHeader");
+    ownerForm.appendChild(header);
+
+    var form = document.createElement("form");
+
+    var labelSpaceId = document.createElement("label");
+    labelSpaceId.setAttribute("for", "assignSpaceId");
+    labelSpaceId.textContent = "ID przestrzeni:";
+    form.appendChild(labelSpaceId);
+    form.appendChild(document.createElement("br"));
+
+    var inputSpaceId = document.createElement("input");
+    inputSpaceId.setAttribute("type", "number");
+    inputSpaceId.setAttribute("id", "assignSpaceId");
+    inputSpaceId.setAttribute("value", spaceId);
+    inputSpaceId.setAttribute("readonly", "readonly");
+    inputSpaceId.classList.add("form-control");
+    form.appendChild(inputSpaceId);
+    form.appendChild(document.createElement("br"));
+
+    var labelShare = document.createElement("label");
+    labelShare.textContent = "Udział:";
+    form.appendChild(labelShare);
+    form.appendChild(document.createElement("br"));
+
+    var inputShareContainer = document.createElement("div");
+    inputShareContainer.classList.add("input-group");
+    form.appendChild(inputShareContainer);
+
+    var inputShare = document.createElement("input");
+    inputShare.setAttribute("type", "range");
+    inputShare.setAttribute("id", "assignShare");
+    inputShare.classList.add("form-range", "form-range-custom");
+    inputShare.setAttribute("min", "0");
+    inputShare.setAttribute("max", "100");
+    inputShare.setAttribute("step", "1");
+    inputShare.setAttribute("value", "50");
+    inputShareContainer.appendChild(inputShare);
+
+    var shareValueContainer = document.createElement("span");
+    shareValueContainer.classList.add("input-group-text")
+    inputShareContainer.appendChild(shareValueContainer);
+
+    var shareValue = document.createElement("span");
+    shareValue.textContent = "50%";
+    shareValueContainer.appendChild(shareValue);
+
+    inputShare.addEventListener("input", function() {
+        shareValue.textContent = this.value + "%";
+    });
+
+    form.appendChild(document.createElement("br"));
+    form.appendChild(document.createElement("br"));
+
+    var labelPurchaseDate = document.createElement("label");
+    labelPurchaseDate.setAttribute("for", "assignPurchaseDate");
+    labelPurchaseDate.textContent = "Data zakupu:";
+    form.appendChild(labelPurchaseDate);
+    form.appendChild(document.createElement("br"));
+    form.appendChild(document.createElement("br"));
+
+    var inputPurchaseDate = document.createElement("input");
+    inputPurchaseDate.setAttribute("type", "datetime-local");
+    inputPurchaseDate.setAttribute("id", "assignPurchaseDate");
+    form.appendChild(inputPurchaseDate);
+    form.appendChild(document.createElement("br"));
+    form.appendChild(document.createElement("br"));
+
+    var labelOwnerId = document.createElement("label");
+    labelOwnerId.setAttribute("for", "assignOwnerId");
+    labelOwnerId.textContent = "Wybierz właściciela:";
+    form.appendChild(labelOwnerId);
+    form.appendChild(document.createElement("br"));
+    form.appendChild(document.createElement("br"));
+
+    var selectOwner = document.createElement("select");
+    selectOwner.setAttribute("id", "assignOwnerId");
+    form.appendChild(selectOwner);
+    form.appendChild(document.createElement("br"));
+    form.appendChild(document.createElement("br"));
+    try {
+        const owners = await getAllOwners();
+        owners.forEach(owner => {
+            var option = document.createElement("option");
+            option.value = owner.id;
+            option.textContent = owner.full_name;
+            selectOwner.appendChild(option);
+        });
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania właścicieli: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania właścicieli:', error.message);
+    }
+
+    var submitButton = document.createElement("button");
+    submitButton.setAttribute("type", "button");
+    submitButton.textContent = "Przypisz";
+    submitButton.onclick = validateOwnerForm;
+    form.appendChild(submitButton);
+
+    var removeButton = document.createElement("button");
+    removeButton.setAttribute("type", "button");
+    removeButton.textContent = "Zamknij formularz";
+    removeButton.onclick = function() {
+        ownerForm.remove();
+    };
+    removeButton.style.backgroundColor = "#cf4a4a";
+    removeButton.style.color = "black";
+    form.appendChild(removeButton);
+
+    ownerForm.appendChild(form);
+    contentContainer.appendChild(ownerForm);
+    ownerForm.scrollIntoView({ behavior: 'smooth' });
+}
+async function getAllOwners() {
+    try {
+        const response = await fetch(apiBaseUrl+'/get_all_owners', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData.message;
+        } else {
+            throw new Error("Brak danych właścicieli w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania właścicieli: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania właścicieli:', error.message);
+        throw error;
+    }
+}
+function validateOwnerForm() {
+    var spaceId = document.getElementById("assignSpaceId").value;
+    var share = document.getElementById("assignShare").value;
+    var purchaseDate = document.getElementById("assignPurchaseDate").value;
+    var ownerId = document.getElementById("assignOwnerId").value;
+
+    // Sprawdzenie, czy pola nie są puste
+    if (!spaceId || !share || !purchaseDate || !ownerId) {
+        printApiResponse("apiInfoResponse", 'Proszę wypełnić wszystkie pola formularza.', "levelWarning");
+        return false;
+    }
+    var formattedPurchaseDate = new Date(purchaseDate);
+    var year = formattedPurchaseDate.getFullYear();
+    var month = String(formattedPurchaseDate.getMonth() + 1).padStart(2, '0');
+    var day = String(formattedPurchaseDate.getDate()).padStart(2, '0');
+    var hours = String(formattedPurchaseDate.getHours()).padStart(2, '0');
+    var minutes = String(formattedPurchaseDate.getMinutes()).padStart(2, '0');
+    var seconds = String(formattedPurchaseDate.getSeconds()).padStart(2, '0');
+    var datetime = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+
+    var asignData ={
+        space_id: spaceId,
+        share: share/100,
+        purchase_date: datetime,
+        owner_id: ownerId
+    };
+    asignOwner(asignData);
+
+    return true;
+}
+async function asignOwner(asignData){
+    try {
+        const response = await fetch(apiBaseUrl+'/assign_space_to_owner', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(asignData)
+        });
+    
+        const responseData = await response.json();
+    
+        if (response.ok) {
+          printApiResponse("apiInfoResponse","Właściciel przypisany pomyślnie.","levelSucces")
+          hideSpacesForm();
+          generateBuildingPanel();
+          
+        } else {
+          printApiResponse("apiInfoResponse",responseData.message,"levelWarning")
+          console.error('Błąd podczas przypisywania właściciela: ', responseData.message);
+        }
+      } catch (error) {
+          printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
+          console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+      }
+}
+async function deleteSpaceById(space_id){
+    try {
+        printApiResponse("apiInfoResponse", " ","levelACHTUNG");
+        var statePromise = new Promise((resolve, reject) => {
+            var apiInfoResponse = document.getElementById("apiInfoResponse");
+            apiInfoResponse.classList.add("apiInfoResponse");
+            apiInfoResponse.classList.add("levelACHTUNG");
+            apiInfoResponse.textContent = 'Czy napewno chcesz usunąć przestrzeń?';
+            
+            var apiDiv = document.querySelector('.apiDiv');
+            apiDiv.innerHTML = ``;
+            var yesButton = document.createElement("button");
+            yesButton.classList.add("btn","btn-light","achtungButtonYes");
+            yesButton.textContent = "Tak";
+            yesButton.onclick = function() {
+                hideApiResponse("apiInfoResponse");
+                noButton.remove();
+                yesButton.remove();
+                resolve(true);
+            };
+            apiDiv.appendChild(yesButton);
+
+            var noButton = document.createElement("button");
+            noButton.classList.add("btn","btn-light","achtungButtonNo");
+            noButton.textContent = "Nie";
+            noButton.onclick = function() {
+                hideApiResponse("apiInfoResponse");
+                noButton.remove();
+                yesButton.remove();
+                resolve(false);
+            };
+            apiDiv.appendChild(noButton);
+        });
+
+        var state = await statePromise;
+
+        if(state==true){
+            const response = await fetch(apiBaseUrl+'/delete_space/'+space_id, {
+              method: 'DELETE'
+            });
+            const responseData = await response.json();
+            printApiResponse("apiInfoResponse", 'Usunięto przestrzeń o id: ' + space_id, "levelSucces");
+            generateBuildingPanel();
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas wysyłania żądania: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+        throw error;
+    }
 }

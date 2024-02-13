@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (isValid) {
             login(emailValue, hashedValue)
             .then(response => {
-                console.log('Odpowiedź z serwera:', response);
                 if(response.message=="Credentials incorrect"){
                     errorElement.textContent = "Auroryzacja nie udana";
                 }
@@ -83,8 +82,6 @@ document.addEventListener('DOMContentLoaded', function () {
             email: email,
             password_hash: password
         };
-        console.log(requestData);
-        console.log(url);
         try {
             const response = await fetch(url, {
                 method: 'POST',
