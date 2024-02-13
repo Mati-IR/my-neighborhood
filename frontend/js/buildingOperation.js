@@ -173,6 +173,7 @@ async function deleteBuildingById(building_id){
             apiInfoResponse.textContent = 'Czy napewno chcesz usunąć budynek?';
             
             var apiDiv = document.querySelector('.apiDiv');
+            apiDiv.innerHTML = ``;
             var yesButton = document.createElement("button");
             yesButton.classList.add("btn","btn-light","achtungButtonYes");
             yesButton.textContent = "Tak";
@@ -791,6 +792,7 @@ async function deleteSpaceById(space_id){
             apiInfoResponse.textContent = 'Czy napewno chcesz usunąć przestrzeń?';
             
             var apiDiv = document.querySelector('.apiDiv');
+            apiDiv.innerHTML = ``;
             var yesButton = document.createElement("button");
             yesButton.classList.add("btn","btn-light","achtungButtonYes");
             yesButton.textContent = "Tak";
