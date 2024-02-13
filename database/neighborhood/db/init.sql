@@ -127,9 +127,9 @@ CREATE TABLE `invoices_for_space`
 
 PRIMARY KEY (`id`),
 KEY `FK_1` (`space_id`),
-CONSTRAINT `FK_22` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`),
+CONSTRAINT `FK_22` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`) ON DELETE CASCADE,
 KEY `FK_2` (`invoice_id`),
-CONSTRAINT `FK_23` FOREIGN KEY `FK_2` (`invoice_id`) REFERENCES `invoice` (`id`)
+CONSTRAINT `FK_23` FOREIGN KEY `FK_2` (`invoice_id`) REFERENCES `invoice` (`id`) ON DELETE CASCADE
 );
 
 
@@ -144,7 +144,7 @@ CREATE TABLE `lease_agreement`
 
 PRIMARY KEY (`id`),
 KEY `FK_1` (`space_id`),
-CONSTRAINT `FK_24` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`)
+CONSTRAINT `FK_24` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`) ON DELETE CASCADE
 );
 
 
@@ -180,9 +180,9 @@ CREATE TABLE `occupants_of_space`
 
 PRIMARY KEY (`id`),
 KEY `FK_1` (`space_id`),
-CONSTRAINT `FK_10` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`),
+CONSTRAINT `FK_10` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`) ON DELETE CASCADE,
 KEY `FK_2` (`occupant_id`),
-CONSTRAINT `FK_11` FOREIGN KEY `FK_2` (`occupant_id`) REFERENCES `occupant` (`id`)
+CONSTRAINT `FK_11` FOREIGN KEY `FK_2` (`occupant_id`) REFERENCES `occupant` (`id`) ON DELETE CASCADE
 );
 
 
@@ -210,9 +210,9 @@ CREATE TABLE `owner_of_space`
 
 PRIMARY KEY (`id`),
 KEY `FK_1` (`owner_id`),
-CONSTRAINT `FK_12` FOREIGN KEY `FK_1` (`owner_id`) REFERENCES `owner` (`id`),
+CONSTRAINT `FK_12` FOREIGN KEY `FK_1` (`owner_id`) REFERENCES `owner` (`id`) ON DELETE CASCADE,
 KEY `FK_2` (`space_id`),
-CONSTRAINT `FK_13` FOREIGN KEY `FK_2` (`space_id`) REFERENCES `space` (`id`)
+CONSTRAINT `FK_13` FOREIGN KEY `FK_2` (`space_id`) REFERENCES `space` (`id`) ON DELETE CASCADE
 );
 
 
@@ -235,9 +235,9 @@ CREATE TABLE `spaces_for_floor`
 
 PRIMARY KEY (`id`),
 KEY `FK_1` (`floor_id`),
-CONSTRAINT `FK_6` FOREIGN KEY `FK_1` (`floor_id`) REFERENCES `floor_for_building` (`floor_id`),
+CONSTRAINT `FK_6` FOREIGN KEY `FK_1` (`floor_id`) REFERENCES `floor_for_building` (`floor_id`) ON DELETE CASCADE,
 KEY `FK_2` (`space`),
-CONSTRAINT `FK_7` FOREIGN KEY `FK_2` (`space`) REFERENCES `space` (`id`)
+CONSTRAINT `FK_7` FOREIGN KEY `FK_2` (`space`) REFERENCES `space` (`id`) ON DELETE CASCADE
 );
 
 
@@ -305,7 +305,7 @@ CONSTRAINT `FK_1` FOREIGN KEY `FK_1` (`category_id`) REFERENCES `incident_catego
 KEY `FK_2` (`state`),
 CONSTRAINT `FK_2` FOREIGN KEY `FK_2` (`state`) REFERENCES `incident_state` (`id`),
 KEY `FK_3` (`space_id`),
-CONSTRAINT `FK_8` FOREIGN KEY `FK_3` (`space_id`) REFERENCES `space` (`id`),
+CONSTRAINT `FK_8` FOREIGN KEY `FK_3` (`space_id`) REFERENCES `space` (`id`) ON DELETE CASCADE,
 KEY `FK_4` (`admin_id`),
 CONSTRAINT `FK_19` FOREIGN KEY `FK_4` (`admin_id`) REFERENCES `admin` (`id`),
 KEY `FK_5` (`owner_id`),

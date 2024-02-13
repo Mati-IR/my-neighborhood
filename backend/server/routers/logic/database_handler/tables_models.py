@@ -86,8 +86,8 @@ class Space(Base):
 class InvoicesForSpace(Base):
     __tablename__ = 'invoices_for_space'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    space_id = Column(Integer, ForeignKey('space.id'))
-    invoice_id = Column(Integer, ForeignKey('invoice.id'))
+    space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))
+    invoice_id = Column(Integer, ForeignKey('invoice.id', ondelete='CASCADE'))
     space = relationship("Space", backref="invoices_for_spaces")
     invoice = relationship("Invoice", backref="invoices_for_spaces")
 
@@ -99,7 +99,7 @@ class LeaseAgreement(Base):
     rentier_full_name = Column(String(100), nullable=False)
     phone_number = Column(String(20), nullable=False)
     email = Column(String(100), nullable=False)
-    space_id = Column(Integer, ForeignKey('space.id'))
+    space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))
     space = relationship("Space", backref="lease_agreements")
 
 
@@ -123,8 +123,8 @@ class Occupant(Base):
 class OccupantsOfSpace(Base):
     __tablename__ = 'occupants_of_space'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    space_id = Column(Integer, ForeignKey('space.id'))
-    occupant_id = Column(Integer, ForeignKey('occupant.id'))
+    space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))
+    occupant_id = Column(Integer, ForeignKey('occupant.id', ondelete='CASCADE'))
     space = relationship("Space", backref="occupants_of_spaces")
     occupant = relationship("Occupant", backref="occupants_of_spaces")
 
@@ -141,10 +141,10 @@ class Owner(Base):
 class OwnerOfSpace(Base):
     __tablename__ = 'owner_of_space'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    space_id = Column(Integer, ForeignKey('space.id'))
+    space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))
     share =  Column(DECIMAL(precision=5, scale=2), nullable=False)
     purchase_date = Column(DateTime, nullable=False)
-    owner_id = Column(Integer, ForeignKey('owner.id'))
+    owner_id = Column(Integer, ForeignKey('owner.id', ondelete='CASCADE'))
     owner = relationship("Owner", backref="owner_of_spaces")
     space = relationship("Space", backref="owner_of_spaces")
 
@@ -160,8 +160,8 @@ class Serviceman(Base):
 class SpacesForFloor(Base):
     __tablename__ = 'spaces_for_floor'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    floor_id = Column(Integer, ForeignKey('floor_for_building.floor_id'))
-    space = Column(Integer, ForeignKey('space.id'))
+    floor_id = Column(Integer, ForeignKey('floor_for_building.floor_id', ondelete='CASCADE'))
+    space = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))
     floor = relationship("FloorForBuilding", backref="spaces_for_floor")
     space_relation = relationship("Space", backref="spaces_for_floor")
 
@@ -205,7 +205,7 @@ class Incident(Base):
     category_id = Column(Integer, ForeignKey('incident_category.id'))
     description = Column(String(3000), nullable=False)
     admin_id = Column(Integer, ForeignKey('admin.id'))
-    space_id = Column(Integer, ForeignKey('space.id'))
+    space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))
     creation_date = Column(DateTime, nullable=False)
     closure_date = Column(DateTime, nullable=False)
     state = Column(Integer, ForeignKey('incident_state.id'))

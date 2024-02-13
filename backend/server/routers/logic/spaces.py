@@ -172,14 +172,25 @@ def get_space_categories():
         session.close()
         return RETURN_SUCCESS, message
 
-def remove_space(space_id):
-    with get_database_session() as session:
-        # Attempt to retrieve the space to ensure it exists
-        space = session.query(Space).filter_by(id=space_id).first()
-        if space:
-            # Delete the space. Related records with ON DELETE CASCADE will be automatically removed.
-            session.delete(space)
-            session.commit()
-            print(f"Space with ID {space_id} and all related records have been removed.")
-        else:
-            print(f"No space found with ID {space_id}.")
+def remove_space(space_id: int):
+    try:
+        with get_database_session() as session:
+            logger.info(f"Attempting to remove space with ID {space_id}")
+            space = session.query(Space).filter_by(id=space_id).first()
+            if space:
+                # Check for references in spaces_for_floor table
+                spaces_for_floor = session.query(SpacesForFloor).filter_by(space=space_id).all()
+                # Delete references if they exist
+                for space_for_floor in spaces_for_floor:
+                    session.delete(space_for_floor)
+                # Now delete the space
+                session.delete(space)
+                session.commit()
+                logger.info(f"Space with ID {space_id} and all related records have been removed successfully.")
+                return RETURN_SUCCESS, "Space removed successfully."
+            else:
+                logger.info(f"No space found with ID {space_id}.")
+                return RETURN_NOT_FOUND, "Space not found."
+    except Exception as e:
+        logger.error(f"An error occurred while removing space with ID {space_id}: {e}")
+        return RETURN_FAILURE, "Error removing space: " + str(e)
