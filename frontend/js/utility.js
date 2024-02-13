@@ -2,26 +2,38 @@ function toggleSidebar() {
     var sidebar = document.getElementById("sidebar");
     sidebar.classList.toggle("show");
 }
-
 function logout() {
     localStorage.clear();
     window.location.href = "login.html";
 }
-  
-function loadFromLocalStorage(){
-    const user = localStorage.getItem('user');
-    const isAdmin = localStorage.getItem('admin');
-    if(user==null){
-        window.location.href = 'login.html';
+async function loadFromLocalStorage(){
+    var response = await makeRequest();
+    const pagePath = window.location.pathname;
+    if(response != null){
+        const user = localStorage.getItem('user');
+        const isAdmin = localStorage.getItem('admin');
+        if(user==null){
+            window.location.href = 'login.html';
+        }
+        else{
+            //var username = document.getElementById("username");
+            if(pagePath == "/index.html"||pagePath=="/"){
+                var message = "Witaj "+user;
+                headerTextChange(message);
+            }
+            else if(pagePath!="/index.html"){
+                navigateToHomePage();
+            }
+            //username.textContent = user;
+        }
     }
     else{
-        //var username = document.getElementById("username");
-        var message = "Witaj "+user;
-        headerTextChange(message);
-        //username.textContent = user;
+        if(pagePath!="/noconnection.html"){
+            window.location.href = 'noconnection.html';
+        }
+            
     }
 }
-
 function printApiResponse(elementId, message, messageLevel) {
     var apiInfoResponse = document.getElementById(elementId);
     apiInfoResponse.classList.add("apiInfoResponse");
@@ -40,7 +52,6 @@ function printApiResponse(elementId, message, messageLevel) {
     sound.play();
     window.scrollTo({ top: 0, behavior: 'auto' });
 }
-
 function hideApiResponse(elementId){
     var apiInfoResponse = document.getElementById(elementId);
     if(apiInfoResponse!=null){
@@ -58,4 +69,26 @@ function headerTextChange(message){
 function navigateToHomePage() {
     window.location.href = homepageUrl;
 }
+async function makeRequest() {
+    const headers = {
+        'accept': 'application/json'
+    };
+
+    try {
+        const response = await fetch(apiBaseUrl+'/', {
+            method: 'GET',
+            headers: headers
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+        return responseData;
+    } catch (error) {
+        console.error('Wystąpił błąd podczas wykonania żądania:', error);
+    }
+}
 loadFromLocalStorage();
+
