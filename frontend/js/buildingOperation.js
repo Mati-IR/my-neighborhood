@@ -744,8 +744,8 @@ function validateOwnerForm() {
     var hours = String(formattedPurchaseDate.getHours()).padStart(2, '0');
     var minutes = String(formattedPurchaseDate.getMinutes()).padStart(2, '0');
     var seconds = String(formattedPurchaseDate.getSeconds()).padStart(2, '0');
-    var datetime = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
-
+    var datetime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes + ':' + seconds+'Z';
+    console.log(datetime)
     var asignData ={
         space_id: spaceId,
         share: share/100,
@@ -770,7 +770,7 @@ async function asignOwner(asignData){
     
         if (response.ok) {
           printApiResponse("apiInfoResponse","Właściciel przypisany pomyślnie.","levelSucces")
-          hideSpacesForm();
+          hideOwnerForm();
           generateBuildingPanel();
           
         } else {
