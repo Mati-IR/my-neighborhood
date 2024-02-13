@@ -172,6 +172,7 @@ def get_space_categories():
         session.close()
         return RETURN_SUCCESS, message
 
+
 def remove_space(space_id: int):
     try:
         with get_database_session() as session:

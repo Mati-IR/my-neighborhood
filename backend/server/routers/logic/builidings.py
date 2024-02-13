@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from .database_handler.tables_models import Building, FloorForBuilding, SpacesForFloor, Space
 from .database_handler.util import get_database_session
-from .spaces import get_space_by_id
+from .spaces import get_space_by_id, remove_space
 import os
 import logging
 
@@ -96,12 +96,28 @@ def get_building(building_id):
 
 def remove_building(building_id):
     with get_database_session() as session:
+        # Query for any spaces associated with the building
+        spaces = session.query(SpacesForFloor).join(FloorForBuilding).filter(FloorForBuilding.building_id == building_id).all()
+
+        # If there are associated spaces, delete them first
+        if spaces:
+            for space in spaces:
+                remove_space(space.space)
+            session.commit()
+
         # Query for any floors associated with the building
         floors = session.query(FloorForBuilding).filter(FloorForBuilding.building_id == building_id).all()
 
         # If there are associated floors, delete them first
         if floors:
             for floor in floors:
+                # Query for any spaces associated with the floor
+                spaces_for_floor = session.query(SpacesForFloor).filter(SpacesForFloor.floor_id == floor.floor_id).all()
+
+                # If there are associated spaces, delete them first
+                if spaces_for_floor:
+                    for space_for_floor in spaces_for_floor:
+                        session.delete(space_for_floor)
                 session.delete(floor)
             session.commit()
 
@@ -112,7 +128,7 @@ def remove_building(building_id):
             try:
                 session.commit()
                 session.close()
-                return RETURN_SUCCESS, 'Building and associated floors removed'
+                return RETURN_SUCCESS, 'Building and associated floors and spaces removed'
             except Exception as e:
                 session.rollback()
                 return RETURN_FAILURE, f'Failed to remove building: {str(e)}'

@@ -56,7 +56,7 @@ CREATE TABLE `floor_for_building`
 
 PRIMARY KEY (`floor_id`),
 KEY `FK_1` (`building_id`),
-CONSTRAINT `FK_5` FOREIGN KEY `FK_1` (`building_id`) REFERENCES `building` (`id`)
+CONSTRAINT `FK_5` FOREIGN KEY `FK_1` (`building_id`) REFERENCES `building` (`id`) ON DELETE CASCADE
 );
 
 

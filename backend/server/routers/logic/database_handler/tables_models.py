@@ -42,7 +42,7 @@ class FloorForBuilding(Base):
     __tablename__ = 'floor_for_building'
     floor_id = Column(Integer, primary_key=True, autoincrement=True)
     floor_number = Column(Integer, nullable=False)
-    building_id = Column(Integer, ForeignKey('building.id'))
+    building_id = Column(Integer, ForeignKey('building.id', ondelete='CASCADE'))
 
 
 class Utility(Base):
