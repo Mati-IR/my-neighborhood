@@ -123,6 +123,14 @@ def assign_space_to_owner(space_to_owner: SpaceToOwnerModel):
             session.close()
             return code, message
 
+        sum_of_share = session.query(OwnerOfSpace.share).filter(OwnerOfSpace.space_id == space_to_owner.space_id).all()
+        sum_of_share = sum([x[0] for x in sum_of_share]) + space_to_owner.share
+        if sum_of_share + space_to_owner.share > 1:
+            code = RETURN_FAILURE
+            message = "Sum of shares cannot be greater than 1"
+            session.close()
+            return code, message
+
         # if owner does not exist
         if session.query(Owner).filter(Owner.id == space_to_owner.owner_id).first() is None:
             code = RETURN_NOT_FOUND
