@@ -15,10 +15,10 @@ function loadFromLocalStorage(){
         window.location.href = 'login.html';
     }
     else{
-        var username = document.getElementById("username");
+        //var username = document.getElementById("username");
         var message = "Witaj "+user;
         headerTextChange(message);
-        username.textContent = user;
+        //username.textContent = user;
     }
 }
 
