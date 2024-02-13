@@ -20,6 +20,7 @@ async function loadFromLocalStorage(){
             if(pagePath == "/index.html"||pagePath=="/"){
                 var message = "Witaj "+user;
                 headerTextChange(message);
+                generateSidebar(isAdmin);
             }
             else if(pagePath!="/index.html"){
                 navigateToHomePage();

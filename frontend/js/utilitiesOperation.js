@@ -42,7 +42,7 @@ async function displayUtilitiesData(data, containerId) {
         var tbody = document.createElement("tbody");
 
         // Tworzenie nagłówków tabeli
-        var headers = ["ID", "Nazwa", "Cena za jednostke",""];
+        var headers = ["ID", "Nazwa", "Cena za jednostke","Usuń","Edytuj"];
         var headerRow = document.createElement("tr");
         headers.forEach(function(headerText) {
             var headerCell = document.createElement("th");

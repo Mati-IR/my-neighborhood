@@ -6,24 +6,43 @@ function displayUserData() {
 
     var div = document.createElement("div");
     var userDataHtml = `
-        <ul class="list-group">
-            <li class="list-group-item">Email: ${userData.email}</li>
-            <li class="list-group-item">Pełna nazwa: ${userData.full_name}</li>
-            <li class="list-group-item">Numer telefonu: ${userData.phone_number}</li>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th scope="row">Email:</th>
+                    <td>${userData.email}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Pełna nazwa:</th>
+                    <td>${userData.full_name}</td>
+                </tr>
+                <tr>
+                    <th scope="row">Numer telefonu:</th>
+                    <td>${userData.phone_number}</td>
+                </tr>
     `;
+
     const isAdmin = localStorage.getItem('admin');
-    if(isAdmin == "true"){
+    if (isAdmin == "true") {
         userDataHtml += `
-            <li class="list-group-item">Wynagrodzenie: ${userData.salary}</li>
-            </ul>
-        `;  
-    }
-    else{
+            <tr>
+                <th scope="row">Wynagrodzenie:</th>
+                <td>${userData.salary}</td>
+            </tr>
+        `;
+    } else {
         userDataHtml += `
-            <li class="list-group-item">Adres: ${userData.full_address}</li>
-            </ul>
-        `;  
+            <tr>
+                <th scope="row">Adres:</th>
+                <td>${userData.full_address}</td>
+            </tr>
+        `;
     }
+
+    userDataHtml += `
+            </tbody>
+        </table>
+    `;
 
     div.innerHTML = userDataHtml;
     contentContainer.appendChild(div);
@@ -53,7 +72,7 @@ const userData = {
     "full_address": "Polska"
 };
 
-function generateNewUserForm(userData) {
+function generateEditUserForm(userData) {
     hideApiResponse("apiInfoResponse");
 
     var contentContainer = document.getElementById("content");
@@ -195,7 +214,7 @@ function hideUserDataForm(userData){
     if(ImputForm != null){
         ImputForm.remove();
     }else{
-        generateNewUserForm(userData)
+        generateEditUserForm(userData)
     }
 }
 function hidePasswordForm(){
@@ -271,6 +290,7 @@ function generateChangePasswordForm() {
 
     PasswordForm.appendChild(form);
     contentContainer.appendChild(PasswordForm);
+    PasswordForm.scrollIntoView({ behavior: 'smooth' });
 }
 function validateChangePasswordForm() {
     var currentPassword = document.getElementById("currentPassword").value;
