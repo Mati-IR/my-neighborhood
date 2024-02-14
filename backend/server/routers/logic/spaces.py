@@ -225,3 +225,29 @@ def remove_owner_from_space(owner_id: int, space_id: int):
     except Exception as e:
         logger.error(f"An error occurred while removing owner with ID {owner_id} from space with ID {space_id}: {e}")
         return RETURN_FAILURE, "Error removing owner from space: " + str(e)
+
+def get_owners_of_space(space_id: int):
+    try:
+        with get_database_session() as session:
+            logger.info(f"Attempting to retrieve owners of space with ID {space_id}")
+            owners_of_space = session.query(OwnerOfSpace).filter_by(space_id=space_id).all()
+            if owners_of_space:
+                owner_list = []
+                for owner in owners_of_space:
+                    owner_info = session.query(Owner).filter_by(id=owner.owner_id).first()
+                    owner_list.append({
+                        "id": owner_info.id,
+                        "full_name": owner_info.full_name,
+                        "phone_number": owner_info.phone_number,
+                        "full_address": owner_info.full_address,
+                        "share": round(float(owner.share), 2),
+                        "purchase_date": owner.purchase_date.isoformat()
+                    })
+                logger.info(f"Owners of space with ID {space_id} retrieved successfully.")
+                return RETURN_SUCCESS, owner_list
+            else:
+                logger.info(f"No owners found for space with ID {space_id}.")
+                return RETURN_NOT_FOUND, "No owners found for space."
+    except Exception as e:
+        logger.error(f"An error occurred while retrieving owners of space with ID {space_id}: {e}")
+        return RETURN_FAILURE, "Error retrieving owners of space: " + str(e)
