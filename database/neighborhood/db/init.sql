@@ -26,6 +26,7 @@ CREATE TABLE `admin`
  `full_name`    varchar(100) NOT NULL ,
  `phone_number` varchar(220) NULL ,
  `salary`       decimal NULL ,
+ `salary_currency` varchar(3) NULL ,
  `credentials_id`  int NOT NULL ,
 
 PRIMARY KEY (`id`),

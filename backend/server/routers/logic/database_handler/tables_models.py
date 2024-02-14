@@ -23,6 +23,7 @@ class Admin(Base):
     full_name = Column(String(100), nullable=False)
     phone_number = Column(String(220))
     salary = Column(DECIMAL)
+    salary_currency = Column(String(3))
     credentials_id = Column(Integer, ForeignKey('admin_credentials.id'), unique=True)
 
 

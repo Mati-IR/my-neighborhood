@@ -63,6 +63,12 @@ def register_admin(admin_registration_model):
         if len(admin_registration_model.password_hash) != LENGTH_OF_SHA256:
             return RETURN_INCORRECT_LENGTH, 'Password too short'
 
+        from iso4217 import Currency
+        try:
+            Currency(admin_registration_model.salary_currency)
+        except:
+            return RETURN_FAILURE, 'Currency not found'
+
         # add admin to database
         new_credential = AdminCredential(email=admin_registration_model.email,
                                     password_hash=admin_registration_model.password_hash)
@@ -74,6 +80,7 @@ def register_admin(admin_registration_model):
             full_name=admin_registration_model.full_name,
             phone_number=admin_registration_model.phone_number,
             salary=admin_registration_model.salary,
+            salary_currency=admin_registration_model.salary_currency,
             credentials_id=new_credential.id))  # Use the ID directly
         session.commit()
         return RETURN_SUCCESS, 'Admin registered'

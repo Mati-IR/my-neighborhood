@@ -14,6 +14,7 @@ class AdminRegistrationModel(BaseModel):
     full_name: str
     phone_number: str
     salary: float
+    salary_currency: str
 
 
 class OwnerRegistrationModel(BaseModel):
