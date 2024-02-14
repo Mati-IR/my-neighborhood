@@ -77,11 +77,13 @@ def create_space(space: SpaceModel):
 
         return code, message
 
+
 def get_space_by_id(space_id, short=False):
     with get_database_session() as session:
         space = session.query(Space).filter(Space.id == space_id).first()
         floor_id = session.query(SpacesForFloor.floor_id).filter(SpacesForFloor.space == space_id).first()[0]
-        building_id = session.query(FloorForBuilding.building_id).filter(FloorForBuilding.floor_id == floor_id).first()[0]
+        building_id = session.query(FloorForBuilding.building_id).filter(FloorForBuilding.floor_id == floor_id).first()[
+            0]
         logger.info(f"Floor id: {floor_id}")
 
         if space is None:
@@ -129,7 +131,7 @@ def assign_space_to_owner(space_to_owner: SpaceToOwnerModel):
         sum_of_share = Decimal(sum_of_share).quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
 
         owner_share = Decimal(space_to_owner.share).quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
-        
+
         if sum_of_share + owner_share > 1:
             code = RETURN_FAILURE
             message = "Sum of shares cannot be greater than 1"
@@ -150,7 +152,8 @@ def assign_space_to_owner(space_to_owner: SpaceToOwnerModel):
             session.close()
             return code, message
 
-        if session.query(OwnerOfSpace).filter(OwnerOfSpace.owner_id == space_to_owner.owner_id, OwnerOfSpace.space_id == space_to_owner.space_id).first() is not None:
+        if session.query(OwnerOfSpace).filter(OwnerOfSpace.owner_id == space_to_owner.owner_id,
+                                              OwnerOfSpace.space_id == space_to_owner.space_id).first() is not None:
             code = RETURN_USER_ALREADY_EXISTS
             message = "Owner already assigned to space"
             session.close()
@@ -171,12 +174,13 @@ def assign_space_to_owner(space_to_owner: SpaceToOwnerModel):
         session.commit()
         return code, message
 
+
 def get_space_categories():
     with get_database_session() as session:
         space_types = session.query(SpaceType).all()
         message = []
         for space_type in space_types:
-            message.append({ "id": space_type.id, "name": space_type.type_name })
+            message.append({"id": space_type.id, "name": space_type.type_name})
         session.close()
         return RETURN_SUCCESS, message
 
@@ -203,3 +207,21 @@ def remove_space(space_id: int):
     except Exception as e:
         logger.error(f"An error occurred while removing space with ID {space_id}: {e}")
         return RETURN_FAILURE, "Error removing space: " + str(e)
+
+
+def remove_owner_from_space(owner_id: int, space_id: int):
+    try:
+        with get_database_session() as session:
+            logger.info(f"Attempting to remove owner with ID {owner_id} from space with ID {space_id}")
+            owner_of_space = session.query(OwnerOfSpace).filter_by(owner_id=owner_id, space_id=space_id).first()
+            if owner_of_space:
+                session.delete(owner_of_space)
+                session.commit()
+                logger.info(f"Owner with ID {owner_id} removed from space with ID {space_id} successfully.")
+                return RETURN_SUCCESS, "Owner removed from space successfully."
+            else:
+                logger.info(f"No owner found with ID {owner_id} for space with ID {space_id}.")
+                return RETURN_NOT_FOUND, "Owner not found for space."
+    except Exception as e:
+        logger.error(f"An error occurred while removing owner with ID {owner_id} from space with ID {space_id}: {e}")
+        return RETURN_FAILURE, "Error removing owner from space: " + str(e)

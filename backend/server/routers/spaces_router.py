@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from .models import SpaceModel, SpaceToOwnerModel
-from .logic import create_space as new_space, get_space_by_id, assign_space_to_owner as assign_space, get_space_categories as get_all_space_categories, remove_space
+from .models import SpaceModel, SpaceToOwnerModel, RemoveOwnerFromSpaceModel
+from .logic import create_space as new_space, get_space_by_id, assign_space_to_owner as assign_space, get_space_categories as get_all_space_categories, remove_space, remove_owner_from_space
 import logging
 import json
 
@@ -33,4 +33,9 @@ def assign_space_to_owner(space_to_owner: SpaceToOwnerModel):
 @router.delete("/delete_space/{space_id}")
 def delete_space(space_id: int):
     code, message = remove_space(space_id)
+    return JSONResponse(status_code=code, content={"message": message})
+
+@router.delete("/remove_owner_from_space")
+def remove_owner_from_space_api(space_to_owner: RemoveOwnerFromSpaceModel):
+    code, message = remove_owner_from_space(space_to_owner.owner_id, space_to_owner.space_id)
     return JSONResponse(status_code=code, content={"message": message})

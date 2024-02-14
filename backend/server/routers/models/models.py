@@ -46,3 +46,8 @@ class SpaceToOwnerModel(BaseModel):
     share: float
     purchase_date: datetime
     owner_id: int
+
+
+class RemoveOwnerFromSpaceModel(BaseModel):
+    space_id: int
+    owner_id: int
