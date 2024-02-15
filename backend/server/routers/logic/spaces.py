@@ -296,29 +296,11 @@ def create_lease_agreement(lease_agreement: NewLeaseAgreementModel):
         return RETURN_FAILURE, "Error creating lease agreement: " + str(e)
 
 
-def remove_lease_agreement(agreement_id: int):
+def get_lease_agreement(space_id: int):
     try:
         with get_database_session() as session:
-            logger.info(f"Attempting to remove lease agreement with ID {agreement_id}")
-            lease_agreement = session.query(LeaseAgreement).filter_by(id=agreement_id).first()
-            if lease_agreement:
-                session.delete(lease_agreement)
-                session.commit()
-                logger.info(f"Lease agreement with ID {agreement_id} removed successfully.")
-                return RETURN_SUCCESS, "Lease agreement removed successfully."
-            else:
-                logger.info(f"No lease agreement found with ID {agreement_id}.")
-                return RETURN_NOT_FOUND, "Lease agreement not found."
-    except Exception as e:
-        logger.error(f"An error occurred while removing lease agreement with ID {agreement_id}: {e}")
-        return RETURN_FAILURE, "Error removing lease agreement: " + str(e)
-
-
-def get_lease_agreement(agreement_id: int):
-    try:
-        with get_database_session() as session:
-            logger.info(f"Attempting to retrieve lease agreement with ID {agreement_id}")
-            lease_agreement = session.query(LeaseAgreement).filter_by(id=agreement_id).first()
+            logger.info(f"Attempting to retrieve lease agreement for space with ID {space_id}")
+            lease_agreement = session.query(LeaseAgreement).filter_by(space_id=space_id).first()
             if lease_agreement:
                 agreement_info = {
                     "id": lease_agreement.id,
@@ -330,14 +312,32 @@ def get_lease_agreement(agreement_id: int):
                     "start_date": lease_agreement.start_date.isoformat(),
                     "end_date": lease_agreement.end_date.isoformat()
                 }
-                logger.info(f"Lease agreement with ID {agreement_id} retrieved successfully.")
+                logger.info(f"Lease agreement for space with ID {space_id} retrieved successfully.")
                 return RETURN_SUCCESS, agreement_info
             else:
-                logger.info(f"No lease agreement found with ID {agreement_id}.")
+                logger.info(f"No lease agreement found for space with ID {space_id}.")
                 return RETURN_NOT_FOUND, "Lease agreement not found."
     except Exception as e:
-        logger.error(f"An error occurred while retrieving lease agreement with ID {agreement_id}: {e}")
+        logger.error(f"An error occurred while retrieving lease agreement for space with ID {space_id}: {e}")
         return RETURN_FAILURE, "Error retrieving lease agreement: " + str(e)
+
+
+def remove_lease_agreement(space_id: int):
+    try:
+        with get_database_session() as session:
+            logger.info(f"Attempting to remove lease agreement for space with ID {space_id}")
+            lease_agreement = session.query(LeaseAgreement).filter_by(space_id=space_id).first()
+            if lease_agreement:
+                session.delete(lease_agreement)
+                session.commit()
+                logger.info(f"Lease agreement for space with ID {space_id} removed successfully.")
+                return RETURN_SUCCESS, "Lease agreement removed successfully."
+            else:
+                logger.info(f"No lease agreement found for space with ID {space_id}.")
+                return RETURN_NOT_FOUND, "Lease agreement not found."
+    except Exception as e:
+        logger.error(f"An error occurred while removing lease agreement for space with ID {space_id}: {e}")
+        return RETURN_FAILURE, "Error removing lease agreement: " + str(e)
 
 
 def update_lease_agreement(lease_agreement: LeaseAgreementModel):
@@ -368,6 +368,7 @@ def update_lease_agreement(lease_agreement: LeaseAgreementModel):
             lease_agreement_to_update.email = lease_agreement.email
             lease_agreement_to_update.start_date = lease_agreement.start_date
             lease_agreement_to_update.end_date = lease_agreement.end_date
+            lease_agreement_to_update.space_id = lease_agreement.space_id
             session.commit()
             return code, message
     except Exception as e:

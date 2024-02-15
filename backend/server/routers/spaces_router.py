@@ -63,14 +63,14 @@ def post_lease_agreement(lease_agreement: NewLeaseAgreementModel):
     code, message = create_lease_agreement(lease_agreement)
     return JSONResponse(status_code=code, content={"message": message})
 
-@router.delete("/lease_agreement/{lease_agreement_id}")
-def delete_lease_agreement(lease_agreement_id: int):
-    code, message = remove_lease_agreement(lease_agreement_id)
+@router.delete("/lease_agreement/{space_id}")
+def delete_lease_agreement(space_id: int):
+    code, message = remove_lease_agreement(space_id)
     return JSONResponse(status_code=code, content={"message": message})
 
-@router.get("/lease_agreement/{lease_agreement_id}")
-def get_lease_agreement_by_id(lease_agreement_id: int):
-    code, message = get_lease_agreement(lease_agreement_id)
+@router.get("/lease_agreement/{space_id}")
+def get_lease_agreement_by_id(space_id: int):
+    code, message = get_lease_agreement(space_id)
     return JSONResponse(status_code=code, content={"message": message})
 
 @router.put("/lease_agreement")
