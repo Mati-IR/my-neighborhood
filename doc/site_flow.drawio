@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-02-15T12:35:10.047Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="i2YnPyI6tWZALYe__3c1" version="23.1.4" type="device">
+<mxfile host="app.diagrams.net" modified="2024-02-15T22:50:13.824Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="kmO8RD1vwDbHrg0J1FQJ" version="23.1.4" type="device">
   <diagram name="Strona-1" id="-Ldg9SIxWEaMv2h-fhzh">
     <mxGraphModel dx="3088" dy="746" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -119,7 +119,7 @@
         <mxCell id="-0zjHkO4cwcMO9rpGIld-27" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="-0zjHkO4cwcMO9rpGIld-20" target="-0zjHkO4cwcMO9rpGIld-26" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="-0zjHkO4cwcMO9rpGIld-20" value="Tworzenie ogłoszeń" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="-0zjHkO4cwcMO9rpGIld-20" value="Tworzenie ogłoszeń" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="380" y="310" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="-0zjHkO4cwcMO9rpGIld-25" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="-0zjHkO4cwcMO9rpGIld-22" target="-0zjHkO4cwcMO9rpGIld-24" edge="1">
@@ -144,7 +144,7 @@
         <mxCell id="-0zjHkO4cwcMO9rpGIld-24" value="Przypisanie załogi/&lt;br&gt;edycja personelu remontowego&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="-370" y="410" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="-0zjHkO4cwcMO9rpGIld-26" value="Edycja" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="-0zjHkO4cwcMO9rpGIld-26" value="Edycja" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="380" y="410" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="-0zjHkO4cwcMO9rpGIld-28" value="Edycja kategori" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -168,7 +168,7 @@
         <mxCell id="-0zjHkO4cwcMO9rpGIld-45" value="Raporty" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="1090" y="280" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="-0zjHkO4cwcMO9rpGIld-46" value="Podgląd ogłoszeń" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="-0zjHkO4cwcMO9rpGIld-46" value="Podgląd ogłoszeń" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="1240.5" y="280" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="xKl3YeKgHJPGubothBde-6" value="" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=12;startSize=8;endSize=8;" parent="1" source="xKl3YeKgHJPGubothBde-1" target="xKl3YeKgHJPGubothBde-5" edge="1">
