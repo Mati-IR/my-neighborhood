@@ -97,9 +97,11 @@ class LeaseAgreement(Base):
     __tablename__ = 'lease_agreement'
     id = Column(Integer, primary_key=True, autoincrement=True)
     rent = Column(DECIMAL)
-    rentier_full_name = Column(String(100), nullable=False)
+    renter_full_name = Column(String(100), nullable=False)
     phone_number = Column(String(20), nullable=False)
     email = Column(String(100), nullable=False)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
     space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))
     space = relationship("Space", backref="lease_agreements")
 

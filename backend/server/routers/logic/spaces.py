@@ -3,12 +3,13 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from ..models import SpaceModel, SpaceToOwnerModel
+from ..models import SpaceModel, SpaceToOwnerModel, LeaseAgreementModel, NewLeaseAgreementModel
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import SpacesForFloor, Space, SpaceType, FloorForBuilding, OwnerOfSpace, Owner
+from .database_handler.tables_models import SpacesForFloor, Space, SpaceType, FloorForBuilding, OwnerOfSpace, Owner, \
+    LeaseAgreement
 from .database_handler.util import get_database_session
 
 LENGTH_OF_SHA256 = 64
@@ -226,6 +227,7 @@ def remove_owner_from_space(owner_id: int, space_id: int):
         logger.error(f"An error occurred while removing owner with ID {owner_id} from space with ID {space_id}: {e}")
         return RETURN_FAILURE, "Error removing owner from space: " + str(e)
 
+
 def get_owners_of_space(space_id: int):
     try:
         with get_database_session() as session:
@@ -251,3 +253,123 @@ def get_owners_of_space(space_id: int):
     except Exception as e:
         logger.error(f"An error occurred while retrieving owners of space with ID {space_id}: {e}")
         return RETURN_FAILURE, "Error retrieving owners of space: " + str(e)
+
+
+def create_lease_agreement(lease_agreement: NewLeaseAgreementModel):
+    try:
+        with get_database_session() as session:
+            code = RETURN_SUCCESS
+            message = "Lease agreement created"
+
+            if None in lease_agreement.__dict__.values():
+                code = RETURN_FAILURE
+                message = "Message corrupted"
+                return code, message
+
+            if lease_agreement.start_date > lease_agreement.end_date:
+                code = RETURN_FAILURE
+                message = "Start date is after end date"
+                return code, message
+
+            if session.query(LeaseAgreement).filter(
+                    LeaseAgreement.space_id == lease_agreement.space_id).first() is not None:
+                code = RETURN_USER_ALREADY_EXISTS
+                message = "Lease agreement for this space already exists"
+                return code, message
+
+            space = session.query(Space).filter(Space.id == lease_agreement.space_id).first()
+            if space is None:
+                code = RETURN_NOT_FOUND
+                message = "Space not found"
+                return code, message
+
+            new_lease_agreement = LeaseAgreement(rent=lease_agreement.rent,
+                                                 renter_full_name=lease_agreement.renter_full_name,
+                                                 phone_number=lease_agreement.phone_number, email=lease_agreement.email,
+                                                 start_date=lease_agreement.start_date, end_date=lease_agreement.end_date,
+                                                 space_id=lease_agreement.space_id)
+            session.add(new_lease_agreement)
+            session.commit()
+            return code, message
+    except Exception as e:
+        logger.error(f"An error occurred while creating lease agreement: {e}")
+        return RETURN_FAILURE, "Error creating lease agreement: " + str(e)
+
+
+def remove_lease_agreement(agreement_id: int):
+    try:
+        with get_database_session() as session:
+            logger.info(f"Attempting to remove lease agreement with ID {agreement_id}")
+            lease_agreement = session.query(LeaseAgreement).filter_by(id=agreement_id).first()
+            if lease_agreement:
+                session.delete(lease_agreement)
+                session.commit()
+                logger.info(f"Lease agreement with ID {agreement_id} removed successfully.")
+                return RETURN_SUCCESS, "Lease agreement removed successfully."
+            else:
+                logger.info(f"No lease agreement found with ID {agreement_id}.")
+                return RETURN_NOT_FOUND, "Lease agreement not found."
+    except Exception as e:
+        logger.error(f"An error occurred while removing lease agreement with ID {agreement_id}: {e}")
+        return RETURN_FAILURE, "Error removing lease agreement: " + str(e)
+
+
+def get_lease_agreement(agreement_id: int):
+    try:
+        with get_database_session() as session:
+            logger.info(f"Attempting to retrieve lease agreement with ID {agreement_id}")
+            lease_agreement = session.query(LeaseAgreement).filter_by(id=agreement_id).first()
+            if lease_agreement:
+                agreement_info = {
+                    "id": lease_agreement.id,
+                    "rent": float(lease_agreement.rent),
+                    "renter_full_name": lease_agreement.renter_full_name,
+                    "phone_number": lease_agreement.phone_number,
+                    "email": lease_agreement.email,
+                    "space_id": lease_agreement.space_id,
+                    "start_date": lease_agreement.start_date.isoformat(),
+                    "end_date": lease_agreement.end_date.isoformat()
+                }
+                logger.info(f"Lease agreement with ID {agreement_id} retrieved successfully.")
+                return RETURN_SUCCESS, agreement_info
+            else:
+                logger.info(f"No lease agreement found with ID {agreement_id}.")
+                return RETURN_NOT_FOUND, "Lease agreement not found."
+    except Exception as e:
+        logger.error(f"An error occurred while retrieving lease agreement with ID {agreement_id}: {e}")
+        return RETURN_FAILURE, "Error retrieving lease agreement: " + str(e)
+
+
+def update_lease_agreement(lease_agreement: LeaseAgreementModel):
+    try:
+        with get_database_session() as session:
+            code = RETURN_SUCCESS
+            message = "Lease agreement updated"
+
+            if None in lease_agreement.__dict__.values():
+                code = RETURN_FAILURE
+                message = "Message corrupted"
+                return code, message
+
+            if lease_agreement.start_date > lease_agreement.end_date:
+                code = RETURN_FAILURE
+                message = "Start date is after end date"
+                return code, message
+
+            if session.query(LeaseAgreement).filter(LeaseAgreement.id == lease_agreement.id).first() is None:
+                code = RETURN_NOT_FOUND
+                message = "Lease agreement not found"
+                return code, message
+
+            lease_agreement_to_update = session.query(LeaseAgreement).filter_by(id=lease_agreement.id).first()
+            lease_agreement_to_update.rent = lease_agreement.rent
+            lease_agreement_to_update.renter_full_name = lease_agreement.renter_full_name
+            lease_agreement_to_update.phone_number = lease_agreement.phone_number
+            lease_agreement_to_update.email = lease_agreement.email
+            lease_agreement_to_update.start_date = lease_agreement.start_date
+            lease_agreement_to_update.end_date = lease_agreement.end_date
+            session.commit()
+            return code, message
+    except Exception as e:
+        logger.error(f"An error occurred while updating lease agreement{lease_agreement}: {e}")
+        return RETURN_FAILURE, "Error updating lease agreement: " + str(e)

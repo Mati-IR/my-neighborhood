@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 
 from pydantic import BaseModel, EmailStr
 
@@ -54,23 +54,12 @@ class RemoveOwnerFromSpaceModel(BaseModel):
     owner_id: int
 
 
-#CREATE TABLE `news`
-#(
-# `id`            int NOT NULL AUTO_INCREMENT ,
-# `title`         varchar(45) NOT NULL ,
-# `description`   varchar(3000) NOT NULL ,
-# `creation_date` datetime NOT NULL ,
-# `creator_id`    int NOT NULL ,
-#
-#PRIMARY KEY (`id`),
-#KEY `FK_1` (`creator_id`),
-#CONSTRAINT `FK_18` FOREIGN KEY `FK_1` (`creator_id`) REFERENCES `admin` (`id`)
-#);
 class NewNewsModel(BaseModel):
     title: str
     description: str
     creation_date: datetime
     creator_id: int
+
 
 class NewsModel(BaseModel):
     id: int
@@ -78,3 +67,37 @@ class NewsModel(BaseModel):
     description: str
     creation_date: datetime
     creator_id: int
+
+
+# CREATE TABLE `lease_agreement`
+# (
+#  `id`                int NOT NULL AUTO_INCREMENT ,
+#  `rent`              decimal NULL ,
+#  `rentier_full_name` varchar(100) NOT NULL ,
+#  `phone_number`      varchar(20) NOT NULL ,
+#  `email`             varchar(100) NOT NULL ,
+#  `space_id`          int NOT NULL ,
+#
+# PRIMARY KEY (`id`),
+# KEY `FK_1` (`space_id`),
+# CONSTRAINT `FK_24` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`) ON DELETE CASCADE
+# );
+class NewLeaseAgreementModel(BaseModel):
+    rent: float
+    renter_full_name: str
+    phone_number: str
+    email: EmailStr
+    space_id: int
+    start_date: date
+    end_date: date
+
+class LeaseAgreementModel(BaseModel):
+    id: int
+    rent: float
+    renter_full_name: str
+    phone_number: str
+    email: EmailStr
+    space_id: int
+    start_date: date
+    end_date: date
+

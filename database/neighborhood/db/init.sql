@@ -138,10 +138,12 @@ CREATE TABLE `lease_agreement`
 (
  `id`                int NOT NULL AUTO_INCREMENT ,
  `rent`              decimal NULL ,
- `rentier_full_name` varchar(100) NOT NULL ,
+ `renter_full_name` varchar(100) NOT NULL ,
  `phone_number`      varchar(20) NOT NULL ,
  `email`             varchar(100) NOT NULL ,
  `space_id`          int NOT NULL ,
+ `start_date`        date NOT NULL ,
+ `end_date`          date NOT NULL ,
 
 PRIMARY KEY (`id`),
 KEY `FK_1` (`space_id`),
