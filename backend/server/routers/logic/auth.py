@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from ..models import CredentialsModel
 from .database_handler.tables_models import OwnerCredential, AdminCredential, Admin, Owner
 from .database_handler.util import get_database_session
 import os
@@ -59,7 +60,8 @@ def login(email, password_hash):
 def register_admin(admin_registration_model):
     with get_database_session() as session:
         # check if email is already in database
-        if session.query(AdminCredential.email).filter(AdminCredential.email == admin_registration_model.email).first() is not None:
+        if session.query(AdminCredential.email).filter(
+                AdminCredential.email == admin_registration_model.email).first() is not None:
             return RETURN_USER_ALREADY_EXISTS, 'Email already in use'
 
         # check if password is long enough
@@ -74,7 +76,7 @@ def register_admin(admin_registration_model):
 
         # add admin to database
         new_credential = AdminCredential(email=admin_registration_model.email,
-                                    password_hash=admin_registration_model.password_hash)
+                                         password_hash=admin_registration_model.password_hash)
         session.add(new_credential)
         session.flush()  # This ensures new_credential.id is available immediately after the add, without needing to commit first
 
@@ -92,16 +94,17 @@ def register_admin(admin_registration_model):
 def register_owner(owner_registration_model):
     with get_database_session() as session:
         # check if email is already in database
-        if session.query(OwnerCredential.email).filter(OwnerCredential.email == owner_registration_model.email).first() is not None:
+        if session.query(OwnerCredential.email).filter(
+                OwnerCredential.email == owner_registration_model.email).first() is not None:
             return RETURN_USER_ALREADY_EXISTS, 'Email already in use'
 
         # check if password is long enough
         if len(owner_registration_model.password_hash) != LENGTH_OF_SHA256:
-            return RETURN_INCORRECT_LENGTH, 'Password too short'
+            return RETURN_INCORRECT_LENGTH, 'Password\'s hash length incorrect'
 
         # add owner to database
         new_credential = OwnerCredential(email=owner_registration_model.email,
-                                    password_hash=owner_registration_model.password_hash)
+                                         password_hash=owner_registration_model.password_hash)
         session.add(new_credential)
         session.flush()  # This ensures new_credential.id is available immediately after the add, without needing to commit first
 
@@ -114,6 +117,7 @@ def register_owner(owner_registration_model):
         session.commit()
         return RETURN_SUCCESS, 'Owner registered'
 
+
 def get_all_owners():
     with get_database_session() as session:
         users = session.query(Owner).all()
@@ -124,3 +128,26 @@ def get_all_owners():
                 "phone_number": user.phone_number,
                 "full_address": user.full_address
             }
+
+
+def update_credentials(credentials: CredentialsModel):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Credentials updated"
+
+        if len(credentials.password_hash) != LENGTH_OF_SHA256:
+            return RETURN_INCORRECT_LENGTH, 'Password\'s hash length incorrect'
+
+        user_credentials = session.query(OwnerCredential).filter(OwnerCredential.email == credentials.email).first()
+        if user_credentials is None:
+            user_credentials = session.query(AdminCredential).filter(AdminCredential.email == credentials.email).first()
+            if user_credentials is None:
+                code = RETURN_FAILURE
+                message = "User not found"
+                return code, message
+
+        user_credentials.email = credentials.email
+        user_credentials.password_hash = credentials.password_hash
+        session.commit()
+
+        return code, message

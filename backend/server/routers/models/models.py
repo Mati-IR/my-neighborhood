@@ -25,6 +25,11 @@ class OwnerRegistrationModel(BaseModel):
     full_address: str
 
 
+class CredentialsModel(BaseModel):
+    email: str
+    password_hash: str
+
+
 class BuildingModel(BaseModel):
     building_name: str
     city: str

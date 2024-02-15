@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from .models import SignInRequestModel, AdminRegistrationModel, OwnerRegistrationModel
-from .logic import login, register_admin, register_owner, get_all_owners
+from .models import SignInRequestModel, AdminRegistrationModel, OwnerRegistrationModel, CredentialsModel
+from .logic import login, register_admin, register_owner, get_all_owners, update_credentials
 import logging
 
 router = APIRouter()
@@ -34,3 +34,8 @@ def register_own(owner: OwnerRegistrationModel):
 def get_all():
     message = list(get_all_owners())
     return JSONResponse(status_code=200, content={'message': message})
+
+@router.put('/update_credentials')
+def put_credentials(credentials: CredentialsModel):
+    code, message = update_credentials(credentials)
+    return JSONResponse(status_code=code, content={'message': message})
