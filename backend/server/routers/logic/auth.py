@@ -26,6 +26,7 @@ def login(email, password_hash):
         user_credentials = session.query(OwnerCredential).filter(OwnerCredential.email == email).first()
         user = None
         user_name = ""
+        user_id = None
 
         # is user_credentials in database
         if user_credentials is None:
@@ -38,9 +39,11 @@ def login(email, password_hash):
                 message = "Admin"
                 user = session.query(Admin).filter(Admin.credentials_id == user_credentials.id).first()
                 user_name = user.full_name
+                user_id = user.id
         else:
             user = session.query(Owner).filter(Owner.credentials_id == user_credentials.id).first()
             user_name = user.full_name
+            user_id = user.id
 
         # if previous checks haven't failed and password correct
         if (code is RETURN_SUCCESS
@@ -50,7 +53,7 @@ def login(email, password_hash):
             code = RETURN_FAILURE
             message = 'Credentials incorrect'
 
-        return code, user_name, is_admin, message
+        return code, user_name, user_id, is_admin, message
 
 
 def register_admin(admin_registration_model):

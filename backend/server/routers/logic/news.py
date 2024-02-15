@@ -144,4 +144,3 @@ def update_news(news_model: NewsModel):
 
         session.commit()
         return code, message
-    

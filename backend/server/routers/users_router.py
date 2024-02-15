@@ -13,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 @router.post('/login', response_model=SignInRequestModel)
 def sign_in(user_details: SignInRequestModel):
-    code, user, is_admin, message = login(user_details.email, user_details.password_hash)
-    return JSONResponse(status_code=code, content={'user': user,
-                                                   'is_admin': is_admin, 'message': message})
+    code, user, user_id, is_admin, message = login(user_details.email, user_details.password_hash)
+    return JSONResponse(status_code=code, content={'user': user, 'is_admin': is_admin,
+                                                   'user_id': user_id, 'message': message})
 
 
 @router.post('/register_admin')
