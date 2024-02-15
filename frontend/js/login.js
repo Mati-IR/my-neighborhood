@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 else{
                     localStorage.setItem('user', response.user);
                     localStorage.setItem('admin', response.is_admin);
+                    localStorage.setItem('id', response.user_id);
                     window.location.href = 'index.html';
                 }
             })
@@ -90,8 +91,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: JSON.stringify(requestData)
             });
-    
+            
+            console.log("LOGOWANIE")
             const responseData = await response.json();
+            console.log(responseData)
             return responseData;
         } catch (error) {
             console.error('Wystąpił błąd podczas wysyłania żądania:', error);

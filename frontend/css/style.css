@@ -328,3 +328,56 @@ button[type="button"]:hover {
   .list-group-item {
       position: static;
   }
+  .announcement-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    
+    .announcement-card {
+      width: calc(33.33% - 20px);
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .announcement-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .announcement-description {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .creator-info,
+    .creation-date {
+      font-size: 14px;
+      color: #6c757d;
+    }
+
+    .pagination {
+      margin-top: 20px;
+      justify-content: center;
+    }
+.pagination-button {
+      background-color: #43b652;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 16px;
+      margin: 0 2px;
+      cursor: pointer;
+  }
+
+  .pagination-button.active {
+      background-color: #30693D;
+  }
+
+  .pagination-button.disabled {
+      background-color: #D3D3D3;
+      cursor: not-allowed;
+  }

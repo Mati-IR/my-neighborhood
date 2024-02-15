@@ -18,6 +18,7 @@ function generateSidebar(accountType) {
     else{
         items = [
             { text: "Dane użytkownika", onclick: "displayUserData()" },
+            { text: "Ogłoszenia", onclick: "displayNews()" },
         ];
     }
     items.forEach(item => {
