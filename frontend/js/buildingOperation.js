@@ -259,6 +259,14 @@ function hideOwnerForm(spaceId){
         asignOwnerFormGenerate(spaceId)
     }
 }
+function hideOwnerDetails(spaceId){
+    var ownerForm= document.getElementById("ownerForSpaceTable_"+spaceId);
+    if(ownerForm != null){
+        ownerForm.remove();
+    }else{
+        displayOwners(spaceId)
+    }
+}
 function validateBuildingForm() {
     var buildingName = document.getElementById("createBuildingName").value;
     var city = document.getElementById("createCity").value;
@@ -532,16 +540,17 @@ async function generateBuildingDetailsTable(buildingDetails) {
     }
 
     let detailsHTML = '<div class="table-responsive"><table class="table table-bordered table-striped">';
-    detailsHTML += '<thead><tr><th>Piętro</th><th>Numer</th><th>Metraż</th><th>Typ</th><th>Usuń</th><th>Dodaj właściciela</th><th>Usuń właściciela</th></tr></thead>';
+    detailsHTML += '<thead><tr><th>Piętro</th><th>Numer</th><th>Metraż</th><th>Typ</th><th>Usuń</th><th>Dodaj właściciela</th><th>Pokaż</th></tr></thead>';
     detailsHTML += '<tbody>';
 
     buildingDetails.building_details.floors.forEach(floor => {
         floor.spaces.forEach(space => {
             const spaceTypeName = spaceCategories.get(space.space_type) || '';
-            detailsHTML += `<tr><td>${floor.floor_number}</td><td>${space.space_number}</td><td>${space.area}</td><td>${spaceTypeName}</td>
+            detailsHTML += `<tr><td>${floor.floor_number}</td><td>${space.space_number}</td><td>${space.area} m2</td><td>${spaceTypeName}</td>
             <td><button class="btn btn-light buttonDecoration" onclick="deleteSpaceById(${space.id})"><i class="bi bi-trash-fill" style="color:#cf4a4a"></i></button></td>
             <td><button class="btn btn-light buttonDecoration" onclick="hideOwnerForm(${space.id})"><i class="bi bi-person-fill-add"></i></button></td>
-            <td><button class="btn btn-light buttonDecoration" onclick="test("remove")"><i class="bi bi-person-fill-dash" style="color:#cf4a4a"></i></button></td></tr>`;
+            <td><button class="btn btn-light buttonDecoration" onclick="hideOwnerDetails(${space.id})"><i class="bi bi-caret-down-fill"></i></button></td></tr>
+            <tr id="ownerForSpace_`+space.id+`"></tr>`;
         });
     });
 
@@ -745,7 +754,6 @@ function validateOwnerForm() {
     var minutes = String(formattedPurchaseDate.getMinutes()).padStart(2, '0');
     var seconds = String(formattedPurchaseDate.getSeconds()).padStart(2, '0');
     var datetime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes + ':' + seconds+'Z';
-    console.log(datetime)
     var asignData ={
         space_id: spaceId,
         share: share/100,
@@ -832,3 +840,185 @@ async function deleteSpaceById(space_id){
         throw error;
     }
 }
+async function getOwnersOfSpace(space_id){
+    try {
+        const response = await fetch(apiBaseUrl+'/get_owners_of_space/'+space_id, {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData.message;
+        } else {
+            throw new Error("Brak danych właścicieli w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania właścicieli: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania właścicieli:', error.message);
+        throw error;
+    }
+}
+async function displayOwners(spaceId) {
+    var ownerForSpace = document.getElementById("ownerForSpace_" + spaceId);
+    var tableContainer = document.createElement("td");
+    tableContainer.colSpan = 7;
+    tableContainer.id = "ownerForSpaceTable_"+spaceId
+
+    var innerTable = document.createElement("table");
+    innerTable.classList.add("table", "table-bordered", "table-striped");
+
+    var innerThead = document.createElement("thead");
+    var innerHeaderRow = document.createElement("tr");
+    var headers = ["ID", "Imię nazwisko", "Numer telefonu", "Adres","Udział","Data zakupu","Usuń"]; // Możesz dostosować nagłówki do potrzeb
+    headers.forEach(function(headerText) {
+        var th = document.createElement("th");
+        th.textContent = headerText;
+        innerHeaderRow.appendChild(th);
+    });
+    innerThead.appendChild(innerHeaderRow);
+    innerTable.appendChild(innerThead);
+
+    var innerTbody = document.createElement("tbody");
+
+    var ownersData = await getOwnersOfSpace(spaceId)
+    if(typeof ownersData === "string"){
+        var row = document.createElement("tr");
+        var noDataCell = document.createElement("td");
+            noDataCell.textContent = "Brak danych o właścicielach";
+            row.appendChild(noDataCell);
+            innerTbody.appendChild(row);
+    }
+    else{
+        var leftShare = 1;
+        ownersData.forEach(function(owner) {
+            var row = document.createElement("tr");
+
+            var ownerIdCell = document.createElement("td");
+            ownerIdCell.textContent = owner.id;
+            row.appendChild(ownerIdCell);
+
+            var fullNameCell = document.createElement("td");
+            fullNameCell.textContent = owner.full_name;
+            row.appendChild(fullNameCell);
+
+            var phoneNumberCell = document.createElement("td");
+            phoneNumberCell.textContent = owner.phone_number;
+            row.appendChild(phoneNumberCell);
+
+            var fullAddressCell = document.createElement("td");
+            fullAddressCell.textContent = owner.full_address;
+            row.appendChild(fullAddressCell);
+
+            var shareCell = document.createElement("td");
+            shareCell.textContent = owner.share*100+" %";
+            leftShare = leftShare - owner.share;
+            row.appendChild(shareCell);
+
+            var purchaseDateCell = document.createElement("td");
+            // Konwertuj datę na czytelny format
+            var purchaseDate = new Date(owner.purchase_date);
+            purchaseDateCell.textContent = purchaseDate.toLocaleString();
+            row.appendChild(purchaseDateCell);
+
+            var dataForRemove = {
+                space_id : spaceId,
+                owner_id : owner.id
+            };
+            var jsonDataForRemove = JSON.stringify(dataForRemove);
+            var button = document.createElement("button");
+                button.classList.add("btn", "btn-light", "buttonDecoration");
+                button.setAttribute("onclick", `deleteUserFromSpace('${jsonDataForRemove}')`);
+                var icon = document.createElement("i");
+                icon.classList.add("bi", "bi-person-fill-dash");
+                icon.style.color = "#cf4a4a";
+                button.appendChild(icon);
+                var cell = document.createElement("td");
+                cell.appendChild(button);
+                row.appendChild(cell)
+            innerTbody.appendChild(row);
+        });
+        var row2 = document.createElement("tr");
+        var empty1Cell = document.createElement("td");
+        empty1Cell.textContent = " ";
+        var empty2Cell = document.createElement("td");
+        empty2Cell.textContent = " ";
+        var empty3Cell = document.createElement("td");
+        empty3Cell.textContent = " ";
+
+        row2.appendChild(empty1Cell);
+        row2.appendChild(empty2Cell);
+        row2.appendChild(empty3Cell);
+        var textCell = document.createElement("td");
+        textCell.textContent = "Pozostałe udziały";
+        var leftShareCell = document.createElement("td");
+        leftShareCell.textContent = leftShare*100+" %";
+
+        row2.appendChild(textCell);
+        row2.appendChild(leftShareCell);
+        innerTbody.appendChild(row2);
+    }
+    innerTable.appendChild(innerTbody);
+
+    ownerForSpace.innerHTML = "";
+    tableContainer.appendChild(innerTable)
+    ownerForSpace.appendChild(tableContainer);
+}
+async function deleteUserFromSpace(dataForRemove){
+    try {
+        printApiResponse("apiInfoResponse", " ","levelACHTUNG");
+        var statePromise = new Promise((resolve, reject) => {
+            var apiInfoResponse = document.getElementById("apiInfoResponse");
+            apiInfoResponse.classList.add("apiInfoResponse");
+            apiInfoResponse.classList.add("levelACHTUNG");
+            apiInfoResponse.textContent = 'Czy napewno chcesz usunąć właściciela?';
+            
+            var apiDiv = document.querySelector('.apiDiv');
+            apiDiv.innerHTML = ``;
+            var yesButton = document.createElement("button");
+            yesButton.classList.add("btn","btn-light","achtungButtonYes");
+            yesButton.textContent = "Tak";
+            yesButton.onclick = function() {
+                hideApiResponse("apiInfoResponse");
+                noButton.remove();
+                yesButton.remove();
+                resolve(true);
+            };
+            apiDiv.appendChild(yesButton);
+
+            var noButton = document.createElement("button");
+            noButton.classList.add("btn","btn-light","achtungButtonNo");
+            noButton.textContent = "Nie";
+            noButton.onclick = function() {
+                hideApiResponse("apiInfoResponse");
+                noButton.remove();
+                yesButton.remove();
+                resolve(false);
+            };
+            apiDiv.appendChild(noButton);
+        });
+
+        var state = await statePromise;
+
+        if(state==true){
+            const response = await fetch(apiBaseUrl+'/remove_owner_from_space', {
+                method: 'DELETE',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataForRemove)
+              });
+            printApiResponse("apiInfoResponse", 'NASTĄPIŁA EKSMISJA', "levelSucces");
+            generateBuildingPanel();
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas wysyłania żądania: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+        throw error;
+    }
+}
+
+
+
+
+
+
+

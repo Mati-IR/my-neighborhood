@@ -214,6 +214,7 @@ function validateForm() {
     return true;
 }
 async function registerAdmin(adminData) {
+    adminData.salary_currency = "PLN";
     try {
       const response = await fetch(apiBaseUrl+'/register_admin', {
         method: 'POST',
