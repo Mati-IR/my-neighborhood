@@ -52,3 +52,29 @@ class SpaceToOwnerModel(BaseModel):
 class RemoveOwnerFromSpaceModel(BaseModel):
     space_id: int
     owner_id: int
+
+
+#CREATE TABLE `news`
+#(
+# `id`            int NOT NULL AUTO_INCREMENT ,
+# `title`         varchar(45) NOT NULL ,
+# `description`   varchar(3000) NOT NULL ,
+# `creation_date` datetime NOT NULL ,
+# `creator_id`    int NOT NULL ,
+#
+#PRIMARY KEY (`id`),
+#KEY `FK_1` (`creator_id`),
+#CONSTRAINT `FK_18` FOREIGN KEY `FK_1` (`creator_id`) REFERENCES `admin` (`id`)
+#);
+class NewNewsModel(BaseModel):
+    title: str
+    description: str
+    creation_date: datetime
+    creator_id: int
+
+class NewsModel(BaseModel):
+    id: int
+    title: str
+    description: str
+    creation_date: datetime
+    creator_id: int
