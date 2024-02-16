@@ -259,12 +259,25 @@ function hideOwnerForm(spaceId){
         asignOwnerFormGenerate(spaceId)
     }
 }
-function hideOwnerDetails(spaceId){
-    var ownerForm= document.getElementById("ownerForSpaceTable_"+spaceId);
-    if(ownerForm != null){
-        ownerForm.remove();
+function hideOwnerDetails(spaceId, message){
+    var spaceTable= document.getElementById("ownerForSpaceTable_"+spaceId);
+    var leaseTable= document.getElementById("leaseAgreementForSpaceTable_"+spaceId);
+    if(spaceTable != null){
+        spaceTable.remove();
+        if(message!="Lease agreement not found.")
+            leaseTable.remove();
     }else{
-        displayOwners(spaceId)
+        displayOwners(spaceId);
+        if(message!="Lease agreement not found.")
+            displayLeaseAgreement(spaceId,message);
+    }
+}
+function hideLeaseForm(spaceId,leaseData){
+    var leaseForm = document.getElementById("leaseForm");
+    if(leaseForm != null){
+        leaseForm.remove();
+    }else{
+        generateEditLeaseForm(spaceId,leaseData)
     }
 }
 function validateBuildingForm() {
@@ -540,23 +553,35 @@ async function generateBuildingDetailsTable(buildingDetails) {
     }
 
     let detailsHTML = '<div class="table-responsive"><table class="table table-bordered table-striped">';
-    detailsHTML += '<thead><tr><th>Piętro</th><th>Numer</th><th>Metraż</th><th>Typ</th><th>Usuń</th><th>Dodaj właściciela</th><th>Pokaż</th></tr></thead>';
+    detailsHTML += '<thead><tr><th>Piętro</th><th>Numer</th><th>Metraż</th><th>Typ</th><th>Wynajem</th><th>Usuń</th><th>Dodaj właściciela</th><th>Pokaż</th></tr></thead>';
     detailsHTML += '<tbody>';
 
-    buildingDetails.building_details.floors.forEach(floor => {
-        floor.spaces.forEach(space => {
+    for (const floor of buildingDetails.building_details.floors) {
+        for (const space of floor.spaces) {
             const spaceTypeName = spaceCategories.get(space.space_type) || '';
-            detailsHTML += `<tr><td>${floor.floor_number}</td><td>${space.space_number}</td><td>${space.area} m2</td><td>${spaceTypeName}</td>
-            <td><button class="btn btn-light buttonDecoration" onclick="deleteSpaceById(${space.id})"><i class="bi bi-trash-fill" style="color:#cf4a4a"></i></button></td>
+            var message;
+            try {
+                message = await getLeaseAgreement(space.id);
+            } catch (error) {
+                console.error("Error occurred while fetching lease agreement:", error);
+            }
+            detailsHTML += `<tr><td>${floor.floor_number}</td><td>${space.space_number}</td><td>${space.area} m2</td><td>${spaceTypeName}</td>`;
+            if(message === "Lease agreement not found."){
+                detailsHTML += `<td style="background-color: #43b652; cursor: pointer;" onclick="hideLeaseForm(${space.id})">Wolne</td>`
+            }
+            else{
+                detailsHTML += `<td style="background-color: #cf4a4a;">Wynajete</td>`
+            }
+            detailsHTML +=`<td><button class="btn btn-light buttonDecoration" onclick="deleteSpaceById(${space.id})"><i class="bi bi-trash-fill" style="color:#cf4a4a"></i></button></td>
             <td><button class="btn btn-light buttonDecoration" onclick="hideOwnerForm(${space.id})"><i class="bi bi-person-fill-add"></i></button></td>
-            <td><button class="btn btn-light buttonDecoration" onclick="hideOwnerDetails(${space.id})"><i class="bi bi-caret-down-fill"></i></button></td></tr>
-            <tr id="ownerForSpace_`+space.id+`"></tr>`;
-        });
-    });
+            <td><button class="btn btn-light buttonDecoration" onclick='hideOwnerDetails(${space.id}, ${JSON.stringify(message)})'><i class="bi bi-caret-down-fill"></i></button></td></tr>
+            <tr id="ownerForSpace_${space.id}"></tr>
+            <tr id="leaseAgreementForSpace_${space.id}"></tr>`;
+        }
+    }
 
     detailsHTML += '</tbody>';
     detailsHTML += '</table></div>';
-
     return detailsHTML;
 }
 async function getSpaceCategories(){
@@ -860,8 +885,13 @@ async function getOwnersOfSpace(space_id){
 async function displayOwners(spaceId) {
     var ownerForSpace = document.getElementById("ownerForSpace_" + spaceId);
     var tableContainer = document.createElement("td");
-    tableContainer.colSpan = 7;
+    tableContainer.colSpan = 8;
     tableContainer.id = "ownerForSpaceTable_"+spaceId
+
+    var tableHeader = document.createElement("h3");
+    var text = document.createTextNode("Tabela właścicieli");
+    tableHeader.appendChild(text);
+    tableContainer.appendChild(tableHeader);
 
     var innerTable = document.createElement("table");
     innerTable.classList.add("table", "table-bordered", "table-striped");
@@ -1007,6 +1037,320 @@ async function deleteUserFromSpace(dataForRemove){
                 body: JSON.stringify(dataForRemove)
               });
             printApiResponse("apiInfoResponse", 'NASTĄPIŁA EKSMISJA', "levelSucces");
+            generateBuildingPanel();
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas wysyłania żądania: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+        throw error;
+    }
+}
+async function getLeaseAgreement(spaceId){
+    try {
+        const response = await fetch(apiBaseUrl+'/lease_agreement/'+spaceId, {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData.message;
+        } else {
+            throw new Error("Brak danych wynajmu w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania wynajmu: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania wynajmu:', error.message);
+        throw error;
+    }
+}
+async function displayLeaseAgreement(spaceId,leaseData) {
+
+    var ownerForSpace = document.getElementById("leaseAgreementForSpace_" + spaceId);
+    var tableContainer = document.createElement("td");
+    tableContainer.colSpan = 8;
+    tableContainer.id = "leaseAgreementForSpaceTable_"+spaceId;
+
+    var tableHeader = document.createElement("h3");
+    var text = document.createTextNode("Tabela umowy najmu");
+    tableHeader.appendChild(text);
+    tableContainer.appendChild(tableHeader);
+
+    var innerTable = document.createElement("table");
+    innerTable.classList.add("table", "table-bordered", "table-striped");
+
+    var innerThead = document.createElement("thead");
+    var innerHeaderRow = document.createElement("tr");
+    var headers = ["Imię i nazwisko najemcy", "Numer telefonu", "Email", "Czynsz",  "Data rozpoczęcia", "Data zakończenia","Edytuj","Usuń"];
+    headers.forEach(function(headerText) {
+        var th = document.createElement("th");
+        th.textContent = headerText;
+        innerHeaderRow.appendChild(th);
+    });
+    innerThead.appendChild(innerHeaderRow);
+    innerTable.appendChild(innerThead);
+
+    var innerTbody = document.createElement("tbody");
+
+    var row = document.createElement("tr");
+
+    var detailsHTML = `<td>${leaseData.renter_full_name}</td><td>${leaseData.phone_number}</td><td>${leaseData.email}</td><td>${leaseData.rent}</td><td>${leaseData.start_date}</td><td>${leaseData.end_date}</td>
+                        <td><button class="btn btn-light buttonDecoration" onclick='hideLeaseForm(${spaceId},${JSON.stringify(leaseData)})'><i class="bi bi-pencil-square"></i></button></td>
+                        <td><button class="btn btn-light buttonDecoration" onclick="deleteLeaseById(${spaceId})"><i class="bi bi-trash-fill" style="color:#cf4a4a"></i></button></td>`;
+    row.innerHTML=detailsHTML;
+    innerTbody.appendChild(row);
+    innerTable.appendChild(innerTbody);
+
+    ownerForSpace.innerHTML = "";
+    tableContainer.appendChild(innerTable);
+    ownerForSpace.appendChild(tableContainer);
+}
+function generateEditLeaseForm(spaceId,leaseData) {
+    hideApiResponse("apiInfoResponse");
+
+    var contentContainer = document.getElementById("content");
+
+    var inputForm = document.createElement("div");
+    inputForm.classList.add("content-container");
+    inputForm.id = "leaseForm";
+
+    var form = document.createElement("form");
+
+    var labelFullName = document.createElement("label");
+    labelFullName.setAttribute("for", "editFullName");
+    labelFullName.textContent = "Imię i nazwisko najemcy:";
+
+    var inputFullName = document.createElement("input");
+    inputFullName.setAttribute("type", "text");
+    inputFullName.setAttribute("id", "editFullName");
+    inputFullName.setAttribute("placeholder", "Imię i nazwisko najemcy");
+    
+    var labelPhoneNumber = document.createElement("label");
+    labelPhoneNumber.setAttribute("for", "editPhoneNumber");
+    labelPhoneNumber.textContent = "Numer telefonu:";
+    
+    var inputPhoneNumber = document.createElement("input");
+    inputPhoneNumber.setAttribute("type", "text");
+    inputPhoneNumber.setAttribute("id", "editPhoneNumber");
+    inputPhoneNumber.setAttribute("placeholder", "Numer telefonu");
+
+    var labelEmail = document.createElement("label");
+    labelEmail.setAttribute("for", "editEmail");
+    labelEmail.textContent = "Email:";
+
+    var inputEmail = document.createElement("input");
+    inputEmail.setAttribute("type", "email");
+    inputEmail.setAttribute("id", "editEmail");
+    inputEmail.setAttribute("placeholder", "Email");
+
+    var labelRent = document.createElement("label");
+    labelRent.setAttribute("for", "editRent");
+    labelRent.textContent = "Czynsz:";
+
+    var inputRent = document.createElement("input");
+    inputRent.setAttribute("type", "number");
+    inputRent.setAttribute("id", "editRent");
+    inputRent.setAttribute("placeholder", "Czynsz");
+
+    var labelStartDate = document.createElement("label");
+    labelStartDate.setAttribute("for", "editStartDate");
+    labelStartDate.textContent = "Data rozpoczęcia:";
+
+    var inputStartDate = document.createElement("input");
+    inputStartDate.setAttribute("type", "date");
+    inputStartDate.setAttribute("id", "editStartDate");
+    inputStartDate.setAttribute("placeholder", "Data rozpoczęcia");
+
+    var labelEndDate = document.createElement("label");
+    labelEndDate.setAttribute("for", "editEndDate");
+    labelEndDate.textContent = "Data zakończenia:";
+
+    var inputEndDate = document.createElement("input");
+    inputEndDate.setAttribute("type", "date");
+    inputEndDate.setAttribute("id", "editEndDate");
+    inputEndDate.setAttribute("placeholder", "Data zakończenia");
+    
+    var header = document.createElement("h2");
+    header.textContent = "Formularz umowy najmu";
+    header.classList.add("MenuHeader");
+
+    var submitButton = document.createElement("button");
+    submitButton.setAttribute("type", "button");
+    submitButton.textContent = "Dodaj";
+    
+    
+    var toApiMetode = 'POST';
+    var leaseDataid = 1;
+    if(leaseData != "Lease agreement not found."&&typeof leaseData !== 'undefined'){
+        inputFullName.value = leaseData.renter_full_name;
+        inputPhoneNumber.value = leaseData.phone_number;
+        inputEmail.value = leaseData.email;
+        inputRent.value = leaseData.rent;
+        inputStartDate.value = leaseData.start_date;
+        inputEndDate.value = leaseData.end_date;
+        toApiMetode ='PUT';
+        header.textContent = "Formularz zmian danych umowy najmu";
+        submitButton.textContent = "Zmień dane";
+        leaseDataid=leaseData.id
+    }
+
+    form.appendChild(labelFullName);
+    form.appendChild(inputFullName);
+    form.appendChild(labelPhoneNumber);
+    form.appendChild(inputPhoneNumber);
+    form.appendChild(labelEmail);
+    form.appendChild(inputEmail);
+    form.appendChild(labelRent);
+    form.appendChild(inputRent);
+    form.appendChild(labelStartDate);
+    form.appendChild(inputStartDate);
+    form.appendChild(labelEndDate);
+    form.appendChild(inputEndDate);
+
+    inputForm.appendChild(header);
+
+    submitButton.onclick = function() {
+        validateLeaseDataForm(spaceId, leaseDataid, toApiMetode);
+    };
+    form.appendChild(submitButton);
+
+    var removeButton = document.createElement("button");
+    removeButton.setAttribute("type", "button");
+    removeButton.textContent = "Zamknij formularz";
+    removeButton.onclick = function() {
+        inputForm.remove();
+    };
+    removeButton.style.backgroundColor = "#cf4a4a";
+    removeButton.style.color = "black";
+    form.appendChild(removeButton);
+
+    inputForm.appendChild(form);
+    contentContainer.appendChild(inputForm);
+    inputForm.scrollIntoView({ behavior: 'smooth' });
+}
+function validateLeaseDataForm(space_id,id,toApiMetode) {
+    var rentInput = document.getElementById("editRent");
+    var emailInput = document.getElementById("editEmail");
+    var fullNameInput = document.getElementById("editFullName");
+    var phoneNumberInput = document.getElementById("editPhoneNumber");
+    var startDateInput = document.getElementById("editStartDate");
+    var endDateInput = document.getElementById("editEndDate");
+
+    var isValid = true;
+
+    if (rentInput.value === "" || isNaN(rentInput.value) || rentInput.value < 0) {
+        isValid = false;
+        rentInput.classList.add("invalid");
+    } else {
+        rentInput.classList.remove("invalid");
+    }
+
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(emailInput.value)) {
+        isValid = false;
+        emailInput.classList.add("invalid");
+    } else {
+        emailInput.classList.remove("invalid");
+    }
+
+    var inputsToCheck = [fullNameInput, phoneNumberInput, startDateInput, endDateInput];
+    inputsToCheck.forEach(function(input) {
+        if (input.value === "") {
+            isValid = false;
+            input.classList.add("invalid");
+        } else {
+            input.classList.remove("invalid");
+        }
+    });
+
+    if (!isValid) {
+        printApiResponse("apiInfoResponse", "Proszę uzupełnić poprawnie wszystkie pola formularza.", "levelWarning");
+    } else {
+        dataToSend={
+            email: emailInput.value,
+            end_date: endDateInput.value,
+            phone_number: phoneNumberInput.value,
+            rent: rentInput.value,
+            renter_full_name: fullNameInput.value,
+            space_id: space_id,
+            start_date: startDateInput.value
+        }
+        if(toApiMetode == 'PUT'){
+            dataToSend.id = id;
+            addEditLease(dataToSend,'PUT')
+        } 
+        else
+            addEditLease(dataToSend,'POST')
+    }
+}
+async function addEditLease(dataToSend,toApiMetode){
+    try {
+        const response = await fetch(apiBaseUrl+'/lease_agreement', {
+          method: toApiMetode,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataToSend)
+        });
+    
+        const responseData = await response.json();
+    
+        if (response.ok) {
+            if(toApiMetode === 'POST')
+                printApiResponse("apiInfoResponse","Pomyślnie dodano najem.","levelSucces")
+            else
+                printApiResponse("apiInfoResponse","Pomyślnie zedytowano najem.","levelSucces")
+            generateBuildingPanel();
+          
+        } else {
+          printApiResponse("apiInfoResponse",responseData.message,"levelWarning")
+          console.error('Błąd podczas dodawania najmu: ', responseData.message);
+        }
+      } catch (error) {
+          printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
+          console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+      }
+}
+async function deleteLeaseById(spaceId){
+    try {
+        printApiResponse("apiInfoResponse", " ","levelACHTUNG");
+        var statePromise = new Promise((resolve, reject) => {
+            var apiInfoResponse = document.getElementById("apiInfoResponse");
+            apiInfoResponse.classList.add("apiInfoResponse");
+            apiInfoResponse.classList.add("levelACHTUNG");
+            apiInfoResponse.textContent = 'Czy napewno chcesz usunąć umowe najmu?';
+            
+            var apiDiv = document.querySelector('.apiDiv');
+            apiDiv.innerHTML = ``;
+            var yesButton = document.createElement("button");
+            yesButton.classList.add("btn","btn-light","achtungButtonYes");
+            yesButton.textContent = "Tak";
+            yesButton.onclick = function() {
+                hideApiResponse("apiInfoResponse");
+                noButton.remove();
+                yesButton.remove();
+                resolve(true);
+            };
+            apiDiv.appendChild(yesButton);
+
+            var noButton = document.createElement("button");
+            noButton.classList.add("btn","btn-light","achtungButtonNo");
+            noButton.textContent = "Nie";
+            noButton.onclick = function() {
+                hideApiResponse("apiInfoResponse");
+                noButton.remove();
+                yesButton.remove();
+                resolve(false);
+            };
+            apiDiv.appendChild(noButton);
+        });
+
+        var state = await statePromise;
+
+        if(state==true){
+            const response = await fetch(apiBaseUrl+'/lease_agreement/'+spaceId, {
+              method: 'DELETE'
+            });
+            const responseData = await response.json();
+            printApiResponse("apiInfoResponse", 'Usunięto umowe najmu z przestrzeni o id: ' + spaceId, "levelSucces");
             generateBuildingPanel();
         }
     } catch (error) {
