@@ -10,16 +10,20 @@ function generateSidebar(accountType) {
             { text: "Dane użytkownika", onclick: "displayUserData()" },
             { text: "Zmiana stawek", onclick: "displayUtilities()" },
             { text: "Ogłoszenia", onclick: "displayNews()" },
-            { text: "Głosowania", onclick: "displayUtilities()" },
-            { text: "Obsługa usterek", onclick: "displayUtilities()" },
-            { text: "Raporty", onclick: "displayUtilities()" }
+            { text: "Głosowania", onclick: "displayVotingSystem()" },
+            { text: "Obsługa usterek", onclick: "displayIncidentSystem()" },
+            { text: "Raporty", onclick: "displayRaport()" }
         ];
     }
     else{
         items = [
             { text: "Dane użytkownika", onclick: "displayUserData()" },
+            { text: "Twoje mieszkanie", onclick: "displayUserData()" },
             { text: "Ogłoszenia", onclick: "displayNews()" },
-            { text: "Aktualne stawki opłat", onclick: "displayUtilities()" }
+            { text: "Aktualne stawki opłat", onclick: "displayUtilities()" },
+            { text: "Głosowania", onclick: "displayVotingSystem()" },
+            { text: "Zgłoś usterke", onclick: "displayIncidentSystem()" },
+            { text: "Raporty", onclick: "displayRaport()" }
         ];
     }
     items.forEach(item => {

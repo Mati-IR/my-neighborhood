@@ -13,6 +13,7 @@ async function loadFromLocalStorage(){
         const user = localStorage.getItem('user');
         const isAdmin = localStorage.getItem('admin');
         if(user==null){
+            location.reload();
             window.location.href = 'login.html';
         }
         else{
@@ -30,6 +31,7 @@ async function loadFromLocalStorage(){
     }
     else{
         if(pagePath!="/noconnection.html"){
+            location.reload();
             window.location.href = 'noconnection.html';
         }
             
