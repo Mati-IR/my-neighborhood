@@ -19,6 +19,7 @@ function generateSidebar(accountType) {
         items = [
             { text: "Dane użytkownika", onclick: "displayUserData()" },
             { text: "Ogłoszenia", onclick: "displayNews()" },
+            { text: "Aktualne stawki opłat", onclick: "displayUtilities()" }
         ];
     }
     items.forEach(item => {
