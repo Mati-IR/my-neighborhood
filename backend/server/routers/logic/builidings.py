@@ -155,9 +155,9 @@ def get_building_details(building_id):
             }
             # get ids of all spaces on this floor
             spaces_id = [x.space for x in session.query(SpacesForFloor).filter(SpacesForFloor.floor_id == floor.floor_id).all()]
-            logger.warn("Spaces: ")
+            logger.warning("Spaces: ")
             for id in spaces_id:
-                logger.warn(f"Space id: {id}")
+                logger.warning(f"Space id: {id}")
                 _, space_details = get_space_by_id(id, short=True)
                 floor_details["spaces"].append(space_details)
 

@@ -2,7 +2,7 @@ import httpx
 import uvicorn
 from fastapi import FastAPI, HTTPException, Depends, Request, File, UploadFile, Form, status
 import logging
-from routers import users_router, buildings_router, spaces_router, news_router, invoices_router
+from routers import users_router, buildings_router, spaces_router, news_router, invoices_router, incidents_router
 from fastapi.middleware.cors import CORSMiddleware
 
 # setup logger
@@ -17,6 +17,7 @@ app.include_router(buildings_router.router)
 app.include_router(spaces_router.router)
 app.include_router(news_router.router)
 app.include_router(invoices_router.router)
+app.include_router(incidents_router.router)
 
 @app.get("/")
 def read_root():

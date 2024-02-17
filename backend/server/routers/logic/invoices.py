@@ -121,3 +121,6 @@ def remove_utility(utility_id: int):
         session.commit()
 
         return code, message
+
+
+    

@@ -128,3 +128,16 @@ class UtilityModel(BaseModel):
 class GetUserModel(BaseModel):
     id: int
     is_admin: bool
+
+
+class NewServicemanModel(BaseModel):
+    full_name: str
+    specialties: str
+    company_id: str
+
+
+class ServicemanModel(BaseModel):
+    id: int
+    full_name: str
+    specialties: str
+    company_id: str
