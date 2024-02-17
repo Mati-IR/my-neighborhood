@@ -155,7 +155,31 @@ def get_all_admins():
         return RETURN_SUCCESS, return_list
 
 
-
+def get_user_by_id(user_id, is_admin):
+    with get_database_session() as session:
+        if is_admin:
+            user = session.query(Admin).filter(Admin.id == user_id).first()
+            if user is None:
+                return RETURN_NOT_FOUND, 'Admin not found'
+            return RETURN_SUCCESS, {
+                'id': user.id,
+                'full_name': user.full_name,
+                'phone_number': user.phone_number,
+                'salary': float(user.salary),
+                'salary_currency': user.salary_currency,
+                'email': session.query(AdminCredential.email).filter(AdminCredential.id == user.credentials_id).first()[0]
+            }
+        else:
+            user = session.query(Owner).filter(Owner.id == user_id).first()
+            if user is None:
+                return RETURN_NOT_FOUND, 'Owner not found'
+            return RETURN_SUCCESS, {
+                'id': user.id,
+                'full_name': user.full_name,
+                'phone_number': user.phone_number,
+                'full_address': user.full_address,
+                'email': session.query(OwnerCredential.email).filter(OwnerCredential.id == user.credentials_id).first()[0]
+            }
 
 def update_credentials(credentials: CredentialsModel):
     with get_database_session() as session:

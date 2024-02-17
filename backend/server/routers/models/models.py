@@ -123,3 +123,8 @@ class UtilityModel(BaseModel):
     name: str
     price_per_unit: float
     unit: str
+
+
+class GetUserModel(BaseModel):
+    id: int
+    is_admin: bool
