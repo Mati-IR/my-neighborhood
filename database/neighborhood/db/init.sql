@@ -65,10 +65,15 @@ CREATE TABLE `utilities`
 (
  `id`             int NOT NULL AUTO_INCREMENT ,
  `name`           varchar(40) NOT NULL ,
- `price_per_unit` decimal NOT NULL ,
+ `price_per_unit` decimal(6, 2) NOT NULL ,
+ `unit`           varchar(10) NULL ,
 
 PRIMARY KEY (`id`)
 );
+
+INSERT INTO `utilities` (`name`, `price_per_unit`, `unit`) VALUES ('Water', 1.5, 'm3'), ('Electricity', 0.2, 'kWh'),
+                                                                ('Heating', 0.8, 'm2'), ('Gas', 0.5, 'm3'),
+                                                                ('Garbage', 5, 'month');
 
 
 CREATE TABLE `invoice_position`

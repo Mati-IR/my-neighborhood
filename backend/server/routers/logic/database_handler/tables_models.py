@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DECIMAL, DateTime, Date, Text, SmallInteger
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DECIMAL, DateTime, Date, Text, SmallInteger, \
+    Numeric
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -50,7 +51,8 @@ class Utility(Base):
     __tablename__ = 'utilities'
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(40), nullable=False)
-    price_per_unit = Column(DECIMAL, nullable=False)
+    price_per_unit = Column(Numeric(precision=6, scale=2), nullable=False)
+    unit = Column(String(10), nullable=True)
 
 
 class InvoicePosition(Base):
