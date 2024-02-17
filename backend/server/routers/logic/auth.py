@@ -10,6 +10,7 @@ import logging
 LENGTH_OF_SHA256 = 64
 RETURN_SUCCESS = 200
 RETURN_FAILURE = 400
+RETURN_NOT_FOUND = 404
 RETURN_USER_ALREADY_EXISTS = 409
 RETURN_INCORRECT_LENGTH = 411
 
@@ -120,16 +121,40 @@ def register_owner(owner_registration_model):
 
 def get_all_owners():
     with get_database_session() as session:
+        return_list = []
         users = session.query(Owner).all()
+        if not users:
+            return RETURN_NOT_FOUND, 'No owners found'
         for user in users:
-            yield {
+            return_list.append( {
                 'id': user.id,
                 'full_name': user.full_name,
                 'phone_number': user.phone_number,
                 'full_address': user.full_address,
-                'email': session.query(OwnerCredential.email).filter(OwnerCredential.id == user.credentials_id).first()[
-                    0]
-            }
+                'email': session.query(OwnerCredential.email).filter(OwnerCredential.id == user.credentials_id).first()[0]
+            })
+
+        return RETURN_SUCCESS, return_list
+
+def get_all_admins():
+    with get_database_session() as session:
+        return_list = []
+        users = session.query(Admin).all()
+        if not users:
+            return RETURN_NOT_FOUND, 'No admins found'
+        for user in users:
+            return_list.append( {
+                'id': user.id,
+                'full_name': user.full_name,
+                'phone_number': user.phone_number,
+                'salary': float(user.salary),
+                'salary_currency': user.salary_currency,
+                'email': session.query(AdminCredential.email).filter(AdminCredential.id == user.credentials_id).first()[0]
+            })
+
+        return RETURN_SUCCESS, return_list
+
+
 
 
 def update_credentials(credentials: CredentialsModel):
