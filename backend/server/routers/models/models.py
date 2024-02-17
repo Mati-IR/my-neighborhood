@@ -25,6 +25,23 @@ class OwnerRegistrationModel(BaseModel):
     full_address: str
 
 
+class OwnerUpdateModel(BaseModel):
+    id: int
+    full_name: str
+    phone_number: str
+    full_address: str
+    email: str
+
+
+class AdminUpdateModel(BaseModel):
+    id: int
+    full_name: str
+    phone_number: str
+    salary: float
+    salary_currency: str
+    email: str
+
+
 class CredentialsModel(BaseModel):
     email: str
     password_hash: str

@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from ..models import CredentialsModel
+from ..models import CredentialsModel, OwnerUpdateModel, AdminUpdateModel
 from .database_handler.tables_models import OwnerCredential, AdminCredential, Admin, Owner
 from .database_handler.util import get_database_session
 import os
@@ -123,10 +123,12 @@ def get_all_owners():
         users = session.query(Owner).all()
         for user in users:
             yield {
-                "id": user.id,
-                "full_name": user.full_name,
-                "phone_number": user.phone_number,
-                "full_address": user.full_address
+                'id': user.id,
+                'full_name': user.full_name,
+                'phone_number': user.phone_number,
+                'full_address': user.full_address,
+                'email': session.query(OwnerCredential.email).filter(OwnerCredential.id == user.credentials_id).first()[
+                    0]
             }
 
 
@@ -150,4 +152,55 @@ def update_credentials(credentials: CredentialsModel):
         user_credentials.password_hash = credentials.password_hash
         session.commit()
 
+        return code, message
+
+
+def update_owner(owner_model: OwnerUpdateModel):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "User updated"
+
+        user = session.query(Owner).filter(Owner.id == owner_model.id).first()
+        if user is None:
+            code = RETURN_FAILURE
+            message = "User not found"
+            return code, message
+
+        credentials = session.query(OwnerCredential).filter(OwnerCredential.id == user.credentials_id).first()
+        if credentials is None:
+            code = RETURN_FAILURE
+            message = "Credentials not found"
+            return code, message
+
+        user.full_name = owner_model.full_name
+        user.phone_number = owner_model.phone_number
+        user.full_address = owner_model.full_address
+        credentials.email = owner_model.email
+        session.commit()
+        return code, message
+
+
+def update_admin(admin_model: AdminUpdateModel):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "User updated"
+
+        user = session.query(Admin).filter(Admin.id == admin_model.id).first()
+        if user is None:
+            code = RETURN_FAILURE
+            message = "User not found"
+            return code, message
+
+        credentials = session.query(AdminCredential).filter(AdminCredential.id == user.credentials_id).first()
+        if credentials is None:
+            code = RETURN_FAILURE
+            message = "Credentials not found"
+            return code, message
+
+        user.full_name = admin_model.full_name
+        user.phone_number = admin_model.phone_number
+        user.salary = admin_model.salary
+        user.salary_currency = admin_model.salary_currency
+        credentials.email = admin_model.email
+        session.commit()
         return code, message
