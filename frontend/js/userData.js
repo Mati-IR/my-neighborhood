@@ -1,6 +1,12 @@
-function displayUserData() {
+async function displayUserData() {
     var contentContainer = document.getElementById("content");
         contentContainer.innerHTML = '';
+    const isAdmin = localStorage.getItem('admin');
+    const userId = localStorage.getItem('id');
+    console.log(isAdmin)
+    console.log(userId)
+    var userData = await getUserData(userId,isAdmin);
+    console.log(userData);
 
     headerTextChange("Informacje o użytkowniku");
 
@@ -22,12 +28,12 @@ function displayUserData() {
                 </tr>
     `;
 
-    const isAdmin = localStorage.getItem('admin');
+    
     if (isAdmin == "true") {
         userDataHtml += `
             <tr>
                 <th scope="row">Wynagrodzenie:</th>
-                <td>${userData.salary}</td>
+                <td>${userData.salary} ${userData.salary_currency}</td>
             </tr>
         `;
     } else {
@@ -59,19 +65,11 @@ function displayUserData() {
     showPasswordFormButton.setAttribute("type", "button");
     showPasswordFormButton.textContent = "Zmień hasło";
     showPasswordFormButton.onclick = function() {
-        hidePasswordForm();
+        hidePasswordForm(userData.email);
     };
     contentContainer.appendChild(showPasswordFormButton);
 
 }
-const userData = {
-    "email": "example@example.com",
-    "full_name": "John Doe",
-    "phone_number": "123-456-789",
-    "salary": 50000,
-    "full_address": "Polska"
-};
-
 function generateEditUserForm(userData) {
     hideApiResponse("apiInfoResponse");
 
@@ -154,7 +152,9 @@ function generateEditUserForm(userData) {
     var submitButton = document.createElement("button");
     submitButton.setAttribute("type", "button");
     submitButton.textContent = "Zmień dane";
-    submitButton.onclick = validateUserDataForm;
+    submitButton.onclick = function() {
+        validateUserDataForm(userData.id);
+    };
     form.appendChild(submitButton);
 
     var removeButton = document.createElement("button");
@@ -171,7 +171,7 @@ function generateEditUserForm(userData) {
     contentContainer.appendChild(ImputForm);
     ImputForm.scrollIntoView({ behavior: 'smooth' });
 }
-function validateUserDataForm() {
+function validateUserDataForm(userId) {
     var email = document.getElementById("createEmail").value;
     var fullName = document.getElementById("createFullName").value;
     var phoneNumber = document.getElementById("createPhoneNumber").value;
@@ -189,9 +189,16 @@ function validateUserDataForm() {
         printApiResponse("apiInfoResponse", "Numer telefonu musi mieć 9 cyfr", "levelWarning");
         return false;
     }
-
+    var dataToSend = {
+        id: userId,
+        full_name: fullName,
+        phone_number: phoneNumber,
+        email: email,
+    };
     var isAdmin = localStorage.getItem('admin');
+    var ApiMetode = "/update_owner";
     if (isAdmin === "true") {
+        ApiMetode = "/update_admin";
         var salary = document.getElementById("createSalary").value;
         if (salary === "") {
             printApiResponse("apiInfoResponse", "Wynagrodzenie nie może być puste", "levelWarning");
@@ -200,13 +207,18 @@ function validateUserDataForm() {
             printApiResponse("apiInfoResponse", "Wynagrodzenie musi być liczbą większą od zera", "levelWarning");
             return false;
         }
+        dataToSend.salary = salary;
+        dataToSend.salary_currency = "PLN"
     } else {
         var fullAddress = document.getElementById("createFullAddress").value;
         if (fullAddress === "") {
             printApiResponse("apiInfoResponse", "Adres nie może być pusty", "levelWarning");
             return false;
         }
+        dataToSend.full_address = fullAddress;
     }
+
+    editUser(dataToSend,ApiMetode)
     return true;
 }
 function hideUserDataForm(userData){
@@ -217,15 +229,15 @@ function hideUserDataForm(userData){
         generateEditUserForm(userData)
     }
 }
-function hidePasswordForm(){
+function hidePasswordForm(email){
     var ImputForm= document.getElementById("PasswordForm");
     if(ImputForm != null){
         ImputForm.remove();
     }else{
-        generateChangePasswordForm()
+        generateChangePasswordForm(email)
     }
 }
-function generateChangePasswordForm() {
+function generateChangePasswordForm(email) {
     var contentContainer = document.getElementById("content");
 
     var PasswordForm = document.createElement("div");
@@ -270,7 +282,9 @@ function generateChangePasswordForm() {
     var submitButton = document.createElement("button");
     submitButton.setAttribute("type", "button");
     submitButton.textContent = "Zmień hasło";
-    submitButton.onclick = validateChangePasswordForm;
+    submitButton.onclick = function() {
+        validateChangePasswordForm(email);
+    };
     form.appendChild(submitButton);
 
     var header = document.createElement("h2");
@@ -292,13 +306,13 @@ function generateChangePasswordForm() {
     contentContainer.appendChild(PasswordForm);
     PasswordForm.scrollIntoView({ behavior: 'smooth' });
 }
-function validateChangePasswordForm() {
+function validateChangePasswordForm(email) {
     var currentPassword = document.getElementById("currentPassword").value;
     var newPassword = document.getElementById("newPassword").value;
     var confirmPassword = document.getElementById("confirmPassword").value;
 
     if (currentPassword === ""||newPassword === ""||confirmPassword === "") {
-        printApiResponse("apiInfoResponse", "Proszę podać aktualne hasło", "levelWarning");
+        printApiResponse("apiInfoResponse", "Proszę uzupełnić wszystkie pola", "levelWarning");
         return false;
     }
 
@@ -311,6 +325,77 @@ function validateChangePasswordForm() {
         printApiResponse("apiInfoResponse", "Nowe hasło i potwierdzenie nowego hasła nie są identyczne", "levelWarning");
         return false;
     }
-
+    var dataToSend = {
+        email: email,
+        password_hash: sha256(newPassword),
+    }
+    editCredentials(dataToSend);
     return true;
+}
+async function getUserData(userId,isAdmin) {
+    try {
+        const response = await fetch(apiBaseUrl+'/user/'+userId+"/"+isAdmin, {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData.message;
+        } else {
+            throw new Error("Brak danych o użytkowniku w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania danych: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania danych:', error.message);
+        throw error;
+    }
+}
+async function editUser(dataToSend,ApiMetode){
+    try {
+        const response = await fetch(apiBaseUrl+ApiMetode, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataToSend)
+        });
+    
+        const responseData = await response.json();
+    
+        if (response.ok) {
+            printApiResponse("apiInfoResponse","Pomyślnie zedytowano dane.","levelSucces")
+            displayUserData();
+          
+        } else {
+          printApiResponse("apiInfoResponse",responseData.message,"levelWarning")
+          console.error('Błąd podczas edycji danych: ', responseData.message);
+        }
+      } catch (error) {
+          printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
+          console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+      }
+}
+async function editCredentials(dataToSend){
+    try {
+        const response = await fetch(apiBaseUrl+"/update_credentials", {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataToSend)
+        });
+    
+        const responseData = await response.json();
+    
+        if (response.ok) {
+            printApiResponse("apiInfoResponse","Pomyślnie zmieniono hasło.","levelSucces")
+            displayUserData();
+          
+        } else {
+          printApiResponse("apiInfoResponse",responseData.message,"levelWarning")
+          console.error('Błąd podczas zmiany hasła: ', responseData.message);
+        }
+      } catch (error) {
+          printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
+          console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+      }
 }
