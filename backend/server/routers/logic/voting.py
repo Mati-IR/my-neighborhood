@@ -106,15 +106,20 @@ def cast_vote(vote: VoteModel):
             message = "Voting not found"
             return code, message
 
-        prev_vote = session.query(VoteModel).filter(VoteModel.owner_id == vote.owner_id, VoteModel.voting_id == vote.voting_id).first()
+        prev_vote = session.query(Vote).filter(Vote.voter_id == vote.owner_id, Vote.voting_id == vote.voting_id).first()
         if prev_vote is not None:
             code = RETURN_FAILURE
             message = "Vote already casted"
             return code, message
 
 
-        spaces_of_owner = get_all_spaces_of_owner(vote.owner_id)
-        vote_strength = sum([space['share'] for space in spaces_of_owner])
+        code, spaces_of_owner = get_all_spaces_of_owner(vote.owner_id)
+        if code != RETURN_SUCCESS:
+            return code, spaces_of_owner
+        vote_strength = 0
+        logger.info(spaces_of_owner)
+        for space in spaces_of_owner:
+            vote_strength += space["share"]
 
         # if owner has no spaces
         if vote_strength < 0.0001: # direct comparison with 0 is not safe
@@ -124,4 +129,7 @@ def cast_vote(vote: VoteModel):
 
         # import datetime
         from datetime import datetime
-        new_vote = Vote(timestamp=datetime.now(), owned_spaces=vote_strength, voting_id=vote.voting_id, choice=vote.choice, voter_id=vote.owner_id)
+        new_vote = Vote(timestamp=datetime.now(), owned_spaces=vote_strength, voting_id=vote.voting_id, choice=vote.vote, voter_id=vote.owner_id)
+        session.add(new_vote)
+        session.commit()
+        return code, message

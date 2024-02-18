@@ -15,8 +15,8 @@ def post_voting(voting: NewVotingModel):
 
 
 @router.post("/vote")
-def vote(vote: VoteModel):
-    code, message = cast_vote(vote)
+def vote(new_vote: VoteModel):
+    code, message = cast_vote(new_vote)
     return JSONResponse(status_code=code, content={"message": message})
 
 
