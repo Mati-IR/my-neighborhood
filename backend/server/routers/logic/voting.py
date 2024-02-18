@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import Voting, Admin, Vote
+from .database_handler.tables_models import Voting, Admin, Vote, Owner
 from .spaces import get_all_spaces_of_owner
 from ..models import NewVotingModel, VoteModel
 from .database_handler.util import get_database_session
@@ -95,7 +95,7 @@ def cast_vote(vote: VoteModel):
             message = "Admin cannot vote"
             return code, message
 
-        owner = session.query(Admin).filter(Admin.id == vote.owner_id).all()
+        owner = session.query(Owner).filter(Owner.id == vote.owner_id).all()
         if not owner:
             code = RETURN_FAILURE
             message = "Owner not found"
@@ -133,4 +133,38 @@ def cast_vote(vote: VoteModel):
         new_vote = Vote(timestamp=datetime.now(), owned_spaces=vote_strength, voting_id=vote.voting_id, choice=vote.vote, voter_id=vote.owner_id)
         session.add(new_vote)
         session.commit()
+        return code, message
+    
+
+def get_voting_statistics(voting_id: int):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = {}
+        # return weighed average of votes
+        votes = session.query(Vote).filter(Vote.voting_id == voting_id).all()
+        if not votes:
+            code = RETURN_FAILURE
+            message = "Votes not found"
+            return code, message
+        total_votes = 0
+        positive_votes, positive_weights = 0, 0
+        negative_votes, negative_weights = 0, 0
+        for vote in votes:
+            total_votes += 1
+            if vote.choice == 1:
+                positive_votes += 1
+                positive_weights += vote.owned_spaces
+            else:
+                negative_votes += 1
+                negative_weights += vote.owned_spaces
+
+        negative_strength = negative_votes * negative_weights
+        positve_strength = positive_votes * positive_weights
+        total_strength = negative_strength + positve_strength
+        if total_strength != 0:
+            precision = 2 # 2 decimal places
+            message['yes']  = round(float(positve_strength / total_strength), precision)
+            message['no'] = round(float(1.0 - message['yes']), precision)
+        else:
+            message = 'No votes were casted'
         return code, message

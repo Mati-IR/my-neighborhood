@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from .models import NewVotingModel, VoteModel
-from .logic import new_voting, get_all_votings, cast_vote
+from .logic import new_voting, get_all_votings, cast_vote, get_voting_statistics
 import logging
 import json
 
@@ -26,3 +26,7 @@ def get_votings(requester_id: int):
     return JSONResponse(status_code=code, content={"message": message, "votings": votings})
 
 
+@router.get('/voting_stats/{voting_id}')
+def get_voting_stats(voting_id: int):
+    code, message = get_voting_statistics(voting_id)
+    return JSONResponse(status_code=code, content={"message": message})
