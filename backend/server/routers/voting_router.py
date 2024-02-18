@@ -20,9 +20,9 @@ def vote(new_vote: VoteModel):
     return JSONResponse(status_code=code, content={"message": message})
 
 
-@router.get("/all_votings")
-def get_votings():
-    code, message, votings = get_all_votings()
+@router.get("/all_votings/{requester_id}")
+def get_votings(requester_id: int):
+    code, message, votings = get_all_votings(requester_id)
     return JSONResponse(status_code=code, content={"message": message, "votings": votings})
 
 

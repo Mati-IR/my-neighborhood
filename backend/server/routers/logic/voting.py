@@ -65,15 +65,16 @@ def get_all_votings(requester_id: int):
         else:
             for voting in votings:
                 # did the requester already vote?
-                vote = session.query(Vote).filter(Vote.owner_id == requester_id, Vote.voting_id == voting.id).first()
+                vote = session.query(Vote).filter(Vote.voter_id == requester_id, Vote.voting_id == voting.id).first()
+                voted = False
                 if vote is not None:
                     voted = True
                 return_votings.append({
                     'id': voting.id,
                     'title': voting.title,
                     'description': voting.description,
-                    'start_date': voting.start_date,
-                    'end_date': voting.end_date,
+                    'start_date': voting.start_date.isoformat(),
+                    'end_date': voting.end_date.isoformat(),
                     'voted': voted
                 })
         return code, message, return_votings
