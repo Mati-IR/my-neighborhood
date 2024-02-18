@@ -1,6 +1,7 @@
 async function displayVotingSystem(){
     var contentContainer = document.getElementById("content");
         contentContainer.innerHTML = '';
+        headerTextChange("Zarządzanie głosowaniami");
 
     var showServicemanFormButton = document.createElement("button");
         showServicemanFormButton.setAttribute("type", "button");
@@ -36,14 +37,14 @@ const sampleData = {
     news: [
         {
             id: 1,
-            date: "2024-02-18T09:00:00",
+            date: "2024-02-18T09:33:00",
             title: "Przykładowe ogłoszenie 1",
             description: "To jest przykładowe ogłoszenie numer 1.",
             creator_id: 123
         },
         {
             id: 2,
-            date: "2024-02-17T12:30:00",
+            date: "2024-02-18T12:32:00",
             title: "Przykładowe ogłoszenie 2",
             description: "To jest przykładowe ogłoszenie numer 2.",
             creator_id: 456
@@ -170,7 +171,7 @@ function validateVoteForm() {
 
     displayVoteData(title, description, endDate);
 }
-function generateVotingView(data, page,elementId) {
+function generateVotingView(data, page, elementId) {
     const container = document.getElementById(elementId);
     container.innerHTML = "";
     if (!data || data.length === 0 || data.message === "No news found") {
@@ -206,13 +207,19 @@ function generateVotingView(data, page,elementId) {
 
         const remainingTimeElement = document.createElement("p");
         remainingTimeElement.classList.add("remaining-time");
+
         function updateRemainingTime() {
             const currentTime = new Date();
             let timeDifference = Math.abs(creationDate - currentTime);
             let prefix = "";
+
             if (creationDate < currentTime) {
                 prefix = "Czas na głosowanie minął";
                 remainingTimeElement.textContent = `${prefix}`;
+                const voteDiv = announcementCard.querySelector('.vote-options');
+                    if (voteDiv) {
+                        voteDiv.remove();
+                    }
             } else {
                 prefix = "Pozostało: ";
                 const seconds = Math.floor(timeDifference / 1000) % 60;
@@ -220,11 +227,9 @@ function generateVotingView(data, page,elementId) {
                 const hours = Math.floor(timeDifference / (1000 * 60 * 60)) % 24;
 
                 remainingTimeElement.textContent = `${prefix}${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-                timeDifference -= hours * (1000 * 60 * 60);
-                timeDifference -= minutes * (1000 * 60);
-                timeDifference -= seconds * 1000;
             }
         }
+
         updateRemainingTime();
         const updateInterval = setInterval(updateRemainingTime, 1000);
 
@@ -233,13 +238,14 @@ function generateVotingView(data, page,elementId) {
         announcementCard.appendChild(dateElement);
         announcementCard.appendChild(remainingTimeElement);
 
-        if (isAdmin === 'true'&& elementId === "activeVoting-container") {
+        // Dodajemy przyciski na końcu ogłoszenia
+        /*if (isAdmin === 'true' && elementId === "activeVoting-container") {
             const editButton = document.createElement("button");
             editButton.classList.add("btn", "btn-light", "buttonDecoration");
             editButton.style.marginRight = "5px";
             editButton.innerHTML = '<i class="bi bi-pencil-fill"></i>';
             editButton.addEventListener("click", () => {
-                var data={
+                var data = {
                     title: announcement.title,
                     description: announcement.description,
                     creator_id: announcement.creator_id
@@ -248,26 +254,74 @@ function generateVotingView(data, page,elementId) {
             });
 
             announcementCard.appendChild(editButton);
+
             const deleteButton = document.createElement("button");
             deleteButton.classList.add("btn", "btn-light", "buttonDecoration");
-            deleteButton.style.justifyContent="center"
+            deleteButton.style.justifyContent = "center";
             deleteButton.innerHTML = '<i class="bi bi-trash-fill" style="color:#cf4a4a"></i>';
             deleteButton.addEventListener("click", () => {
                 deleteNewsById(announcement.id);
             });
+
             announcementCard.appendChild(deleteButton);
+        }*/
+
+        // Dodajemy przyciski na końcu, jeśli czas minął
+        if (announcementCard.querySelector('.remaining-time').textContent != "Czas na głosowanie minął"&&isAdmin!='true') {
+            const voteDiv = document.createElement("div");
+            voteDiv.classList.add("vote-options", "radioDiv"); // Dodajemy klasę radioDiv
+
+            const voteYesInput = document.createElement("input");
+            voteYesInput.setAttribute("type", "radio");
+            voteYesInput.setAttribute("name", `vote-${announcement.id}`);
+            voteYesInput.setAttribute("value", "yes");
+            voteYesInput.id = `vote-yes-${announcement.id}`;
+
+            const voteYesLabel = document.createElement("label");
+            voteYesLabel.setAttribute("for", `vote-yes-${announcement.id}`);
+            voteYesLabel.textContent = "Tak";
+
+            const voteNoInput = document.createElement("input");
+            voteNoInput.setAttribute("type", "radio");
+            voteNoInput.setAttribute("name", `vote-${announcement.id}`);
+            voteNoInput.setAttribute("value", "no");
+            voteNoInput.id = `vote-no-${announcement.id}`;
+
+            const voteNoLabel = document.createElement("label");
+            voteNoLabel.setAttribute("for", `vote-no-${announcement.id}`);
+            voteNoLabel.textContent = "Nie";
+
+            const voteButton = document.createElement("button");
+            voteButton.textContent = "Zagłosuj";
+            voteButton.classList.add("btn", "btn-primary", "buttonDecoration");
+            voteButton.addEventListener("click", () => {
+                const selectedValue = document.querySelector(`input[name=vote-${announcement.id}]:checked`).value;
+                // Tutaj można dodać logikę obsługi głosu
+                console.log(`Głosowanie na ogłoszenie ${announcement.id}: ${selectedValue}`);
+            });
+
+            voteDiv.appendChild(voteYesInput);
+            voteDiv.appendChild(voteYesLabel);
+            voteDiv.appendChild(voteNoInput);
+            voteDiv.appendChild(voteNoLabel);
+            voteDiv.appendChild(voteButton);
+
+            announcementCard.appendChild(voteDiv);
         }
 
         container.appendChild(announcementCard);
     });
 
     var pagination = document.createElement("div");
-    pagination.setAttribute("id", "pagination"+elementId);
+    pagination.setAttribute("id", "pagination" + elementId);
     pagination.classList.add("pagination");
     document.getElementById("content").appendChild(pagination);
 
-    generateVotingPagination(data.news.length, page, data,elementId);
+    generateVotingPagination(data.news.length, page, data, elementId);
 }
+
+
+
 function generateVotingPagination(totalAnnouncements, currentPage, data,elementId) {
     const totalPages = Math.ceil(totalAnnouncements / announcementsPerPage);
     const paginationContainer = document.getElementById("pagination"+elementId);
