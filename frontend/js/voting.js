@@ -8,8 +8,6 @@ async function displayVotingSystem(){
 
     var voting = await getAllVotings(userId);
     const { activeVotings, endedVotings } = splitVotingsByStatus(voting);
-    console.log(activeVotings)
-    console.log(endedVotings)
     if(isAdmin==='true'){
         var showServicemanFormButton = document.createElement("button");
         showServicemanFormButton.setAttribute("type", "button");
@@ -19,8 +17,6 @@ async function displayVotingSystem(){
         };
         contentContainer.appendChild(showServicemanFormButton);
     }
-    
-
     var activeHeader = document.createElement("h2");
         activeHeader.classList.add("accountHeader");
         activeHeader.innerHTML = "Aktywne głosowania"
@@ -190,7 +186,7 @@ function generateVotingView(data, page, elementId) {
     const displayedAnnouncements = data.votings.slice(startIndex, endIndex);
 
     const isAdmin = localStorage.getItem('admin');
-    displayedAnnouncements.forEach(announcement => {
+    displayedAnnouncements.forEach(async announcement => {
         const announcementCard = document.createElement("div");
         announcementCard.classList.add("announcement-card");
         announcementCard.setAttribute("id", announcement.id);
@@ -245,7 +241,6 @@ function generateVotingView(data, page, elementId) {
 
         if (announcementCard.querySelector('.remaining-time').textContent != "Czas na głosowanie minął"){
             if(isAdmin != 'true'){
-                console.log(announcement.voted)
                 if(announcement.voted === false){
                     const voteDiv = document.createElement("div");
                     voteDiv.classList.add("vote-options", "radioDiv");
@@ -275,7 +270,6 @@ function generateVotingView(data, page, elementId) {
                     voteButton.classList.add("btn", "btn-primary", "buttonDecoration");
                     voteButton.addEventListener("click", () => {
                         const selectedValue = document.querySelector(`input[name=vote-${announcement.id}]:checked`).value;
-                        // Tutaj można dodać logikę obsługi głosu
                         var dataToSend = {
                             owner_id: localStorage.getItem('id'),
                             voting_id: announcement.id,
@@ -300,9 +294,46 @@ function generateVotingView(data, page, elementId) {
                 }
             }
         }
+        if(elementId === "archiveVoting-container"){
+            var voteResult = await getVotingResult(announcement.id);
+            if(voteResult.message === "Votes not found"){
+                const voteResultDiv = document.createElement("p");
+                    voteResultDiv.innerHTML="Nikt nie oddał głosu"
+                    announcementCard.appendChild(voteResultDiv);
+            }
+            else{
+                const voteResultDiv = document.createElement("div");
+                const voteResultP = document.createElement("p");
+                voteResultP.innerHTML="<b>Wynik</b>"
+                voteResultDiv.appendChild(voteResultP)
+                const totalVotes = voteResult.message.yes + voteResult.message.no;
+
+                const yesPercentage = (voteResult.message.yes / totalVotes) * 100;
+                const noPercentage = (voteResult.message.no / totalVotes) * 100;
+
+                const yesBar = document.createElement("div");
+                yesBar.style.width = `${yesPercentage}%`;
+                yesBar.style.backgroundColor = 'green';
+                yesBar.textContent = `${Math.round(yesPercentage)}%`;
+
+                const noBar = document.createElement("div");
+                noBar.style.width = `${noPercentage}%`;
+                noBar.style.backgroundColor = 'red';
+                noBar.textContent = `${Math.round(noPercentage)}%`;
+
+                const voteResultText = document.createElement("p");
+                voteResultText.textContent = `Głosy: Tak - ${voteResult.message.yes}, Nie - ${voteResult.message.no}`;
+
+                voteResultDiv.appendChild(voteResultText);
+                voteResultDiv.appendChild(yesBar);
+                voteResultDiv.appendChild(noBar);
+
+                announcementCard.appendChild(voteResultDiv);
+            }
+        }
         container.appendChild(announcementCard);
     });
-
+    
     var pagination = document.createElement("div");
     pagination.setAttribute("id", "pagination" + elementId);
     pagination.classList.add("pagination");
@@ -447,5 +478,21 @@ async function postVote(dataToSend){
           console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
       }
 }
-
+async function getVotingResult(votingId){
+    try {
+        const response = await fetch(apiBaseUrl+'/voting_stats/'+votingId, {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData;
+        } else {
+            throw new Error("Brak danych głosowania w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania głosowania: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania głosowania:', error.message);
+        throw error;
+    }
+}
 
