@@ -93,5 +93,8 @@ async function makeRequest() {
         console.error('Wystąpił błąd podczas wykonania żądania:', error);
     }
 }
+function documentation() {
+    window.location.href = 'http://localhost:8000/docs#/';
+}
 loadFromLocalStorage();
 

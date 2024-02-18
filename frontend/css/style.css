@@ -334,6 +334,18 @@ button[type="button"]:hover {
       justify-content: space-between;
       gap: 20px;
     }
+    .activeVoting-container{
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    .archiveVoting-container{
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 20px;
+    }
     
     .announcement-card {
       width: calc(33.33% - 20px);

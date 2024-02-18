@@ -12,7 +12,8 @@ function generateSidebar(accountType) {
             { text: "Ogłoszenia", onclick: "displayNews()" },
             { text: "Głosowania", onclick: "displayVotingSystem()" },
             { text: "Obsługa usterek", onclick: "displayIncidentSystem()" },
-            { text: "Raporty", onclick: "displayRaport()" }
+            { text: "Raporty", onclick: "displayRaport()" },
+            { text: "Dokumentacja API", onclick: "documentation()" }
         ];
     }
     else{

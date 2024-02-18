@@ -190,6 +190,7 @@ function displayChangeRatesForm(utilityid,utilityData) {
 
         inputForm.appendChild(form);
         container.appendChild(inputForm);
+        inputForm.scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
         console.error('Wystąpił błąd podczas wyświetlania formularza:', error.message);
     }

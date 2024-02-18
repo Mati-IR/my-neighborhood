@@ -2,10 +2,20 @@ async function displayIncidentSystem(){
     var contentContainer = document.getElementById("content");
         contentContainer.innerHTML = '';
 
+    var showServicemanFormButton = document.createElement("button");
+        showServicemanFormButton.setAttribute("type", "button");
+        showServicemanFormButton.textContent = "Dodaj serwisanta";
+        showServicemanFormButton.onclick = function() {
+            hideServicemanForm();
+        };
+        contentContainer.appendChild(showServicemanFormButton);
+
     headerTextChange("Zarządzanie usterkami");
+    var servicemanData = await getServicemen();
+    console.log(servicemanData);
     displayServicemanData(servicemanData, "content");
 }
-var servicemanData = [
+/*var servicemanData = [
     {
         id: 1,
         full_name: "John Doe",
@@ -24,7 +34,7 @@ var servicemanData = [
         specialties: "Project Management",
         company_id: "DEF789"
     }
-];
+];*/
 async function displayServicemanData(data, containerId) {
     try {
         var container = document.getElementById(containerId);
@@ -89,15 +99,8 @@ async function displayServicemanData(data, containerId) {
         table.appendChild(tbody);
         container.appendChild(table);
 
-        var showServicemanFormButton = document.createElement("button");
-        showServicemanFormButton.setAttribute("type", "button");
-        showServicemanFormButton.textContent = "Dodaj serwisanta";
-        showServicemanFormButton.onclick = function() {
-            hideServicemanForm();
-        };
-        container.appendChild(showServicemanFormButton);
-
     } catch (error) {
+        printApiResponse("apiInfoResponse", 'Brak serwisantów w bazie', "levelWarning");
         console.error('Wystąpił błąd podczas wyświetlania danych:', error.message);
     }
 }
@@ -147,7 +150,7 @@ function displayServicemanDataForm(userId, userData) {
         submitButton.setAttribute("type", "button");
         submitButton.textContent = "Dodaj";
         submitButton.onclick = function() {
-            validateUserDataForm(toApiMethod, userId);
+            validateServicemanDataForm(toApiMethod, userId);
         };
         submitButton.style.marginTop = "1.5rem";
         submitButton.style.width = "100%";
@@ -183,9 +186,33 @@ function displayServicemanDataForm(userId, userData) {
 
         inputForm.appendChild(form);
         container.appendChild(inputForm);
+        inputForm.scrollIntoView({ behavior: 'smooth' });
     } catch (error) {
         console.error('Wystąpił błąd podczas wyświetlania formularza:', error.message);
     }
+}
+function validateServicemanDataForm(toApiMethod, userId) {
+    var fullNameInput = document.getElementById("newFullName");
+    var specialtiesInput = document.getElementById("newSpecialties");
+
+    var fullName = fullNameInput.value.trim();
+    var specialties = specialtiesInput.value.trim();
+
+    // Sprawdzamy, czy pole z pełną nazwą jest puste
+    if (fullName === "" || specialties === "") {
+        printApiResponse("apiInfoResponse","Uzupelnij wszystkie pola","levelWarning")
+        return;
+    }
+    var dataToSend = {
+        full_name: fullName,
+        specialties: specialties,
+        company_id: 1,
+    }
+    if(toApiMethod === 'PUT'){
+        dataToSend.id = userId;
+    }
+    // Walidacja zakończona sukcesem - można wysłać dane do API lub wykonać inne akcje
+    sendServicemanToApi(dataToSend,toApiMethod);
 }
 function hideServicemanForm(userid,userData){
     var ImputForm= document.getElementById("inputForm");
@@ -193,5 +220,104 @@ function hideServicemanForm(userid,userData){
         ImputForm.remove();
     }else{
         displayServicemanDataForm(userid,userData)
+    }
+}
+async function getServicemen(){
+    try {
+        const response = await fetch(apiBaseUrl+'/all_servicemen', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData.message;
+        } else {
+            printApiResponse("apiInfoResponse", 'Brak serwisantów w bazie: ' + error.message, "levelWarning");
+            throw new Error("Brak danych właścicieli w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania serwisantów: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania serwisantów:', error.message);
+        throw error;
+    }
+}
+async function sendServicemanToApi(dataToSend,toApiMetode){
+    try {
+        console.log(dataToSend)
+        console.log(toApiMetode)
+        const response = await fetch(apiBaseUrl+"/serviceman", {
+          method: toApiMetode,
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataToSend)
+        });
+    
+        const responseData = await response.json();
+    
+        if (response.ok) {
+            if(toApiMetode === 'POST')
+                printApiResponse("apiInfoResponse","Pomyślnie dodano serwisanta.","levelSucces")
+            else
+                printApiResponse("apiInfoResponse","Pomyślnie zedytowano serwisanta.","levelSucces")
+            displayIncidentSystem();
+          
+        } else {
+          printApiResponse("apiInfoResponse",responseData.message,"levelWarning")
+          console.error('Błąd podczas dodawania opłaty: ', responseData.message);
+        }
+      } catch (error) {
+          printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
+          console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+      }
+}
+async function deleteServicemanById(userid){
+    try {
+
+        printApiResponse("apiInfoResponse", " ","levelACHTUNG");
+        var statePromise = new Promise((resolve, reject) => {
+            var apiInfoResponse = document.getElementById("apiInfoResponse");
+            apiInfoResponse.classList.add("apiInfoResponse");
+            apiInfoResponse.classList.add("levelACHTUNG");
+            apiInfoResponse.textContent = 'Czy napewno chcesz usunąć serwisanta?';
+            
+            var apiDiv = document.querySelector('.apiDiv');
+            apiDiv.innerHTML = ``;
+            var yesButton = document.createElement("button");
+            yesButton.classList.add("btn","btn-light","achtungButtonYes");
+            yesButton.textContent = "Tak";
+            yesButton.onclick = function() {
+                hideApiResponse("apiInfoResponse");
+                noButton.remove();
+                yesButton.remove();
+                resolve(true);
+            };
+            apiDiv.appendChild(yesButton);
+
+            var noButton = document.createElement("button");
+            noButton.classList.add("btn","btn-light","achtungButtonNo");
+            noButton.textContent = "Nie";
+            noButton.onclick = function() {
+                hideApiResponse("apiInfoResponse");
+                noButton.remove();
+                yesButton.remove();
+                resolve(false);
+            };
+            apiDiv.appendChild(noButton);
+        });
+
+        var state = await statePromise;
+
+        if(state==true){
+            const response = await fetch(apiBaseUrl+'/serviceman/'+userid, {
+              method: 'DELETE'
+            });
+            const responseData = await response.json();
+            printApiResponse("apiInfoResponse", 'Usunięto serwisanta o id: ' + userid, "levelSucces");
+            displayIncidentSystem();
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas wysyłania żądania: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+        throw error;
     }
 }
