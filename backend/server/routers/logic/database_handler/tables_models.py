@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DECIMAL, DateTime, Date, Text, SmallInteger, \
     Numeric
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 Base = declarative_base()
 
@@ -181,8 +181,6 @@ class Vote(Base):
     voter_id = Column(Integer, ForeignKey('owner.id'))
     voting_id = Column(Integer, ForeignKey('voting.id'))
     voter = relationship("Owner", backref="votes")
-    voting = relationship("Voting", backref="votes")
-
 
 class Voting(Base):
     __tablename__ = 'voting'
@@ -191,8 +189,7 @@ class Voting(Base):
     end_date = Column(Date, nullable=False)
     title = Column(String(100), nullable=False)
     description = Column(String(4000), nullable=False)
-    votes = Column(Integer, ForeignKey('vote.id'))
-    vote_relation = relationship("Vote", backref="votings")
+
 
 
 class IncidentCategory(Base):

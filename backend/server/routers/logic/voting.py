@@ -53,7 +53,7 @@ def new_voting(new_voting: NewVotingModel):
         return code, message
 
 
-def get_all_votings():
+def get_all_votings(requester_id: int):
     with get_database_session() as session:
         code = RETURN_SUCCESS
         message = "Votings found"
@@ -64,12 +64,17 @@ def get_all_votings():
             message = "Votings not found"
         else:
             for voting in votings:
+                # did the requester already vote?
+                vote = session.query(Vote).filter(Vote.owner_id == requester_id, Vote.voting_id == voting.id).first()
+                if vote is not None:
+                    voted = True
                 return_votings.append({
                     'id': voting.id,
                     'title': voting.title,
                     'description': voting.description,
                     'start_date': voting.start_date,
-                    'end_date': voting.end_date
+                    'end_date': voting.end_date,
+                    'voted': voted
                 })
         return code, message, return_votings
 
@@ -119,4 +124,4 @@ def cast_vote(vote: VoteModel):
 
         # import datetime
         from datetime import datetime
-        new_vote = Vote(timestamp=datetime.now(), owned_spaces=spaces_of_owner, voting_id=vote.voting_id, choice=vote.choice, owner_id=vote.owner_id, vote_strength=vote_strength)
+        new_vote = Vote(timestamp=datetime.now(), owned_spaces=vote_strength, voting_id=vote.voting_id, choice=vote.choice, voter_id=vote.owner_id)
