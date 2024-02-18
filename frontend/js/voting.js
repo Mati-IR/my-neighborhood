@@ -3,13 +3,23 @@ async function displayVotingSystem(){
         contentContainer.innerHTML = '';
         headerTextChange("Zarządzanie głosowaniami");
 
-    var showServicemanFormButton = document.createElement("button");
+    const userId = localStorage.getItem('id');
+    const isAdmin = localStorage.getItem('admin');
+
+    var voting = await getAllVotings(userId);
+    const { activeVotings, endedVotings } = splitVotingsByStatus(voting);
+    console.log(activeVotings)
+    console.log(endedVotings)
+    if(isAdmin==='true'){
+        var showServicemanFormButton = document.createElement("button");
         showServicemanFormButton.setAttribute("type", "button");
         showServicemanFormButton.textContent = "Dodaj głosowanie";
         showServicemanFormButton.onclick = function() {
             hideVoteForm();
         };
         contentContainer.appendChild(showServicemanFormButton);
+    }
+    
 
     var activeHeader = document.createElement("h2");
         activeHeader.classList.add("accountHeader");
@@ -19,7 +29,7 @@ async function displayVotingSystem(){
         container.setAttribute("id", "activeVoting-container");
         container.classList.add("activeVoting-container");
         contentContainer.appendChild(container);
-    generateVotingView(sampleData,currentPage,"activeVoting-container");
+    generateVotingView(activeVotings,currentPage,"activeVoting-container");
     
     var breakLine = document.createElement("br");
         contentContainer.appendChild(breakLine);
@@ -31,48 +41,8 @@ async function displayVotingSystem(){
         container.setAttribute("id", "archiveVoting-container");
         container.classList.add("archiveVoting-container");
         contentContainer.appendChild(container);
-    generateVotingView(sampleData,currentPage,"archiveVoting-container");
+    generateVotingView(endedVotings,currentPage,"archiveVoting-container");
 }
-const sampleData = {
-    news: [
-        {
-            id: 1,
-            date: "2024-02-18T09:33:00",
-            title: "Przykładowe ogłoszenie 1",
-            description: "To jest przykładowe ogłoszenie numer 1.",
-            creator_id: 123
-        },
-        {
-            id: 2,
-            date: "2024-02-18T12:32:00",
-            title: "Przykładowe ogłoszenie 2",
-            description: "To jest przykładowe ogłoszenie numer 2.",
-            creator_id: 456
-        },
-        {
-            id: 3,
-            date: "2024-02-16T15:45:00",
-            title: "Przykładowe ogłoszenie 3",
-            description: "To jest przykładowe ogłoszenie numer 3.",
-            creator_id: 789
-        },
-        {
-            id: 4,
-            date: "2024-02-15T10:20:00",
-            title: "Przykładowe ogłoszenie 4",
-            description: "To jest przykładowe ogłoszenie numer 4.",
-            creator_id: 101112
-        },
-        {
-            id: 5,
-            date: "2024-02-14T16:00:00",
-            title: "Przykładowe ogłoszenie 5",
-            description: "To jest przykładowe ogłoszenie numer 5.",
-            creator_id: 131415
-        },
-        // Można dodać więcej ogłoszeń według potrzeb
-    ]
-};
 function generateNewVotingForm() {
     hideApiResponse("apiInfoResponse");
 
@@ -115,6 +85,18 @@ function generateNewVotingForm() {
     inputDescription.style.borderRadius = "5px";
     inputDescription.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.1)";
 
+    var labelStartDate = document.createElement("label");
+    labelStartDate.setAttribute("for", "startDate");
+    labelStartDate.textContent = "Data rozpoczęcia głosowania:";
+
+    var inputStartDate = document.createElement("input");
+    inputStartDate.setAttribute("type", "datetime-local");
+    inputStartDate.setAttribute("id", "startDate");
+    inputStartDate.style.width = "100%";
+    inputStartDate.style.marginBottom = "15px";
+    inputStartDate.style.borderRadius = "5px";
+    inputStartDate.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.1)";
+
     var labelEndDate = document.createElement("label");
     labelEndDate.setAttribute("for", "endDate");
     labelEndDate.textContent = "Data zakończenia głosowania:";
@@ -138,6 +120,8 @@ function generateNewVotingForm() {
     form.appendChild(inputTitle);
     form.appendChild(labelDescription);
     form.appendChild(inputDescription);
+    form.appendChild(labelStartDate);
+    form.appendChild(inputStartDate);
     form.appendChild(labelEndDate);
     form.appendChild(inputEndDate);
     form.appendChild(submitButton);
@@ -165,27 +149,47 @@ function hideVoteForm(){
     }
 }
 function validateVoteForm() {
-    var title = document.getElementById("dataTitle").value;
-    var description = document.getElementById("dataDescription").value;
-    var endDate = document.getElementById("endDate").value;
+    var title = document.getElementById("dataTitle").value.trim();
+    var description = document.getElementById("dataDescription").value.trim();
+    var startDate = document.getElementById("startDate").value.trim();
+    var endDate = document.getElementById("endDate").value.trim();
 
-    displayVoteData(title, description, endDate);
+    if (title === ""||description === ""||startDate === ""||endDate === "") {
+        printApiResponse("apiInfoResponse","Proszę uzupełnić wszystkie pola","levelWarning")
+        return;
+    }
+
+    var startDateObj = new Date(startDate);
+    var endDateObj = new Date(endDate);
+
+    if (startDateObj >= endDateObj) {
+        printApiResponse("apiInfoResponse","Data rozpoczęcia głosowania musi być wcześniejsza niż data zakończenia głosowania.","levelWarning")
+        return;
+    }
+    var dataToSend = {
+        start_date: startDate,
+        end_date: endDate,
+        title: title,
+        description: description,
+        creator_id: localStorage.getItem('id')
+    }
+
+    postNewVoting(dataToSend);
 }
 function generateVotingView(data, page, elementId) {
     const container = document.getElementById(elementId);
     container.innerHTML = "";
-    if (!data || data.length === 0 || data.message === "No news found") {
+    if (!data || data.length === 0 || data.message === "Votings not found") {
         container.classList.add("d-flex", "justify-content-center");
-        container.textContent = "Brak dostępnych ogłoszeń.";
+        container.textContent = "Brak dostępnych głosowań.";
         return;
     }
 
     const startIndex = (page - 1) * announcementsPerPage;
     const endIndex = startIndex + announcementsPerPage;
-    const displayedAnnouncements = data.news.slice(startIndex, endIndex);
+    const displayedAnnouncements = data.votings.slice(startIndex, endIndex);
 
     const isAdmin = localStorage.getItem('admin');
-
     displayedAnnouncements.forEach(announcement => {
         const announcementCard = document.createElement("div");
         announcementCard.classList.add("announcement-card");
@@ -199,8 +203,8 @@ function generateVotingView(data, page, elementId) {
         descriptionElement.textContent = announcement.description;
         descriptionElement.classList.add("announcement-description");
 
-        const creationDate = new Date(announcement.date);
-        const formattedDate = creationDate.toLocaleString();
+        const creationDate = new Date(announcement.start_date);
+        const formattedDate = creationDate.toLocaleString(); // Zmiana formatu daty
         const dateElement = document.createElement("p");
         dateElement.textContent = `Utworzono dnia: ${formattedDate}`;
         dateElement.classList.add("creation-date");
@@ -208,20 +212,21 @@ function generateVotingView(data, page, elementId) {
         const remainingTimeElement = document.createElement("p");
         remainingTimeElement.classList.add("remaining-time");
 
+        const endDate = new Date(announcement.end_date);
         function updateRemainingTime() {
             const currentTime = new Date();
-            let timeDifference = Math.abs(creationDate - currentTime);
+            let timeDifference = Math.abs(endDate - currentTime);
             let prefix = "";
 
-            if (creationDate < currentTime) {
+            if (endDate < currentTime) {
                 prefix = "Czas na głosowanie minął";
                 remainingTimeElement.textContent = `${prefix}`;
                 const voteDiv = announcementCard.querySelector('.vote-options');
-                    if (voteDiv) {
-                        voteDiv.remove();
-                    }
+                if (voteDiv) {
+                    voteDiv.remove();
+                }
             } else {
-                prefix = "Pozostało: ";
+                prefix = "Pozostały czas: ";
                 const seconds = Math.floor(timeDifference / 1000) % 60;
                 const minutes = Math.floor(timeDifference / (1000 * 60)) % 60;
                 const hours = Math.floor(timeDifference / (1000 * 60 * 60)) % 24;
@@ -238,77 +243,63 @@ function generateVotingView(data, page, elementId) {
         announcementCard.appendChild(dateElement);
         announcementCard.appendChild(remainingTimeElement);
 
-        // Dodajemy przyciski na końcu ogłoszenia
-        /*if (isAdmin === 'true' && elementId === "activeVoting-container") {
-            const editButton = document.createElement("button");
-            editButton.classList.add("btn", "btn-light", "buttonDecoration");
-            editButton.style.marginRight = "5px";
-            editButton.innerHTML = '<i class="bi bi-pencil-fill"></i>';
-            editButton.addEventListener("click", () => {
-                var data = {
-                    title: announcement.title,
-                    description: announcement.description,
-                    creator_id: announcement.creator_id
-                };
-                generateNewNewsForm(data, announcement.id);
-            });
+        if (announcementCard.querySelector('.remaining-time').textContent != "Czas na głosowanie minął"){
+            if(isAdmin != 'true'){
+                console.log(announcement.voted)
+                if(announcement.voted === false){
+                    const voteDiv = document.createElement("div");
+                    voteDiv.classList.add("vote-options", "radioDiv");
 
-            announcementCard.appendChild(editButton);
+                    const voteYesInput = document.createElement("input");
+                    voteYesInput.setAttribute("type", "radio");
+                    voteYesInput.setAttribute("name", `vote-${announcement.id}`);
+                    voteYesInput.setAttribute("value", "true");
+                    voteYesInput.id = `vote-yes-${announcement.id}`;
 
-            const deleteButton = document.createElement("button");
-            deleteButton.classList.add("btn", "btn-light", "buttonDecoration");
-            deleteButton.style.justifyContent = "center";
-            deleteButton.innerHTML = '<i class="bi bi-trash-fill" style="color:#cf4a4a"></i>';
-            deleteButton.addEventListener("click", () => {
-                deleteNewsById(announcement.id);
-            });
+                    const voteYesLabel = document.createElement("label");
+                    voteYesLabel.setAttribute("for", `vote-yes-${announcement.id}`);
+                    voteYesLabel.textContent = "Tak";
 
-            announcementCard.appendChild(deleteButton);
-        }*/
+                    const voteNoInput = document.createElement("input");
+                    voteNoInput.setAttribute("type", "radio");
+                    voteNoInput.setAttribute("name", `vote-${announcement.id}`);
+                    voteNoInput.setAttribute("value", "false");
+                    voteNoInput.id = `vote-no-${announcement.id}`;
 
-        // Dodajemy przyciski na końcu, jeśli czas minął
-        if (announcementCard.querySelector('.remaining-time').textContent != "Czas na głosowanie minął"&&isAdmin!='true') {
-            const voteDiv = document.createElement("div");
-            voteDiv.classList.add("vote-options", "radioDiv"); // Dodajemy klasę radioDiv
+                    const voteNoLabel = document.createElement("label");
+                    voteNoLabel.setAttribute("for", `vote-no-${announcement.id}`);
+                    voteNoLabel.textContent = "Nie";
 
-            const voteYesInput = document.createElement("input");
-            voteYesInput.setAttribute("type", "radio");
-            voteYesInput.setAttribute("name", `vote-${announcement.id}`);
-            voteYesInput.setAttribute("value", "yes");
-            voteYesInput.id = `vote-yes-${announcement.id}`;
+                    const voteButton = document.createElement("button");
+                    voteButton.textContent = "Zagłosuj";
+                    voteButton.classList.add("btn", "btn-primary", "buttonDecoration");
+                    voteButton.addEventListener("click", () => {
+                        const selectedValue = document.querySelector(`input[name=vote-${announcement.id}]:checked`).value;
+                        // Tutaj można dodać logikę obsługi głosu
+                        var dataToSend = {
+                            owner_id: localStorage.getItem('id'),
+                            voting_id: announcement.id,
+                            vote: selectedValue,
+                            is_admin: localStorage.getItem('admin'),
+                        }
+                        postVote(dataToSend);
+                    });
 
-            const voteYesLabel = document.createElement("label");
-            voteYesLabel.setAttribute("for", `vote-yes-${announcement.id}`);
-            voteYesLabel.textContent = "Tak";
+                    voteDiv.appendChild(voteYesInput);
+                    voteDiv.appendChild(voteYesLabel);
+                    voteDiv.appendChild(voteNoInput);
+                    voteDiv.appendChild(voteNoLabel);
+                    voteDiv.appendChild(voteButton);
 
-            const voteNoInput = document.createElement("input");
-            voteNoInput.setAttribute("type", "radio");
-            voteNoInput.setAttribute("name", `vote-${announcement.id}`);
-            voteNoInput.setAttribute("value", "no");
-            voteNoInput.id = `vote-no-${announcement.id}`;
-
-            const voteNoLabel = document.createElement("label");
-            voteNoLabel.setAttribute("for", `vote-no-${announcement.id}`);
-            voteNoLabel.textContent = "Nie";
-
-            const voteButton = document.createElement("button");
-            voteButton.textContent = "Zagłosuj";
-            voteButton.classList.add("btn", "btn-primary", "buttonDecoration");
-            voteButton.addEventListener("click", () => {
-                const selectedValue = document.querySelector(`input[name=vote-${announcement.id}]:checked`).value;
-                // Tutaj można dodać logikę obsługi głosu
-                console.log(`Głosowanie na ogłoszenie ${announcement.id}: ${selectedValue}`);
-            });
-
-            voteDiv.appendChild(voteYesInput);
-            voteDiv.appendChild(voteYesLabel);
-            voteDiv.appendChild(voteNoInput);
-            voteDiv.appendChild(voteNoLabel);
-            voteDiv.appendChild(voteButton);
-
-            announcementCard.appendChild(voteDiv);
+                    announcementCard.appendChild(voteDiv);
+                }else{
+                    const voteDiv = document.createElement("div");
+                    voteDiv.classList.add("vote-options", "radioDiv");
+                    voteDiv.innerHTML="Głos został już oddany"
+                    announcementCard.appendChild(voteDiv);
+                }
+            }
         }
-
         container.appendChild(announcementCard);
     });
 
@@ -317,11 +308,8 @@ function generateVotingView(data, page, elementId) {
     pagination.classList.add("pagination");
     document.getElementById("content").appendChild(pagination);
 
-    generateVotingPagination(data.news.length, page, data, elementId);
+    generateVotingPagination(data.votings.length, page, data, elementId);
 }
-
-
-
 function generateVotingPagination(totalAnnouncements, currentPage, data,elementId) {
     const totalPages = Math.ceil(totalAnnouncements / announcementsPerPage);
     const paginationContainer = document.getElementById("pagination"+elementId);
@@ -371,3 +359,93 @@ function generateVotingPagination(totalAnnouncements, currentPage, data,elementI
     });
     paginationContainer.appendChild(nextButton);
 }
+async function getAllVotings(userId){
+    try {
+        const response = await fetch(apiBaseUrl+'/all_votings/'+userId, {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData;
+        } else {
+            throw new Error("Brak danych głosowania w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania głosowania: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania głosowania:', error.message);
+        throw error;
+    }
+}
+async function postNewVoting(dataToSend){
+    try {
+        const response = await fetch(apiBaseUrl+"/voting", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataToSend)
+        });
+    
+        const responseData = await response.json();
+    
+        if (response.ok) {
+            printApiResponse("apiInfoResponse","Pomyślnie dodano głosowanie.","levelSucces")
+            displayVotingSystem();
+          
+        } else {
+          printApiResponse("apiInfoResponse",responseData.message,"levelWarning")
+          console.error('Błąd podczas dodawania opłaty: ', responseData.message);
+        }
+      } catch (error) {
+          printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
+          console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+      }
+}
+function splitVotingsByStatus(votingsData) {
+    const currentDate = new Date();
+
+    const activeVotings = [];
+    const endedVotings = [];
+
+    votingsData.votings.forEach(voting => {
+        const endDate = new Date(voting.end_date);
+
+        if (endDate > currentDate) {
+            activeVotings.push(voting);
+        } else {
+            endedVotings.push(voting);
+        }
+    });
+
+    return {
+        activeVotings: { message: votingsData.message, votings: activeVotings },
+        endedVotings: { message: votingsData.message, votings: endedVotings }
+    };
+}
+async function postVote(dataToSend){
+    try {
+        const response = await fetch(apiBaseUrl+"/vote", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataToSend)
+        });
+    
+        const responseData = await response.json();
+    
+        if (response.ok) {
+            printApiResponse("apiInfoResponse","Pomyślnie oddano głos.","levelSucces")
+            displayVotingSystem();
+          
+        } else {
+          printApiResponse("apiInfoResponse",responseData.message,"levelWarning")
+          console.error('Błąd podczas dodawania głosu: ', responseData.message);
+        }
+      } catch (error) {
+          printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
+          console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+      }
+}
+
+

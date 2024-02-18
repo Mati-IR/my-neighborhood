@@ -12,7 +12,7 @@ function generateSidebar(accountType) {
             { text: "Ogłoszenia", onclick: "displayNews()" },
             { text: "Głosowania", onclick: "displayVotingSystem()" },
             { text: "Obsługa usterek", onclick: "displayIncidentSystem()" },
-            { text: "Raporty", onclick: "displayRaport()" },
+            { text: "Raporty", onclick: "raport()" },
             { text: "Dokumentacja API", onclick: "documentation()" }
         ];
     }
@@ -24,7 +24,7 @@ function generateSidebar(accountType) {
             { text: "Aktualne stawki opłat", onclick: "displayUtilities()" },
             { text: "Głosowania", onclick: "displayVotingSystem()" },
             { text: "Zgłoś usterke", onclick: "displayIncidentSystem()" },
-            { text: "Raporty", onclick: "displayRaport()" }
+            { text: "Raporty", onclick: "raport()" }
         ];
     }
     items.forEach(item => {

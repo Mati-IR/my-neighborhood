@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Report</title>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.16.0/dist/pdf-lib.js"></script>
+</head>
+<body>
+  <button onclick="generatePDF()">Generate PDF Report</button>
+
+  <script>
+    async function generatePDF() {
+      const { PDFDocument } = PDFLib;
+      const products = [
+        {
+          id: 1,
+          name: "Product XYZ",
+          price_per_unit: 24.99,
+          unit: "piece"
+        },
+        {
+          id: 2,
+          name: "Product DEF",
+          price_per_unit: 15.49,
+          unit: "box"
+        },
+        {
+          id: 3,
+          name: "Product GHI",
+          price_per_unit: 5.99,
+          unit: "packet"
+        }
+      ];
+
+      const pdfDoc = await PDFDocument.create();
+      const page = pdfDoc.addPage();
+
+      const tableTopY = page.getHeight() - 50;
+      const columnWidths = [50, 150, 100, 100];
+      const rowHeight = 20;
+      const tableHeader = ['ID', 'Name', 'Price per Unit', 'Unit'];
+
+      // Dodaj tytuł "Wykaz opłat"
+      page.drawText("Wykaz oplat", { x: 50, y: tableTopY + rowHeight });
+
+      drawTableRow(page, tableTopY, tableHeader, columnWidths, true);
+
+      products.forEach((product, index) => {
+        const rowY = tableTopY - (index + 1) * rowHeight;
+        drawTableRow(page, rowY, [product.id, product.name, `$${product.price_per_unit}`, product.unit], columnWidths, false);
+      });
+
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = "product_report.pdf";
+      link.click();
+    }
+
+    function drawTableRow(page, y, rowData, columnWidths, isHeader) {
+      const rowHeight = 20;
+      const startX = 50;
+      let currentX = startX;
+
+      rowData.forEach((cellData, index) => {
+        page.drawText(cellData.toString(), {
+          x: currentX,
+          y: y - (rowHeight / 2),
+          size: isHeader ? 12 : 10 // Rozmiar czcionki dla nagłówka i danych
+        });
+        currentX += columnWidths[index];
+      });
+
+      if (isHeader) {
+        page.drawLine({
+          start: { x: startX, y: y - rowHeight },
+          end: { x: startX + columnWidths.reduce((acc, width) => acc + width), y: y - rowHeight },
+          thickness: 1
+        });
+      }
+    }
+  </script>
+</body>
+</html>
