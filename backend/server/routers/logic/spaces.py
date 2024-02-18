@@ -374,3 +374,30 @@ def update_lease_agreement(lease_agreement: LeaseAgreementModel):
     except Exception as e:
         logger.error(f"An error occurred while updating lease agreement{lease_agreement}: {e}")
         return RETURN_FAILURE, "Error updating lease agreement: " + str(e)
+
+
+def get_all_spaces_of_owner(owner_id: int):
+    try:
+        with get_database_session() as session:
+            logger.info(f"Attempting to retrieve all spaces for owner with ID {owner_id}")
+            owner_spaces = session.query(OwnerOfSpace).filter_by(owner_id=owner_id).all()
+            owner_of_space = session.query(OwnerOfSpace).filter_by(id=owner_id).all()
+            if owner_spaces and owner_of_space:
+                space_list = []
+                for space in owner_spaces:
+                    space_info = session.query(Space).filter_by(id=space.space_id).first()
+                    space_list.append({
+                        "id": space_info.id,
+                        "space_number": space_info.space_number,
+                        "area": float(space_info.area),
+                        "space_type": space_info.space_type,
+                        "share": session.query(OwnerOfSpace.share).filter_by(space_id=space_info.id, owner_id=owner_id).first()[0],
+                    })
+                logger.info(f"Spaces for owner with ID {owner_id} retrieved successfully.")
+                return RETURN_SUCCESS, space_list
+            else:
+                logger.info(f"No spaces or owner found for owner with ID {owner_id}.")
+                return RETURN_NOT_FOUND, "No spaces found for owner."
+    except Exception as e:
+        logger.error(f"An error occurred while retrieving spaces for owner with ID {owner_id}: {e}")
+        return RETURN_FAILURE, "Error retrieving spaces for owner: " + str(e)

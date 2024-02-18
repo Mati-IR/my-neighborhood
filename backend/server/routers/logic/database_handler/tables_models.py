@@ -179,13 +179,16 @@ class Vote(Base):
                           comment='Weight of the vote will be proportional to the amount of owned spaces')
     choice = Column(SmallInteger, nullable=False)
     voter_id = Column(Integer, ForeignKey('owner.id'))
+    voting_id = Column(Integer, ForeignKey('voting.id'))
     voter = relationship("Owner", backref="votes")
+    voting = relationship("Voting", backref="votes")
 
 
 class Voting(Base):
     __tablename__ = 'voting'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    date = Column(Date, nullable=False)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
     title = Column(String(100), nullable=False)
     description = Column(String(4000), nullable=False)
     votes = Column(Integer, ForeignKey('vote.id'))

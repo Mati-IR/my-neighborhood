@@ -141,3 +141,18 @@ class ServicemanModel(BaseModel):
     full_name: str
     specialties: str
     company_id: str
+
+
+class NewVotingModel(BaseModel):
+    start_date: datetime
+    end_date: datetime
+    title: str
+    description: str
+    creator_id: int
+
+
+class VoteModel(BaseModel):
+    owner_id: int
+    voting_id: int
+    vote: bool
+    is_admin: bool

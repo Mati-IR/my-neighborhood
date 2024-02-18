@@ -256,17 +256,22 @@ CREATE TABLE `vote`
  `owned_spaces` decimal NOT NULL COMMENT 'Weight of the vote will be proportional to the amount of owned spaces' ,
  `choice`       tinyint NOT NULL ,
  `voter_id`     int NOT NULL ,
+ `voting_id`    int NOT NULL ,
 
 PRIMARY KEY (`id`),
 KEY `FK_1` (`voter_id`),
-CONSTRAINT `FK_16` FOREIGN KEY `FK_1` (`voter_id`) REFERENCES `owner` (`id`)
+CONSTRAINT `FK_16` FOREIGN KEY `FK_1` (`voter_id`) REFERENCES `owner` (`id`),
+KEY `FK_2` (`voting_id`),
+CONSTRAINT `FK_26` FOREIGN KEY `FK_2` (`voting_id`) REFERENCES `voting` (`id`)
 );
+
 
 
 CREATE TABLE `voting`
 (
  `id`          int NOT NULL AUTO_INCREMENT ,
- `date`        date NOT NULL ,
+ `start_date`  datetime NOT NULL ,
+ `end_date`    datetime NOT NULL ,
  `title`       varchar(100) NOT NULL ,
  `description` varchar(4000) NOT NULL ,
  `votes`       int NOT NULL ,
