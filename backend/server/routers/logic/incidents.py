@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
-from .database_handler.tables_models import Incident, IncidentCategory, Serviceman, Space, Owner, IncidentState
+from .database_handler.tables_models import Incident, IncidentCategory, Serviceman, Space, Owner, IncidentState, IncidentStaff
 from ..models import NewServicemanModel, ServicemanModel, NewIncidentModel, IncidentModel
 from .database_handler.util import get_database_session
 import os
@@ -285,3 +285,32 @@ def get_all_incident_states():
                     'name': state.name
                 })
         return code, message
+    
+def assign_serviceman_to_incident(incident_id, serviceman_id):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Serviceman assigned to incident"
+        
+        serviceman = session.query(Serviceman).filter(Serviceman.id == serviceman_id).first()
+        if serviceman is None:
+            code = RETURN_NOT_FOUND
+            message = "Serviceman not found"
+            return code, message
+        
+        incident = session.query(Incident).filter(Incident.id == incident_id).first()
+        if incident is None:
+            code = RETURN_NOT_FOUND
+            message = "Incident not found"
+            return code, message
+
+        is_this_serviceman_assigned = session.query(IncidentStaff).filter(IncidentStaff.serviceman_id == serviceman_id, IncidentStaff.incident_id == incident_id).first()
+        if is_this_serviceman_assigned is not None:
+            code = RETURN_FAILURE
+            message = "Serviceman already assigned to this incident"
+            return code, message
+        
+        incident_staff = IncidentStaff(incident_id=incident_id, serviceman_id=serviceman_id)
+        session.add(incident_staff)
+        session.commit()
+        return code, message
+    
