@@ -275,3 +275,19 @@ def get_incidents_for_user(user_id: int):
                 })
         return code, message
     
+def get_all_incident_states():
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Incident states found"
+        states = session.query(IncidentState).all()
+        if not states:
+            code = RETURN_NOT_FOUND
+            message = "Incident states not found"
+        else:
+            message = []
+            for state in states:
+                message.append({
+                    'id': state.id,
+                    'name': state.name
+                })
+        return code, message
