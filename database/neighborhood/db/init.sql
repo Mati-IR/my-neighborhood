@@ -286,6 +286,8 @@ CREATE TABLE `incident_category`
 PRIMARY KEY (`id`)
 );
 
+INSERT INTO `incident_category` (`name`) VALUES ('Hydraulic'), ('Electric'), ('Heating'), ('Maintanance'), ('Elevator'), ('Vandalism'), ('Lost and Found'), ('Pest infestation'), ('Parking violation'), ('Other');
+
 
 CREATE TABLE `incident_state`
 (
