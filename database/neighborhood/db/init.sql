@@ -297,16 +297,20 @@ CREATE TABLE `incident_state`
 PRIMARY KEY (`id`)
 );
 
+INSERT INTO `incident_state` (`name`) VALUES ('Created'), ('Investigation'),  ('Tech on site'), 
+                                            ('Awaiting parts'), ('Awaiting vendor'), ('Resolved');
+
 
 CREATE TABLE `incident`
 (
  `id`            int NOT NULL AUTO_INCREMENT ,
  `category_id`   int NOT NULL ,
+ `title`   varchar(100) NOT NULL ,
  `description`   varchar(3000) NOT NULL ,
- `admin_id`      int NOT NULL ,
+ `admin_id`      int,
  `space_id`      int NOT NULL ,
  `creation_date` datetime NOT NULL ,
- `closure_date`  datetime NOT NULL ,
+ `closure_date`  datetime,
  `state`         int NOT NULL ,
  `owner_id`      int NOT NULL ,
 

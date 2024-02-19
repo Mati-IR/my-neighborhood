@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from .models import NewServicemanModel, ServicemanModel, NewIncidentModel, IncidentModel
-from .logic import new_serviceman, get_all_servicemen, remove_serviceman, update_serviceman, get_all_incident_categories
+from .logic import new_serviceman, get_all_servicemen, remove_serviceman, update_serviceman, get_all_incident_categories, new_incident
 import logging
 import json
 
@@ -37,7 +37,7 @@ def put_serviceman(serviceman: ServicemanModel):
 # Incidents CRUD
 @router.post('/incident')
 def post_incident(incident: NewIncidentModel):
-    code, message = 501, 'Not  implemented' # new_incident(incident)
+    code, message = new_incident(incident)
     return JSONResponse(status_code=code, content={"message": message})
 
 @router.get('/all_incidents')

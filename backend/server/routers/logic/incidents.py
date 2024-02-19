@@ -3,8 +3,9 @@ from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import IncidentCategory, Serviceman
-from ..models import NewServicemanModel, ServicemanModel
+
+from .database_handler.tables_models import Incident, IncidentCategory, Serviceman, Space, Owner, IncidentState
+from ..models import NewServicemanModel, ServicemanModel, NewIncidentModel
 from .database_handler.util import get_database_session
 import os
 import logging
@@ -112,7 +113,7 @@ def get_all_incident_categories():
         message = "Incident categories found"
         categories = session.query(IncidentCategory).all()
         if not categories:
-            code = RETURN_FAILURE
+            code = RETURN_NOT_FOUND
             message = "Incident categories not found"
         else:
             message = []
@@ -123,4 +124,47 @@ def get_all_incident_categories():
                 })
         return code, message
 
+def new_incident(incident_model: NewIncidentModel):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Incident created"
 
+        if None in incident_model.__dict__.values() or "" in incident_model.__dict__.values():
+            code = RETURN_FAILURE
+            message = "Please fill all the fields"
+            return code, message
+        
+        category = session.query(IncidentCategory).filter(IncidentCategory.id == incident_model.category_id).first()
+        if category is None:
+            code = RETURN_NOT_FOUND
+            message = "Category not found"
+            return code, message
+
+        if 0 in [len(incident_model.description), len(incident_model.title)] or \
+        len(incident_model.description) > 3000 or len(incident_model.title) > 100:
+            code = RETURN_INCORRECT_LENGTH
+            message = "Data lengths incorrect"
+            return code, message
+        
+        owner = session.query(Owner).filter(Owner.id == incident_model.owner_id).first()
+        if owner is None:
+            code = RETURN_NOT_FOUND
+            message = "Owner not found"
+            return code, message
+        
+        space = session.query(Space).filter(Space.id == incident_model.space_id).first()
+        if space is None:
+            code = RETURN_NOT_FOUND
+            message = "Space not found"
+            return code, message
+        
+        incident_state = session.query(IncidentState.id).filter(IncidentState.name == 'Created').first()[0]
+        from datetime import datetime
+        incident = Incident(category_id=incident_model.category_id, title=incident_model.title, description=incident_model.description,
+                            space_id=incident_model.space_id, creation_date=datetime.now(), state=incident_state,
+                            owner_id=incident_model.owner_id)
+
+        session.add(incident)
+        session.commit()
+        return code, message
+    

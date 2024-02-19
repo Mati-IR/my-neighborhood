@@ -208,6 +208,7 @@ class Incident(Base):
     __tablename__ = 'incident'
     id = Column(Integer, primary_key=True, autoincrement=True)
     category_id = Column(Integer, ForeignKey('incident_category.id'))
+    title = Column(String(100), nullable=False)
     description = Column(String(3000), nullable=False)
     admin_id = Column(Integer, ForeignKey('admin.id'))
     space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))

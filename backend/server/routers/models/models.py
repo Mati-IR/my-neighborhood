@@ -170,9 +170,9 @@ class VoteModel(BaseModel):
  """
 class NewIncidentModel(BaseModel):
     category_id: int
+    title: str
     description: str
     space_id: int
-    creation_date: datetime
     owner_id: int
 
 
