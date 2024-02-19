@@ -16,6 +16,9 @@ RETURN_NOT_FOUND = 404
 RETURN_BUILDING_ALREADY_EXISTS = 409
 RETURN_INCORRECT_LENGTH = 411
 
+# setup logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def new_serviceman(serviceman_model: NewServicemanModel):
     with get_database_session() as session:
@@ -314,3 +317,26 @@ def assign_serviceman_to_incident(incident_id, serviceman_id):
         session.commit()
         return code, message
     
+def get_incident_staff(incident_id):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = []
+        # staff joined with serviceman
+        staff = session.query(IncidentStaff).join(Serviceman).filter(IncidentStaff.incident_id == incident_id, Serviceman.id == IncidentStaff.id).all()
+
+        if not staff:
+            code = RETURN_NOT_FOUND
+            message = "Incident staff not found"
+        else:
+            logger.info(staff)
+            for staff_member in staff:
+                serviceman = session.query(Serviceman).filter(Serviceman.id == staff_member.serviceman_id).first()
+                message.append({
+                    'incident_id': staff_member.incident_id,
+                    'serviceman_id': staff_member.serviceman_id,
+                    'full_name': serviceman.full_name,
+                    'specialties': serviceman.specialties,
+                    'company_id': serviceman.company_id
+                    # Add other relevant fields here
+                })
+        return code, message
