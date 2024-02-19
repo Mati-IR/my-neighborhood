@@ -3,7 +3,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import Serviceman
+from .database_handler.tables_models import IncidentCategory, Serviceman
 from ..models import NewServicemanModel, ServicemanModel
 from .database_handler.util import get_database_session
 import os
@@ -105,3 +105,22 @@ def update_serviceman(updated_serviceman: ServicemanModel):
         session.commit()
 
         return code, message
+    
+def get_all_incident_categories():
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Incident categories found"
+        categories = session.query(IncidentCategory).all()
+        if not categories:
+            code = RETURN_FAILURE
+            message = "Incident categories not found"
+        else:
+            message = []
+            for category in categories:
+                message.append({
+                    'id': category.id,
+                    'name': category.name
+                })
+        return code, message
+
+

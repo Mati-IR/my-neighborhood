@@ -156,3 +156,33 @@ class VoteModel(BaseModel):
     voting_id: int
     vote: bool
     is_admin: bool
+
+
+"""
+ `category_id`   int NOT NULL ,
+ `description`   varchar(3000) NOT NULL ,
+ `admin_id`      int NOT NULL ,
+ `space_id`      int NOT NULL ,
+ `creation_date` datetime NOT NULL ,
+ `closure_date`  datetime NOT NULL ,
+ `state`         int NOT NULL ,
+ `owner_id`      int NOT NULL ,
+ """
+class NewIncidentModel(BaseModel):
+    category_id: int
+    description: str
+    space_id: int
+    creation_date: datetime
+    owner_id: int
+
+
+class IncidentModel(BaseModel):
+    id: int
+    category_id: int
+    description: str
+    admin_id: int
+    space_id: int
+    creation_date: datetime
+    closure_date: datetime
+    state: int
+    owner_id: int
