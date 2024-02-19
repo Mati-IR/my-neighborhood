@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 from .models import NewServicemanModel, ServicemanModel, NewIncidentModel, IncidentModel
-from .logic import new_serviceman, get_all_servicemen, remove_serviceman, update_serviceman, get_all_incident_categories, new_incident
+from .logic import new_serviceman, get_all_servicemen, remove_serviceman, update_serviceman, get_incidents_for_user, get_all_incident_categories, new_incident, remove_incident, get_all_incidents, update_incident
 import logging
 import json
 
@@ -42,17 +42,22 @@ def post_incident(incident: NewIncidentModel):
 
 @router.get('/all_incidents')
 def get_incidents():
-    code, message = 501, 'Not  implemented' # get_all_incidents()
+    code, message = get_all_incidents()
+    return JSONResponse(status_code=code, content={"message": message})
+
+@router.get('/incident_for_user/{user_id}')
+def incidents_for_user(user_id: int):
+    code, message = get_incidents_for_user(user_id)
     return JSONResponse(status_code=code, content={"message": message})
 
 @router.delete("/incident/{incident_id}")
 def delete_incident(incident_id: int):
-    code, message = 501, 'Not  implemented' # remove_incident(incident_id)
+    code, message = remove_incident(incident_id)
     return JSONResponse(status_code=code, content={"message": message})
 
 @router.put("/incident")
 def put_incident(incident: IncidentModel):
-    code, message = 501, 'Not  implemented' # update_incident(incident)
+    code, message =update_incident(incident)
     return JSONResponse(status_code=code, content={"message": message})
 
 @router.get('/all_incident_categories')

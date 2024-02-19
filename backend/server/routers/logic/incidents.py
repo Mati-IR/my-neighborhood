@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 from .database_handler.tables_models import Incident, IncidentCategory, Serviceman, Space, Owner, IncidentState
-from ..models import NewServicemanModel, ServicemanModel, NewIncidentModel
+from ..models import NewServicemanModel, ServicemanModel, NewIncidentModel, IncidentModel
 from .database_handler.util import get_database_session
 import os
 import logging
@@ -166,5 +166,112 @@ def new_incident(incident_model: NewIncidentModel):
 
         session.add(incident)
         session.commit()
+        return code, message
+    
+
+def get_all_incidents():
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Incidents found"
+        incidents = session.query(Incident).all()
+        if not incidents:
+            code = RETURN_NOT_FOUND
+            message = "Incidents not found"
+        else:
+            message = []
+            for incident in incidents:
+                message.append({
+                    'id': incident.id,
+                    'category_id': incident.category_id,
+                    'title': incident.title,
+                    'description': incident.description,
+                    'admin_id': incident.admin_id,
+                    'space_id': incident.space_id,
+                    'creation_date': incident.creation_date.isoformat(),
+                    'closure_date': incident.closure_date.isoformat() if incident.closure_date is not None else None,
+                    'state': incident.state,
+                    'owner_id': incident.owner_id
+                })
+        return code, message
+    
+
+def update_incident(updated_incident: IncidentModel):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Incident updated"
+
+        if None in updated_incident.__dict__.values() or "" in updated_incident.__dict__.values():
+            code = RETURN_FAILURE
+            message = "Please fill all the fields"
+            return code, message
+        
+        admin = session.query(Owner).filter(Owner.id == updated_incident.admin_id).first()
+        if admin is None:
+            code = RETURN_FAILURE
+            message = "Existing admin must be assigned to ticket"
+            return code, message
+
+        if len(updated_incident.description) > 3000 or len(updated_incident.title) > 100:
+            code = RETURN_INCORRECT_LENGTH
+            message = "Data lengths incorrect"
+            return code, message
+
+        incident = session.query(Incident).filter(Incident.id == updated_incident.id).first()
+        if incident is None:
+            code = RETURN_FAILURE
+            message = "Incident not found"
+            return code, message
+
+        incident.category_id = updated_incident.category_id
+        incident.title = updated_incident.title
+        incident.description = updated_incident.description
+        incident.admin_id = updated_incident.admin_id
+        incident.space_id = updated_incident.space_id
+        incident.creation_date = updated_incident.creation_date
+        incident.closure_date = updated_incident.closure_date
+        incident.state = updated_incident.state
+        incident.owner_id = updated_incident.owner_id
+        session.commit()
+
+        return code, message
+
+def remove_incident(incident_id: int):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Incident removed"
+
+        incident = session.query(Incident).filter(Incident.id == incident_id).first()
+        if incident is None:
+            code = RETURN_NOT_FOUND
+            message = "Incident not found"
+            return code, message
+
+        session.delete(incident)
+        session.commit()
+        return code, message
+    
+def get_incidents_for_user(user_id: int):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Incidents found"
+        incidents = session.query(Incident).filter(Incident.owner_id == user_id).all()
+        if not incidents:
+            code = RETURN_NOT_FOUND
+            message = "Incidents not found"
+        else:
+            message = []
+            for incident in incidents:
+                message.append({
+                    'id': incident.id,
+                    'category_id': incident.category_id,
+                    'title': incident.title,
+                    'description': incident.description,
+                    'admin_id': incident.admin_id,
+                    'space_id': incident.space_id,
+                    'creation_date': incident.creation_date.isoformat(),
+                    'closure_date': incident.closure_date.isoformat() if incident.closure_date is not None else None,
+                    'state': incident.state,
+                    'owner_id': incident.owner_id
+                })
         return code, message
     

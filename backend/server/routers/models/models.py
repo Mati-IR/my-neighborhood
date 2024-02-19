@@ -179,6 +179,7 @@ class NewIncidentModel(BaseModel):
 class IncidentModel(BaseModel):
     id: int
     category_id: int
+    title: str
     description: str
     admin_id: int
     space_id: int
