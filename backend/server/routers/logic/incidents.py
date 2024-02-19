@@ -152,16 +152,10 @@ def new_incident(incident_model: NewIncidentModel):
             message = "Owner not found"
             return code, message
         
-        space = session.query(Space).filter(Space.id == incident_model.space_id).first()
-        if space is None:
-            code = RETURN_NOT_FOUND
-            message = "Space not found"
-            return code, message
-        
         incident_state = session.query(IncidentState.id).filter(IncidentState.name == 'Created').first()[0]
         from datetime import datetime
         incident = Incident(category_id=incident_model.category_id, title=incident_model.title, description=incident_model.description,
-                            space_id=incident_model.space_id, creation_date=datetime.now(), state=incident_state,
+                            location=incident_model.location, creation_date=datetime.now(), state=incident_state,
                             owner_id=incident_model.owner_id)
 
         session.add(incident)
@@ -226,7 +220,7 @@ def update_incident(updated_incident: IncidentModel):
         incident.title = updated_incident.title
         incident.description = updated_incident.description
         incident.admin_id = updated_incident.admin_id
-        incident.space_id = updated_incident.space_id
+        incident.location = updated_incident.location
         incident.creation_date = updated_incident.creation_date
         incident.closure_date = updated_incident.closure_date
         incident.state = updated_incident.state
@@ -267,7 +261,7 @@ def get_incidents_for_user(user_id: int):
                     'title': incident.title,
                     'description': incident.description,
                     'admin_id': incident.admin_id,
-                    'space_id': incident.space_id,
+                    'location': incident.location,
                     'creation_date': incident.creation_date.isoformat(),
                     'closure_date': incident.closure_date.isoformat() if incident.closure_date is not None else None,
                     'state': incident.state,

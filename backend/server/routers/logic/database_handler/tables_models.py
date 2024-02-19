@@ -211,7 +211,7 @@ class Incident(Base):
     title = Column(String(100), nullable=False)
     description = Column(String(3000), nullable=False)
     admin_id = Column(Integer, ForeignKey('admin.id'))
-    space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'))
+    location = Column(String(100), nullable=False)
     creation_date = Column(DateTime, nullable=False)
     closure_date = Column(DateTime, nullable=False)
     state = Column(Integer, ForeignKey('incident_state.id'))
@@ -219,7 +219,6 @@ class Incident(Base):
     category = relationship("IncidentCategory", backref="incidents")
     state_relation = relationship("IncidentState", backref="incidents")
     admin = relationship("Admin", backref="incidents")
-    space = relationship("Space", backref="incidents")
     owner = relationship("Owner", backref="incidents")
 
 
