@@ -172,7 +172,7 @@ class IncidentModel(BaseModel):
     title: str
     description: str
     admin_id: int
-    space_id: int
+    location: str
     creation_date: datetime
     closure_date: datetime
     state: int

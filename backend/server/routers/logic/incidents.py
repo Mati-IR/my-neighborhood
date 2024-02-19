@@ -180,7 +180,7 @@ def get_all_incidents():
                     'title': incident.title,
                     'description': incident.description,
                     'admin_id': incident.admin_id,
-                    'space_id': incident.space_id,
+                    'location': incident.location,
                     'creation_date': incident.creation_date.isoformat(),
                     'closure_date': incident.closure_date.isoformat() if incident.closure_date is not None else None,
                     'state': incident.state,
