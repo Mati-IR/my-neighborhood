@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from .models import SpaceModel, SpaceToOwnerModel, RemoveOwnerFromSpaceModel, NewLeaseAgreementModel, LeaseAgreementModel
+from .models import OccupantModel, SpaceModel, SpaceToOwnerModel, RemoveOwnerFromSpaceModel, NewLeaseAgreementModel, LeaseAgreementModel
 from .logic import (create_space as new_space, get_space_by_id, assign_space_to_owner as assign_space,
                     get_space_categories as get_all_space_categories, remove_space, remove_owner_from_space,
-                    get_owners_of_space, create_lease_agreement, remove_lease_agreement, get_lease_agreement, update_lease_agreement)
+                    get_owners_of_space, create_lease_agreement, remove_lease_agreement,assign_occupant_to_space, get_lease_agreement, update_lease_agreement)
 import logging
 import json
 
@@ -76,4 +76,9 @@ def get_lease_agreement_by_id(space_id: int):
 @router.put("/lease_agreement")
 def put_lease_agreement(lease_agreement: LeaseAgreementModel):
     code, message = update_lease_agreement(lease_agreement)
+    return JSONResponse(status_code=code, content={"message": message})
+
+@router.post('/assign_occupant_to_space')
+def assign_occupant(occupant: OccupantModel):
+    code, message = assign_occupant_to_space(occupant)
     return JSONResponse(status_code=code, content={"message": message})

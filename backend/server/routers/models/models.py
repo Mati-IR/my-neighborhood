@@ -177,3 +177,8 @@ class IncidentModel(BaseModel):
     closure_date: datetime
     state: int
     owner_id: int
+
+class OccupantModel(BaseModel):
+    name: str
+    surname: str
+    space_id: int

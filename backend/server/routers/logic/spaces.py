@@ -3,13 +3,13 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from ..models import SpaceModel, SpaceToOwnerModel, LeaseAgreementModel, NewLeaseAgreementModel
+from ..models import SpaceModel, SpaceToOwnerModel, LeaseAgreementModel, NewLeaseAgreementModel, OccupantModel
 import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from .database_handler.tables_models import SpacesForFloor, Space, SpaceType, FloorForBuilding, OwnerOfSpace, Owner, \
-    LeaseAgreement
+    LeaseAgreement, Occupant, OccupantsOfSpace
 from .database_handler.util import get_database_session
 
 LENGTH_OF_SHA256 = 64
@@ -18,6 +18,8 @@ RETURN_FAILURE = 400
 RETURN_NOT_FOUND = 404
 RETURN_USER_ALREADY_EXISTS = 409
 RETURN_INCORRECT_LENGTH = 411
+
+OCCUPANT_NAME_LENGTH = OCCUPANT_SURNAME_LENGTH = 45
 
 router = APIRouter()
 
@@ -401,3 +403,24 @@ def get_all_spaces_of_owner(owner_id: int):
     except Exception as e:
         logger.error(f"An error occurred while retrieving spaces for owner with ID {owner_id}: {e}")
         return RETURN_FAILURE, "Error retrieving spaces for owner: " + str(e)
+
+def assign_occupant_to_space(occupant: OccupantModel):
+    with get_database_session() as session:
+        if None in occupant.__dict__.values():
+            return RETURN_FAILURE, "Fill all values"
+        if len(occupant.name) > OCCUPANT_NAME_LENGTH or len(occupant.surname) > OCCUPANT_NAME_LENGTH:
+            return RETURN_FAILURE, f'Name or surname too long, max {OCCUPANT_NAME_LENGTH} characters allowed'
+        
+        space = session.query(Space).filter(Space.id == occupant.space_id).first()
+        if space is None:
+            return RETURN_NOT_FOUND, "Space not found"
+        
+        new_occupant = Occupant(name=occupant.name, surname=occupant.surname)
+        session.add(new_occupant)
+        session.flush()
+        
+        occupant_to_space_association = OccupantsOfSpace(space_id=occupant.space_id, occupant_id=new_occupant.id)
+        session.add(occupant_to_space_association)
+        session.commit()
+        return RETURN_SUCCESS, "Occupant assigned to space"
+    
