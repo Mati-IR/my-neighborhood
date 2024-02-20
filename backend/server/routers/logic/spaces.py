@@ -424,3 +424,28 @@ def assign_occupant_to_space(occupant: OccupantModel):
         session.commit()
         return RETURN_SUCCESS, "Occupant assigned to space"
     
+def get_occupants_for_space(space_id: int):
+    with get_database_session() as session:
+        occupants = session.query(OccupantsOfSpace).filter(OccupantsOfSpace.space_id == space_id).all()
+        if not occupants:
+            return RETURN_NOT_FOUND, "No occupants found for space"
+        occupants_list = []
+        for occupant in occupants:
+            occupant_info = session.query(Occupant).filter(Occupant.id == occupant.occupant_id).first()
+            occupants_list.append({
+                "id": occupant_info.id,
+                "name": occupant_info.name,
+                "surname": occupant_info.surname
+            })
+        return RETURN_SUCCESS, occupants_list
+    
+def get_spaces_of_owner(owner_id: int):
+    with get_database_session() as session:
+        spaces = session.query(OwnerOfSpace).filter(OwnerOfSpace.owner_id == owner_id).all()
+        if not spaces:
+            return RETURN_NOT_FOUND, "No spaces found for owner"
+        space_list = []
+        for space in spaces:
+            space_info = session.query(Space).filter(Space.id == space.space_id).first()
+            space_list.append(space_info.id)
+        return RETURN_SUCCESS, space_list
