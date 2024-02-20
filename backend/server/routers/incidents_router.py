@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from .models import NewServicemanModel, ServicemanModel, NewIncidentModel, IncidentModel
+from .models import NewServicemanModel, ServicemanModel, NewIncidentModel, IncidentModel, IncidentUpdateModel
 from .logic import new_serviceman, get_all_servicemen, remove_serviceman, get_incident_staff, update_serviceman, assign_serviceman_to_incident, get_all_incident_states, get_incidents_for_user, get_all_incident_categories, new_incident, remove_incident, get_all_incidents, update_incident
 import logging
 import json
@@ -61,7 +61,7 @@ def delete_incident(incident_id: int):
     return JSONResponse(status_code=code, content={"message": message})
 
 @router.put("/incident")
-def put_incident(incident: IncidentModel):
+def put_incident(incident: IncidentUpdateModel):
     code, message =update_incident(incident)
     return JSONResponse(status_code=code, content={"message": message})
 

@@ -166,6 +166,12 @@ class NewIncidentModel(BaseModel):
     owner_id: int
 
 
+class IncidentUpdateModel(BaseModel):
+    id: int
+    state_id: int
+    admin_id: int
+
+
 class IncidentModel(BaseModel):
     id: int
     category_id: int

@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 from .database_handler.tables_models import Incident, IncidentCategory, Serviceman, Space, Owner, IncidentState, IncidentStaff
-from ..models import NewServicemanModel, ServicemanModel, NewIncidentModel, IncidentModel
+from ..models import IncidentUpdateModel, NewServicemanModel, ServicemanModel, NewIncidentModel, IncidentModel
 from .database_handler.util import get_database_session
 import os
 import logging
@@ -192,7 +192,7 @@ def get_all_incidents():
         return code, message
     
 
-def update_incident(updated_incident: IncidentModel):
+def update_incident(updated_incident: IncidentUpdateModel):
     with get_database_session() as session:
         code = RETURN_SUCCESS
         message = "Incident updated"
@@ -208,26 +208,23 @@ def update_incident(updated_incident: IncidentModel):
             message = "Existing admin must be assigned to ticket"
             return code, message
 
-        if len(updated_incident.description) > 3000 or len(updated_incident.title) > 100:
-            code = RETURN_INCORRECT_LENGTH
-            message = "Data lengths incorrect"
-            return code, message
-
         incident = session.query(Incident).filter(Incident.id == updated_incident.id).first()
         if incident is None:
             code = RETURN_FAILURE
             message = "Incident not found"
             return code, message
+        
+        closed_state = session.query(IncidentState.id).filter(IncidentState.name == 'Resolved').first()[0]
 
-        incident.category_id = updated_incident.category_id
-        incident.title = updated_incident.title
-        incident.description = updated_incident.description
+        if incident.state == closed_state:
+            code = RETURN_FAILURE
+            message = "Incident is already closed"
+            return code, message
+        incident.state = updated_incident.state_id
         incident.admin_id = updated_incident.admin_id
-        incident.location = updated_incident.location
-        incident.creation_date = updated_incident.creation_date
-        incident.closure_date = updated_incident.closure_date
-        incident.state = updated_incident.state
-        incident.owner_id = updated_incident.owner_id
+        if updated_incident.state_id == closed_state:
+            from datetime import datetime
+            incident.closure_date = datetime.now()
         session.commit()
 
         return code, message
