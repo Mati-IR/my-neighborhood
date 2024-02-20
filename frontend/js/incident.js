@@ -2,39 +2,44 @@ async function displayIncidentSystem(){
     var contentContainer = document.getElementById("content");
         contentContainer.innerHTML = '';
 
-    var showServicemanFormButton = document.createElement("button");
+    const isAdmin = localStorage.getItem('admin');
+    const userId = localStorage.getItem('id');
+
+    var category = await getIncidentCategory();
+    var state = await getState();
+
+    headerTextChange("Zarządzanie usterkami");
+    
+    if(isAdmin==='true'){
+        var showServicemanFormButton = document.createElement("button");
         showServicemanFormButton.setAttribute("type", "button");
         showServicemanFormButton.textContent = "Dodaj serwisanta";
         showServicemanFormButton.onclick = function() {
             hideServicemanForm();
         };
         contentContainer.appendChild(showServicemanFormButton);
-
-    headerTextChange("Zarządzanie usterkami");
-    var servicemanData = await getServicemen();
-    console.log(servicemanData);
-    displayServicemanData(servicemanData, "content");
-}
-/*var servicemanData = [
-    {
-        id: 1,
-        full_name: "John Doe",
-        specialties: "Software Development",
-        company_id: "ABC123"
-    },
-    {
-        id: 2,
-        full_name: "Jane Smith",
-        specialties: "Data Analysis",
-        company_id: "XYZ456"
-    },
-    {
-        id: 3,
-        full_name: "Michael Johnson",
-        specialties: "Project Management",
-        company_id: "DEF789"
+        var servicemanData = await getServicemen();
+        displayServicemanData(servicemanData, "content");
+        var allIncident = await getAllIncident();
+        var ownerData = await getAllOwners();
+        generateIncidentTable(allIncident.message, category.message, state.message,"Zgłoszenia do obsłużenia",ownerData,servicemanData);
+    }else{
+        var showIncidentFormButton = document.createElement("button");
+        showIncidentFormButton.setAttribute("type", "button");
+        showIncidentFormButton.textContent = "Zgłoś usterke";
+        showIncidentFormButton.onclick = function() {
+            hideIncidentForm(category.message);
+        };
+        contentContainer.appendChild(showIncidentFormButton);
+        var userIncident = await getIncidentForUser(userId);
+        generateIncidentTable(userIncident.message, category.message, state.message,"Twoje aktywne zgłoszenia");
     }
-];*/
+    //generateIncidentTable(sampleIncidents, category.message, state.message);
+    
+    //generateNewIncidentForm(category.message)
+    
+    
+}
 async function displayServicemanData(data, containerId) {
     try {
         var container = document.getElementById(containerId);
@@ -50,7 +55,6 @@ async function displayServicemanData(data, containerId) {
         var thead = document.createElement("thead");
         var tbody = document.createElement("tbody");
 
-        // Tworzenie nagłówków tabeli
         var headers = ["ID", "Pełna nazwa", "Specjalizacje","Edytuj","Zwolnij"];
         var headerRow = document.createElement("tr");
         headers.forEach(function(headerText) {
@@ -60,11 +64,10 @@ async function displayServicemanData(data, containerId) {
         });
         thead.appendChild(headerRow);
         table.appendChild(thead);
-        // Wypełnianie danych tabeli
+
         data.forEach(function(user) {
             var row = document.createElement("tr");
 
-            // Dodaj komórki z danymi
             var idCell = document.createElement("td");
             idCell.textContent = user.id;
             row.appendChild(idCell);
@@ -222,6 +225,30 @@ function hideServicemanForm(userid,userData){
         displayServicemanDataForm(userid,userData)
     }
 }
+function hideIncidentForm(userid,categories){
+    var dataForm= document.getElementById("dataForm");
+    if(dataForm != null){
+        dataForm.remove();
+    }else{
+        generateNewIncidentForm(userid,categories)
+    }
+}
+function hideAssignForm(incidentId,servicemenList){
+    var AssignForm= document.getElementById("AssignForm");
+    if(AssignForm != null){
+        AssignForm.remove();
+    }else{
+        displayAssignServicemanForm(incidentId,servicemenList)
+    }
+}
+function hideStateChangeForm(incidentId,state){
+    var stateForm= document.getElementById("stateForm");
+    if(stateForm != null){
+        stateForm.remove();
+    }else{
+        displayStateChangeForm(incidentId,state)
+    }
+}
 async function getServicemen(){
     try {
         const response = await fetch(apiBaseUrl+'/all_servicemen', {
@@ -242,8 +269,6 @@ async function getServicemen(){
 }
 async function sendServicemanToApi(dataToSend,toApiMetode){
     try {
-        console.log(dataToSend)
-        console.log(toApiMetode)
         const response = await fetch(apiBaseUrl+"/serviceman", {
           method: toApiMetode,
           headers: {
@@ -320,4 +345,610 @@ async function deleteServicemanById(userid){
         console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
         throw error;
     }
+}
+async function getState(){
+    try {
+        const response = await fetch(apiBaseUrl+'/all_incident_states', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData;
+        } else {
+            throw new Error("Brak danych o stanach w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania stanów: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania stanów:', error.message);
+        throw error;
+    }
+}
+async function getIncidentCategory(){
+    try {
+        const response = await fetch(apiBaseUrl+'/all_incident_categories', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData;
+        } else {
+            throw new Error("Brak danych o kategoriach w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania kategorii: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania kategorii:', error.message);
+        throw error;
+    }
+}
+async function generateIncidentTable(incidents, category, state, headerText, userData, servicemanData) {
+    const isAdmin = localStorage.getItem('admin');
+    const tableWrapper = document.createElement('div');
+    tableWrapper.classList.add('table-responsive');
+
+    var tableHeader = document.createElement("h3");
+    var text = document.createTextNode(headerText);
+    tableHeader.appendChild(text);
+    tableWrapper.appendChild(tableHeader);
+
+    const table = document.createElement('table');
+    table.classList.add('table', 'table-striped');
+
+    const thead = document.createElement('thead');
+    const tbody = document.createElement('tbody');
+
+    const headerRow = document.createElement('tr');
+    ['ID', 'Title', 'Category', 'Creation Date', 'State', 'Actions'].forEach(columnName => {
+        const th = document.createElement('th');
+        th.textContent = columnName;
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+
+    for await (const incident of incidents) {
+        const mainRow = document.createElement('tr');
+        ['id', 'title', 'category_id', 'creation_date', 'state'].forEach(key => {
+            const cell = document.createElement('td');
+            if (key === 'category_id') {
+                cell.textContent = category.find(c => c.id === incident[key])?.name || 'Unknown';
+            } else if (key === 'state') {
+                cell.textContent = state.find(s => s.id === incident[key])?.name || 'Unknown';
+            } else if (key === 'creation_date') {
+                const date = new Date(incident[key]);
+                const formattedDate = `${padZero(date.getDate())}-${padZero(date.getMonth() + 1)}-${date.getFullYear()} ${padZero(date.getHours())}:${padZero(date.getMinutes())}`;
+                cell.textContent = formattedDate;
+            } else {
+                cell.textContent = incident[key] || 'N/A';
+            }
+            mainRow.appendChild(cell);
+        });
+
+        const detailsCell = document.createElement('td');
+        const detailsButton = document.createElement('button');
+        detailsButton.classList.add('btn', 'btn-light', 'buttonDecoration');
+        detailsButton.innerHTML = '<i class="bi bi-caret-down-fill"></i>';
+        detailsButton.addEventListener('click', function() {
+            toggleDetails(incident.id);
+        });
+        detailsCell.appendChild(detailsButton);
+        mainRow.appendChild(detailsCell);
+
+        tbody.appendChild(mainRow);
+
+        const detailsRow = document.createElement('tr');
+        detailsRow.classList.add('details-row', `details-${incident.id}`, 'hidden');
+        const detailsCellContent = document.createElement('td');
+        detailsCellContent.setAttribute('colspan', '6');
+        const detailsContent = document.createElement('div');
+        detailsContent.classList.add('details-content');
+
+        if (isAdmin === 'true' && userData) {
+            const ownerData = userData.find(user => user.id === incident.owner_id);
+            if (ownerData) {
+                const detailsHeader = document.createElement('h4');
+                detailsHeader.textContent = 'Szczegóły zgłoszenia';
+                detailsContent.appendChild(detailsHeader);
+
+                detailsContent.innerHTML += `
+                <p><strong>Description:</strong> ${incident.description || 'N/A'}</p>
+                <p><strong>Location:</strong> ${incident.location || 'N/A'}</p>
+                `;
+                const ownerHeader = document.createElement('h4');
+                ownerHeader.textContent = 'Dane Zgłaszającego';
+                detailsContent.appendChild(ownerHeader);
+
+                detailsContent.innerHTML += `
+                    <p><strong>Full Name:</strong> ${ownerData.full_name}</p>
+                    <p><strong>Phone Number:</strong> ${ownerData.phone_number}</p>
+                    <p><strong>Email:</strong> ${ownerData.email}</p>
+                    <p><strong>Full Address:</strong> ${ownerData.full_address}</p>
+                `;
+
+                const staff = await getIncidentStaff(incident.id);
+                const staffHeader = document.createElement('h4');
+                staffHeader.textContent = 'Załoga incydentu';
+                detailsContent.appendChild(staffHeader);
+
+                if (staff.message.length === 0||staff.message==="Incident staff not found") {
+                    const memberInfo = document.createElement('p');
+                    memberInfo.textContent += "Brak przypisanej załogi";
+                    detailsContent.appendChild(memberInfo);
+                } else {
+                    // Wyświetlanie załogi incydentu
+                    staff.message.forEach(member => {
+                        const memberInfo = document.createElement('p');
+                        memberInfo.textContent = `Name: ${member.full_name}, Specialties: ${member.specialties}`;
+                        detailsContent.appendChild(memberInfo);
+                    });
+                }
+                const changeStateButton = document.createElement('button');
+                changeStateButton.classList.add('btn', 'btn-primary');
+                changeStateButton.textContent = 'Zmiana Stanu';
+                changeStateButton.addEventListener('click', function() {
+                    hideStateChangeForm(incident.id,state)
+                });
+                detailsContent.appendChild(changeStateButton);
+
+                const addLogButton = document.createElement('button');
+                addLogButton.classList.add('btn', 'btn-success');
+                addLogButton.textContent = 'Dodanie Zalogi';
+                addLogButton.addEventListener('click', function() {
+                    hideAssignForm(incident.id, servicemanData);
+                });
+                detailsContent.appendChild(addLogButton);
+            } else {
+                detailsContent.textContent = "Owner data not found";
+            }
+        } else {
+            const detailsHeader = document.createElement('h4');
+            detailsHeader.textContent = 'Szczegóły zgłoszenia';
+            detailsContent.appendChild(detailsHeader);
+
+            detailsContent.innerHTML += `
+                <p><strong>Description:</strong> ${incident.description || 'N/A'}</p>
+                <p><strong>Location:</strong> ${incident.location || 'N/A'}</p>
+            `;
+
+            const staff = await getIncidentStaff(incident.id);
+            const staffHeader = document.createElement('h4');
+            staffHeader.textContent = 'Załoga incydentu';
+            detailsContent.appendChild(staffHeader);
+
+            if (staff.message.length === 0||staff.message==="Incident staff not found") {
+                const memberInfo = document.createElement('p');
+                memberInfo.textContent += "Brak przypisanej załogi";
+                detailsContent.appendChild(memberInfo);
+            } else {
+                // Wyświetlanie załogi incydentu
+                staff.message.forEach(member => {
+                    const memberInfo = document.createElement('p');
+                    memberInfo.textContent = `Name: ${member.full_name}, Specialties: ${member.specialties}`;
+                    detailsContent.appendChild(memberInfo);
+                });
+            }
+        }
+        detailsCellContent.appendChild(detailsContent);
+        detailsRow.appendChild(detailsCellContent);
+        tbody.appendChild(detailsRow);
+    }
+
+    table.appendChild(thead);
+    table.appendChild(tbody);
+    tableWrapper.appendChild(table);
+
+    const contentElement = document.getElementById('content');
+    contentElement.appendChild(tableWrapper);
+}
+function toggleDetails(incidentId) {
+    const detailsRow = document.querySelector(`.details-${incidentId}`);
+    detailsRow.classList.toggle('hidden');
+    detailsRow.scrollIntoView({ behavior: 'smooth' });
+}
+function padZero(num) {
+    return num < 10 ? '0' + num : num;
+}
+function generateNewIncidentForm(categories) {
+    hideApiResponse("apiInfoResponse");
+
+    var contentContainer = document.getElementById("content");
+
+    var dataForm = document.createElement("div");
+    dataForm.classList.add("content-container");
+    dataForm.id = "dataForm";
+
+    var header = document.createElement("h2");
+    header.textContent = "Formularz zgłaszania usterki";
+    header.classList.add("MenuHeader");
+    dataForm.appendChild(header);
+
+    var form = document.createElement("form");
+
+    var labelTitle = document.createElement("label");
+    labelTitle.setAttribute("for", "dataTitle");
+    labelTitle.textContent = "Tytuł:";
+
+    var inputTitle = document.createElement("input");
+    inputTitle.setAttribute("type", "text");
+    inputTitle.setAttribute("id", "dataTitle");
+    inputTitle.setAttribute("placeholder", "Tytuł");
+    inputTitle.style.width = "100%";
+    inputTitle.style.marginBottom = "15px";
+    inputTitle.style.borderRadius = "5px";
+    inputTitle.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.1)";
+
+    var labelDescription = document.createElement("label");
+    labelDescription.setAttribute("for", "dataDescription");
+    labelDescription.textContent = "Opis:";
+
+    var inputDescription = document.createElement("textarea");
+    inputDescription.setAttribute("id", "dataDescription");
+    inputDescription.setAttribute("placeholder", "Opis");
+    inputDescription.setAttribute("rows", "4");
+    inputDescription.style.width = "100%";
+    inputDescription.style.marginBottom = "15px";
+    inputDescription.style.borderRadius = "5px";
+    inputDescription.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.1)";
+
+    var labelCategory = document.createElement("label");
+    labelCategory.textContent = "Kategoria:";
+    labelCategory.style.display = "block";
+    labelCategory.style.marginTop = "15px";
+
+    var selectCategory = document.createElement("select");
+    selectCategory.setAttribute("id", "dataCategory");
+    selectCategory.style.width = "100%";
+    selectCategory.style.marginBottom = "15px";
+    selectCategory.style.borderRadius = "5px";
+    selectCategory.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.1)";
+
+    categories.forEach(function(category) {
+        var option = document.createElement("option");
+        option.value = category.id;
+        option.textContent = category.name;
+        selectCategory.appendChild(option);
+    });
+
+    var labelLocation = document.createElement("label");
+    labelLocation.setAttribute("for", "dataLocation");
+    labelLocation.textContent = "Lokalizacja:";
+
+    var inputLocation = document.createElement("input");
+    inputLocation.setAttribute("type", "text");
+    inputLocation.setAttribute("id", "dataLocation");
+    inputLocation.setAttribute("placeholder", "Lokalizacja");
+    inputLocation.style.width = "100%";
+    inputLocation.style.marginBottom = "15px";
+    inputLocation.style.borderRadius = "5px";
+    inputLocation.style.boxShadow = "0 0 5px rgba(0, 0, 0, 0.1)";
+
+    var submitButton = document.createElement("button");
+    submitButton.setAttribute("type", "button");
+    submitButton.textContent = "Wyślij zgłoszenie";
+    submitButton.onclick = function() {
+        validateIncidentForm();
+    };
+
+    form.appendChild(labelTitle);
+    form.appendChild(inputTitle);
+    form.appendChild(labelDescription);
+    form.appendChild(inputDescription);
+    form.appendChild(labelCategory);
+    form.appendChild(selectCategory);
+    form.appendChild(labelLocation);
+    form.appendChild(inputLocation);
+    form.appendChild(submitButton);
+
+    var removeButton = document.createElement("button");
+    removeButton.setAttribute("type", "button");
+    removeButton.textContent = "Zamknij formularz";
+    removeButton.onclick = function() {
+        dataForm.remove();
+    };
+    removeButton.style.backgroundColor = "#cf4a4a";
+    removeButton.style.color = "black";
+    form.appendChild(removeButton);
+
+    dataForm.appendChild(form);
+    contentContainer.appendChild(dataForm);
+    dataForm.scrollIntoView({ behavior: 'smooth' });
+}
+function validateIncidentForm() {
+    var title = document.getElementById("dataTitle").value.trim();
+    var description = document.getElementById("dataDescription").value.trim();
+    var location = document.getElementById("dataLocation").value.trim();
+    var category = document.getElementById("dataCategory").value.trim();
+    const userId = localStorage.getItem('id');
+
+    if (title === "" || location === "" || description === "") {
+        printApiResponse("apiInfoResponse", 'Uzupełnij wszystkie pola', "levelWarning");
+        return;
+    }
+    var dataToSend = {
+        category_id: category,
+        title: title,
+        description: description,
+        location: location,
+        owner_id: userId
+    }
+    sendIncidentToApi(dataToSend)
+}
+async function sendIncidentToApi(dataToSend){
+    try {
+        const response = await fetch(apiBaseUrl+"/incident", {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataToSend)
+        });
+    
+        const responseData = await response.json();
+    
+        if (response.ok) {
+            printApiResponse("apiInfoResponse","Pomyślnie dodano zgłoszenie.","levelSucces")
+            displayIncidentSystem();
+        } else {
+          printApiResponse("apiInfoResponse",responseData.message,"levelWarning")
+          console.error('Błąd podczas dodawania zgłoszenia: ', responseData.message);
+        }
+      } catch (error) {
+          printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
+          console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+      }
+}
+async function getIncidentForUser(userId){
+    try {
+        const response = await fetch(apiBaseUrl+'/incident_for_user/'+userId, {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData;
+        } else {
+            throw new Error("Brak danych o incydentach w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania incydentów: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania incydentów:', error.message);
+        throw error;
+    }
+}
+async function getIncidentStaff(incidentId){
+    try {
+        const response = await fetch(apiBaseUrl+'/incident_staff/'+incidentId, {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData;
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania zalogi: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania załogi:', error.message);
+        throw error;
+    }
+}
+async function getAllIncident(){
+    try {
+        const response = await fetch(apiBaseUrl+'/all_incidents', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData;
+        } else {
+            throw new Error("Brak danych o incydentach w odpowiedzi z serwera.");
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania incydentów: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania incydentów:', error.message);
+        throw error;
+    }
+}
+async function getAssignStaff(incidentId,servicemanId){
+    try {
+        const response = await fetch(apiBaseUrl+'/assign_serviceman/'+incidentId+'/'+servicemanId, {
+            method: 'POST'
+        });
+        const responseData = await response.json();
+        printApiResponse("apiInfoResponse", 'Dodano zaloge do incydentu', "levelSucces");
+        displayIncidentSystem();
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas dodawania załogi: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas dodawania załogi:', error.message);
+        throw error;
+    }
+}
+function displayAssignServicemanForm(serviceRequestId, servicemenList) {
+    try {
+        var container = document.getElementById("content");
+
+        var inputForm = document.createElement("div");
+        inputForm.classList.add("content-container");
+        inputForm.id = "AssignForm";
+
+        var form = document.createElement("form");
+        form.classList.add("row", "g-2");
+
+        var requestIdInputFormGroup = document.createElement("div");
+        requestIdInputFormGroup.classList.add("col-md-6");
+        var requestIdInputLabel = document.createElement("label");
+        requestIdInputLabel.classList.add("form-label");
+        requestIdInputLabel.setAttribute("for", "serviceRequestId");
+        requestIdInputLabel.textContent = "ID zgłoszenia:";
+        var requestIdInput = document.createElement("input");
+        requestIdInput.classList.add("form-control");
+        requestIdInput.setAttribute("type", "text");
+        requestIdInput.setAttribute("id", "serviceRequestId");
+        requestIdInput.setAttribute("value", serviceRequestId);
+        requestIdInput.disabled = true;
+        requestIdInputFormGroup.appendChild(requestIdInputLabel);
+        requestIdInputFormGroup.appendChild(requestIdInput);
+
+        var servicemanSelectFormGroup = document.createElement("div");
+        servicemanSelectFormGroup.classList.add("col-md-6");
+        var servicemanSelectLabel = document.createElement("label");
+        servicemanSelectLabel.classList.add("form-label");
+        servicemanSelectLabel.setAttribute("for", "servicemanSelect");
+        servicemanSelectLabel.textContent = "Wybierz serwisanta:";
+        var servicemanSelect = document.createElement("select");
+        servicemanSelect.classList.add("form-select");
+        servicemanSelect.setAttribute("id", "servicemanSelect");
+
+        servicemenList.forEach(function(serviceman) {
+            var option = document.createElement("option");
+            option.value = serviceman.id;
+            option.textContent = serviceman.full_name;
+            servicemanSelect.appendChild(option);
+        });
+
+        servicemanSelectFormGroup.appendChild(servicemanSelectLabel);
+        servicemanSelectFormGroup.appendChild(servicemanSelect);
+
+        var submitButton = document.createElement("button");
+        submitButton.classList.add("btn", "btn-primary", "buttonDecoration");
+        submitButton.setAttribute("type", "button");
+        submitButton.textContent = "Dodaj";
+        submitButton.onclick = function() {
+            getAssignStaff(serviceRequestId,servicemanSelect.value)
+        };
+        submitButton.style.marginTop = "1.5rem";
+        submitButton.style.width = "100%";
+
+        var header = document.createElement("h2");
+        header.textContent = "Formularz dodania serwisanta do zgłoszenia";
+        header.classList.add("MenuHeader");
+
+        form.appendChild(requestIdInputFormGroup);
+        form.appendChild(servicemanSelectFormGroup);
+        form.appendChild(submitButton);
+
+        inputForm.appendChild(header);
+
+        var removeButton = document.createElement("button");
+        removeButton.setAttribute("type", "button");
+        removeButton.textContent = "Zamknij formularz";
+        removeButton.onclick = function() {
+            AssignForm.remove();
+        };
+        removeButton.style.backgroundColor = "#cf4a4a";
+        removeButton.style.color = "black";
+        form.appendChild(removeButton);
+
+        inputForm.appendChild(form);
+        container.appendChild(inputForm);
+        inputForm.scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+        console.error('Wystąpił błąd podczas wyświetlania formularza:', error.message);
+    }
+}
+function displayStateChangeForm(serviceRequestId, state) {
+    try {
+        var container = document.getElementById("content");
+
+        var inputForm = document.createElement("div");
+        inputForm.classList.add("content-container");
+        inputForm.id = "stateForm";
+
+        var form = document.createElement("form");
+        form.classList.add("row", "g-2");
+
+        var requestIdInputFormGroup = document.createElement("div");
+        requestIdInputFormGroup.classList.add("col-md-6");
+        var requestIdInputLabel = document.createElement("label");
+        requestIdInputLabel.classList.add("form-label");
+        requestIdInputLabel.setAttribute("for", "serviceRequestId");
+        requestIdInputLabel.textContent = "ID zgłoszenia:";
+        var requestIdInput = document.createElement("input");
+        requestIdInput.classList.add("form-control");
+        requestIdInput.setAttribute("type", "text");
+        requestIdInput.setAttribute("id", "serviceRequestId");
+        requestIdInput.setAttribute("value", serviceRequestId);
+        requestIdInput.disabled = true;
+        requestIdInputFormGroup.appendChild(requestIdInputLabel);
+        requestIdInputFormGroup.appendChild(requestIdInput);
+
+        var servicemanSelectFormGroup = document.createElement("div");
+        servicemanSelectFormGroup.classList.add("col-md-6");
+        var servicemanSelectLabel = document.createElement("label");
+        servicemanSelectLabel.classList.add("form-label");
+        servicemanSelectLabel.setAttribute("for", "servicemanSelect");
+        servicemanSelectLabel.textContent = "Wybierz serwisanta:";
+        var servicemanSelect = document.createElement("select");
+        servicemanSelect.classList.add("form-select");
+        servicemanSelect.setAttribute("id", "servicemanSelect");
+
+        state.forEach(function(state) {
+            var option = document.createElement("option");
+            option.value = state.id;
+            option.textContent = state.name;
+            servicemanSelect.appendChild(option);
+        });
+
+        servicemanSelectFormGroup.appendChild(servicemanSelectLabel);
+        servicemanSelectFormGroup.appendChild(servicemanSelect);
+
+        var submitButton = document.createElement("button");
+        submitButton.classList.add("btn", "btn-primary", "buttonDecoration");
+        submitButton.setAttribute("type", "button");
+        submitButton.textContent = "Dodaj";
+        submitButton.onclick = function() {
+            var dataToSend = {
+                id: serviceRequestId,
+                state: servicemanSelect.value
+            }
+            sendChangeStateToApi(dataToSend)
+        };
+        submitButton.style.marginTop = "1.5rem";
+        submitButton.style.width = "100%";
+
+        var header = document.createElement("h2");
+        header.textContent = "Formularz zmiany stanu zgłoszenia";
+        header.classList.add("MenuHeader");
+
+        form.appendChild(requestIdInputFormGroup);
+        form.appendChild(servicemanSelectFormGroup);
+        form.appendChild(submitButton);
+
+        inputForm.appendChild(header);
+
+        var removeButton = document.createElement("button");
+        removeButton.setAttribute("type", "button");
+        removeButton.textContent = "Zamknij formularz";
+        removeButton.onclick = function() {
+            stateForm.remove();
+        };
+        removeButton.style.backgroundColor = "#cf4a4a";
+        removeButton.style.color = "black";
+        form.appendChild(removeButton);
+
+        inputForm.appendChild(form);
+        container.appendChild(inputForm);
+        inputForm.scrollIntoView({ behavior: 'smooth' });
+    } catch (error) {
+        console.error('Wystąpił błąd podczas wyświetlania formularza:', error.message);
+    }
+}
+async function sendChangeStateToApi(dataToSend){
+    try {
+        const response = await fetch(apiBaseUrl+"/incident", {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dataToSend)
+        });
+    
+        const responseData = await response.json();
+    
+        if (response.ok) {
+            printApiResponse("apiInfoResponse","Pomyślnie dodano zgłoszenie.","levelSucces")
+            displayIncidentSystem();
+        } else {
+          printApiResponse("apiInfoResponse",responseData.message,"levelWarning")
+          console.error('Błąd podczas dodawania zgłoszenia: ', responseData.message);
+        }
+      } catch (error) {
+          printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
+          console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
+      }
 }
