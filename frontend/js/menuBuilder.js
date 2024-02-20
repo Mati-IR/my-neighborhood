@@ -19,7 +19,7 @@ function generateSidebar(accountType) {
     else{
         items = [
             { text: "Dane użytkownika", onclick: "displayUserData()" },
-            { text: "Twoje mieszkanie", onclick: "displayUserData()" },
+            { text: "Twoje mieszkanie", onclick: "spaceInfoDisplay()" },
             { text: "Ogłoszenia", onclick: "displayNews()" },
             { text: "Aktualne stawki opłat", onclick: "displayUtilities()" },
             { text: "Głosowania", onclick: "displayVotingSystem()" },

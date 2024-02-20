@@ -22,6 +22,10 @@ async function loadFromLocalStorage(){
                 var message = "Witaj "+user;
                 headerTextChange(message);
                 generateSidebar(isAdmin);
+                if(isAdmin!='true')
+                    spaceInfoDisplay();
+                else
+                    countElementsWithStateOne();
             }
             else if(pagePath!="/index.html"){
                 navigateToHomePage();

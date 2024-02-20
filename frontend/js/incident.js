@@ -21,6 +21,7 @@ async function displayIncidentSystem(){
         var servicemanData = await getServicemen();
         displayServicemanData(servicemanData, "content");
         var allIncident = await getAllIncident();
+        console.log(allIncident)
         const [state1, state2To5, state6] = segregateByState(allIncident.message);
         var ownerData = await getAllOwners();
         await generateIncidentTable(state1, category.message, state.message,"Zgłoszenia do obsłużenia",ownerData,servicemanData);
@@ -40,11 +41,6 @@ async function displayIncidentSystem(){
         await generateIncidentTable(merged, category.message, state.message,"Twoje aktywne zgłoszenia");
         await generateIncidentTable(state6, category.message, state.message,"Twoje zamknięte zgłoszenia");
     }
-    //generateIncidentTable(sampleIncidents, category.message, state.message);
-    
-    //generateNewIncidentForm(category.message)
-    
-    
 }
 function segregateByState(data) {
     const state1Array = [];
@@ -404,8 +400,7 @@ async function getIncidentCategory(){
     }
 }
 async function generateIncidentTable(incidents, category, state, headerText, userData, servicemanData) {
-    console.log(incidents)
-    if(incidents.length>0){
+    if (incidents.length > 0) {
         const isAdmin = localStorage.getItem('admin');
         const tableWrapper = document.createElement('div');
         tableWrapper.classList.add('table-responsive');
@@ -451,7 +446,7 @@ async function generateIncidentTable(incidents, category, state, headerText, use
             const detailsButton = document.createElement('button');
             detailsButton.classList.add('btn', 'btn-light', 'buttonDecoration');
             detailsButton.innerHTML = '<i class="bi bi-caret-down-fill"></i>';
-            detailsButton.addEventListener('click', function() {
+            detailsButton.addEventListener('click', function () {
                 toggleDetails(incident.id);
             });
             detailsCell.appendChild(detailsButton);
@@ -493,30 +488,49 @@ async function generateIncidentTable(incidents, category, state, headerText, use
                     staffHeader.textContent = 'Załoga incydentu';
                     detailsContent.appendChild(staffHeader);
 
-                    if (staff.message.length === 0||staff.message==="Incident staff not found") {
+                    if (staff.message.length === 0 || staff.message === "Incident staff not found") {
                         const memberInfo = document.createElement('p');
                         memberInfo.textContent += "Brak przypisanej załogi";
                         detailsContent.appendChild(memberInfo);
                     } else {
-                        // Wyświetlanie załogi incydentu
-                        staff.message.forEach(member => {
-                            const memberInfo = document.createElement('p');
-                            memberInfo.textContent = `Imię nazwisko: ${member.full_name} | Specjalizacja: ${member.specialties}`;
-                            detailsContent.appendChild(memberInfo);
+                        // Tabela wyświetlająca załogę incydentu
+                        const staffTable = document.createElement('table');
+                        staffTable.classList.add('table', 'table-striped');
+                        const staffThead = document.createElement('thead');
+                        const staffHeaderRow = document.createElement('tr');
+                        ['Imię i nazwisko', 'Specjalizacja'].forEach(columnName => {
+                            const th = document.createElement('th');
+                            th.textContent = columnName;
+                            staffHeaderRow.appendChild(th);
                         });
+                        staffThead.appendChild(staffHeaderRow);
+                        const staffTbody = document.createElement('tbody');
+                        staff.message.forEach(member => {
+                            const memberRow = document.createElement('tr');
+                            const nameCell = document.createElement('td');
+                            nameCell.textContent = member.full_name;
+                            const specialtyCell = document.createElement('td');
+                            specialtyCell.textContent = member.specialties;
+                            memberRow.appendChild(nameCell);
+                            memberRow.appendChild(specialtyCell);
+                            staffTbody.appendChild(memberRow);
+                        });
+                        staffTable.appendChild(staffThead);
+                        staffTable.appendChild(staffTbody);
+                        detailsContent.appendChild(staffTable);
                     }
                     const changeStateButton = document.createElement('button');
                     changeStateButton.classList.add('btn', 'btn-primary');
                     changeStateButton.textContent = 'Zmiana Stanu';
-                    changeStateButton.addEventListener('click', function() {
-                        hideStateChangeForm(incident.id,state)
+                    changeStateButton.addEventListener('click', function () {
+                        hideStateChangeForm(incident.id, state)
                     });
                     detailsContent.appendChild(changeStateButton);
 
                     const addLogButton = document.createElement('button');
                     addLogButton.classList.add('btn', 'btn-success');
                     addLogButton.textContent = 'Dodanie Zalogi';
-                    addLogButton.addEventListener('click', function() {
+                    addLogButton.addEventListener('click', function () {
                         hideAssignForm(incident.id, servicemanData);
                     });
                     detailsContent.appendChild(addLogButton);
@@ -538,17 +552,36 @@ async function generateIncidentTable(incidents, category, state, headerText, use
                 staffHeader.textContent = 'Załoga incydentu';
                 detailsContent.appendChild(staffHeader);
 
-                if (staff.message.length === 0||staff.message==="Incident staff not found") {
+                if (staff.message.length === 0 || staff.message === "Incident staff not found") {
                     const memberInfo = document.createElement('p');
                     memberInfo.textContent += "Brak przypisanej załogi";
                     detailsContent.appendChild(memberInfo);
                 } else {
-                    // Wyświetlanie załogi incydentu
-                    staff.message.forEach(member => {
-                        const memberInfo = document.createElement('p');
-                        memberInfo.textContent = `Imię nazwisko: ${member.full_name} | Specjalizacja: ${member.specialties}`;
-                        detailsContent.appendChild(memberInfo);
+                    // Tabela wyświetlająca załogę incydentu
+                    const staffTable = document.createElement('table');
+                    staffTable.classList.add('table', 'table-striped');
+                    const staffThead = document.createElement('thead');
+                    const staffHeaderRow = document.createElement('tr');
+                    ['Imię i nazwisko', 'Specjalizacja'].forEach(columnName => {
+                        const th = document.createElement('th');
+                        th.textContent = columnName;
+                        staffHeaderRow.appendChild(th);
                     });
+                    staffThead.appendChild(staffHeaderRow);
+                    const staffTbody = document.createElement('tbody');
+                    staff.message.forEach(member => {
+                        const memberRow = document.createElement('tr');
+                        const nameCell = document.createElement('td');
+                        nameCell.textContent = member.full_name;
+                        const specialtyCell = document.createElement('td');
+                        specialtyCell.textContent = member.specialties;
+                        memberRow.appendChild(nameCell);
+                        memberRow.appendChild(specialtyCell);
+                        staffTbody.appendChild(memberRow);
+                    });
+                    staffTable.appendChild(staffThead);
+                    staffTable.appendChild(staffTbody);
+                    detailsContent.appendChild(staffTable);
                 }
             }
             detailsCellContent.appendChild(detailsContent);
@@ -977,4 +1010,24 @@ async function sendChangeStateToApi(dataToSend){
           printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
           console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
       }
+}
+async function countElementsWithStateOne() {
+    var data = await getAllIncident();
+    const elementsWithStateOne = data.message.filter(item => item.state === 1);
+    const count = elementsWithStateOne.length;
+    const resultElement = document.createElement('div');
+    if(count>0){
+        resultElement.innerText = `Masz zgłoszenia do obsłużenia`;
+        resultElement.style.textAlign = 'center';
+        resultElement.style.color = 'red';
+        resultElement.style.fontSize = '24px';
+    }
+    else{
+        resultElement.innerText = `Nie masz żadnych zgłoszeń do obsłużenia`;
+        resultElement.style.textAlign = 'center';
+        resultElement.style.color = 'black';
+        resultElement.style.fontSize = '24px';
+    }
+    const contentElement = document.getElementById('content');
+    contentElement.appendChild(resultElement);
 }
