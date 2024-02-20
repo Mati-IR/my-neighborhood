@@ -21,8 +21,11 @@ async function displayIncidentSystem(){
         var servicemanData = await getServicemen();
         displayServicemanData(servicemanData, "content");
         var allIncident = await getAllIncident();
+        const [state1, state2To5, state6] = segregateByState(allIncident.message);
         var ownerData = await getAllOwners();
-        generateIncidentTable(allIncident.message, category.message, state.message,"Zgłoszenia do obsłużenia",ownerData,servicemanData);
+        await generateIncidentTable(state1, category.message, state.message,"Zgłoszenia do obsłużenia",ownerData,servicemanData);
+        await generateIncidentTable(state2To5, category.message, state.message,"Aktywne zgłoszenia",ownerData,servicemanData);
+        await generateIncidentTable(state6, category.message, state.message,"Zamknięte zgłoszenia",ownerData,servicemanData);
     }else{
         var showIncidentFormButton = document.createElement("button");
         showIncidentFormButton.setAttribute("type", "button");
@@ -32,13 +35,33 @@ async function displayIncidentSystem(){
         };
         contentContainer.appendChild(showIncidentFormButton);
         var userIncident = await getIncidentForUser(userId);
-        generateIncidentTable(userIncident.message, category.message, state.message,"Twoje aktywne zgłoszenia");
+        const [state1, state2To5, state6] = segregateByState(userIncident.message);
+        var merged = state1.concat(state2To5);
+        await generateIncidentTable(merged, category.message, state.message,"Twoje aktywne zgłoszenia");
+        await generateIncidentTable(state6, category.message, state.message,"Twoje zamknięte zgłoszenia");
     }
     //generateIncidentTable(sampleIncidents, category.message, state.message);
     
     //generateNewIncidentForm(category.message)
     
     
+}
+function segregateByState(data) {
+    const state1Array = [];
+    const state2To5Array = [];
+    const state6Array = [];
+
+    data.forEach(item => {
+        if (item.state === 1) {
+            state1Array.push(item);
+        } else if (item.state >= 2 && item.state <= 5) {
+            state2To5Array.push(item);
+        } else if (item.state === 6) {
+            state6Array.push(item);
+        }
+    });
+
+    return [state1Array, state2To5Array, state6Array];
 }
 async function displayServicemanData(data, containerId) {
     try {
@@ -381,86 +404,133 @@ async function getIncidentCategory(){
     }
 }
 async function generateIncidentTable(incidents, category, state, headerText, userData, servicemanData) {
-    const isAdmin = localStorage.getItem('admin');
-    const tableWrapper = document.createElement('div');
-    tableWrapper.classList.add('table-responsive');
+    console.log(incidents)
+    if(incidents.length>0){
+        const isAdmin = localStorage.getItem('admin');
+        const tableWrapper = document.createElement('div');
+        tableWrapper.classList.add('table-responsive');
 
-    var tableHeader = document.createElement("h3");
-    var text = document.createTextNode(headerText);
-    tableHeader.appendChild(text);
-    tableWrapper.appendChild(tableHeader);
+        var tableHeader = document.createElement("h3");
+        var text = document.createTextNode(headerText);
+        tableHeader.appendChild(text);
+        tableWrapper.appendChild(tableHeader);
 
-    const table = document.createElement('table');
-    table.classList.add('table', 'table-striped');
+        const table = document.createElement('table');
+        table.classList.add('table', 'table-striped');
 
-    const thead = document.createElement('thead');
-    const tbody = document.createElement('tbody');
+        const thead = document.createElement('thead');
+        const tbody = document.createElement('tbody');
 
-    const headerRow = document.createElement('tr');
-    ['ID', 'Title', 'Category', 'Creation Date', 'State', 'Actions'].forEach(columnName => {
-        const th = document.createElement('th');
-        th.textContent = columnName;
-        headerRow.appendChild(th);
-    });
-    thead.appendChild(headerRow);
+        const headerRow = document.createElement('tr');
+        ['ID', 'Tytuł', 'Kategoria', 'Data zgłoszenia', 'Stan', 'Szczegóły'].forEach(columnName => {
+            const th = document.createElement('th');
+            th.textContent = columnName;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
 
-    for await (const incident of incidents) {
-        const mainRow = document.createElement('tr');
-        ['id', 'title', 'category_id', 'creation_date', 'state'].forEach(key => {
-            const cell = document.createElement('td');
-            if (key === 'category_id') {
-                cell.textContent = category.find(c => c.id === incident[key])?.name || 'Unknown';
-            } else if (key === 'state') {
-                cell.textContent = state.find(s => s.id === incident[key])?.name || 'Unknown';
-            } else if (key === 'creation_date') {
-                const date = new Date(incident[key]);
-                const formattedDate = `${padZero(date.getDate())}-${padZero(date.getMonth() + 1)}-${date.getFullYear()} ${padZero(date.getHours())}:${padZero(date.getMinutes())}`;
-                cell.textContent = formattedDate;
+        for await (const incident of incidents) {
+            const mainRow = document.createElement('tr');
+            ['id', 'title', 'category_id', 'creation_date', 'state'].forEach(key => {
+                const cell = document.createElement('td');
+                if (key === 'category_id') {
+                    cell.textContent = category.find(c => c.id === incident[key])?.name || 'Unknown';
+                } else if (key === 'state') {
+                    cell.textContent = state.find(s => s.id === incident[key])?.name || 'Unknown';
+                } else if (key === 'creation_date') {
+                    const date = new Date(incident[key]);
+                    const formattedDate = `${padZero(date.getDate())}-${padZero(date.getMonth() + 1)}-${date.getFullYear()} ${padZero(date.getHours())}:${padZero(date.getMinutes())}`;
+                    cell.textContent = formattedDate;
+                } else {
+                    cell.textContent = incident[key] || 'N/A';
+                }
+                mainRow.appendChild(cell);
+            });
+
+            const detailsCell = document.createElement('td');
+            const detailsButton = document.createElement('button');
+            detailsButton.classList.add('btn', 'btn-light', 'buttonDecoration');
+            detailsButton.innerHTML = '<i class="bi bi-caret-down-fill"></i>';
+            detailsButton.addEventListener('click', function() {
+                toggleDetails(incident.id);
+            });
+            detailsCell.appendChild(detailsButton);
+            mainRow.appendChild(detailsCell);
+
+            tbody.appendChild(mainRow);
+
+            const detailsRow = document.createElement('tr');
+            detailsRow.classList.add('details-row', `details-${incident.id}`, 'hidden');
+            const detailsCellContent = document.createElement('td');
+            detailsCellContent.setAttribute('colspan', '6');
+            const detailsContent = document.createElement('div');
+            detailsContent.classList.add('details-content');
+
+            if (isAdmin === 'true' && userData) {
+                const ownerData = userData.find(user => user.id === incident.owner_id);
+                if (ownerData) {
+                    const detailsHeader = document.createElement('h4');
+                    detailsHeader.textContent = 'Szczegóły zgłoszenia';
+                    detailsContent.appendChild(detailsHeader);
+
+                    detailsContent.innerHTML += `
+                    <p><strong>Opis:</strong> ${incident.description || 'N/A'}</p>
+                    <p><strong>Lokalizacja:</strong> ${incident.location || 'N/A'}</p>
+                    `;
+                    const ownerHeader = document.createElement('h4');
+                    ownerHeader.textContent = 'Dane Zgłaszającego';
+                    detailsContent.appendChild(ownerHeader);
+
+                    detailsContent.innerHTML += `
+                        <p><strong>Imię nazwisko:</strong> ${ownerData.full_name}</p>
+                        <p><strong>Numer telefonu:</strong> ${ownerData.phone_number}</p>
+                        <p><strong>Email:</strong> ${ownerData.email}</p>
+                        <p><strong>Adres:</strong> ${ownerData.full_address}</p>
+                    `;
+
+                    const staff = await getIncidentStaff(incident.id);
+                    const staffHeader = document.createElement('h4');
+                    staffHeader.textContent = 'Załoga incydentu';
+                    detailsContent.appendChild(staffHeader);
+
+                    if (staff.message.length === 0||staff.message==="Incident staff not found") {
+                        const memberInfo = document.createElement('p');
+                        memberInfo.textContent += "Brak przypisanej załogi";
+                        detailsContent.appendChild(memberInfo);
+                    } else {
+                        // Wyświetlanie załogi incydentu
+                        staff.message.forEach(member => {
+                            const memberInfo = document.createElement('p');
+                            memberInfo.textContent = `Imię nazwisko: ${member.full_name} | Specjalizacja: ${member.specialties}`;
+                            detailsContent.appendChild(memberInfo);
+                        });
+                    }
+                    const changeStateButton = document.createElement('button');
+                    changeStateButton.classList.add('btn', 'btn-primary');
+                    changeStateButton.textContent = 'Zmiana Stanu';
+                    changeStateButton.addEventListener('click', function() {
+                        hideStateChangeForm(incident.id,state)
+                    });
+                    detailsContent.appendChild(changeStateButton);
+
+                    const addLogButton = document.createElement('button');
+                    addLogButton.classList.add('btn', 'btn-success');
+                    addLogButton.textContent = 'Dodanie Zalogi';
+                    addLogButton.addEventListener('click', function() {
+                        hideAssignForm(incident.id, servicemanData);
+                    });
+                    detailsContent.appendChild(addLogButton);
+                } else {
+                    detailsContent.textContent = "Owner data not found";
+                }
             } else {
-                cell.textContent = incident[key] || 'N/A';
-            }
-            mainRow.appendChild(cell);
-        });
-
-        const detailsCell = document.createElement('td');
-        const detailsButton = document.createElement('button');
-        detailsButton.classList.add('btn', 'btn-light', 'buttonDecoration');
-        detailsButton.innerHTML = '<i class="bi bi-caret-down-fill"></i>';
-        detailsButton.addEventListener('click', function() {
-            toggleDetails(incident.id);
-        });
-        detailsCell.appendChild(detailsButton);
-        mainRow.appendChild(detailsCell);
-
-        tbody.appendChild(mainRow);
-
-        const detailsRow = document.createElement('tr');
-        detailsRow.classList.add('details-row', `details-${incident.id}`, 'hidden');
-        const detailsCellContent = document.createElement('td');
-        detailsCellContent.setAttribute('colspan', '6');
-        const detailsContent = document.createElement('div');
-        detailsContent.classList.add('details-content');
-
-        if (isAdmin === 'true' && userData) {
-            const ownerData = userData.find(user => user.id === incident.owner_id);
-            if (ownerData) {
                 const detailsHeader = document.createElement('h4');
                 detailsHeader.textContent = 'Szczegóły zgłoszenia';
                 detailsContent.appendChild(detailsHeader);
 
                 detailsContent.innerHTML += `
-                <p><strong>Description:</strong> ${incident.description || 'N/A'}</p>
-                <p><strong>Location:</strong> ${incident.location || 'N/A'}</p>
-                `;
-                const ownerHeader = document.createElement('h4');
-                ownerHeader.textContent = 'Dane Zgłaszającego';
-                detailsContent.appendChild(ownerHeader);
-
-                detailsContent.innerHTML += `
-                    <p><strong>Full Name:</strong> ${ownerData.full_name}</p>
-                    <p><strong>Phone Number:</strong> ${ownerData.phone_number}</p>
-                    <p><strong>Email:</strong> ${ownerData.email}</p>
-                    <p><strong>Full Address:</strong> ${ownerData.full_address}</p>
+                    <p><strong>Opis:</strong> ${incident.description || 'N/A'}</p>
+                    <p><strong>Lokalizacja:</strong> ${incident.location || 'N/A'}</p>
                 `;
 
                 const staff = await getIncidentStaff(incident.id);
@@ -476,67 +546,23 @@ async function generateIncidentTable(incidents, category, state, headerText, use
                     // Wyświetlanie załogi incydentu
                     staff.message.forEach(member => {
                         const memberInfo = document.createElement('p');
-                        memberInfo.textContent = `Name: ${member.full_name}, Specialties: ${member.specialties}`;
+                        memberInfo.textContent = `Imię nazwisko: ${member.full_name} | Specjalizacja: ${member.specialties}`;
                         detailsContent.appendChild(memberInfo);
                     });
                 }
-                const changeStateButton = document.createElement('button');
-                changeStateButton.classList.add('btn', 'btn-primary');
-                changeStateButton.textContent = 'Zmiana Stanu';
-                changeStateButton.addEventListener('click', function() {
-                    hideStateChangeForm(incident.id,state)
-                });
-                detailsContent.appendChild(changeStateButton);
-
-                const addLogButton = document.createElement('button');
-                addLogButton.classList.add('btn', 'btn-success');
-                addLogButton.textContent = 'Dodanie Zalogi';
-                addLogButton.addEventListener('click', function() {
-                    hideAssignForm(incident.id, servicemanData);
-                });
-                detailsContent.appendChild(addLogButton);
-            } else {
-                detailsContent.textContent = "Owner data not found";
             }
-        } else {
-            const detailsHeader = document.createElement('h4');
-            detailsHeader.textContent = 'Szczegóły zgłoszenia';
-            detailsContent.appendChild(detailsHeader);
-
-            detailsContent.innerHTML += `
-                <p><strong>Description:</strong> ${incident.description || 'N/A'}</p>
-                <p><strong>Location:</strong> ${incident.location || 'N/A'}</p>
-            `;
-
-            const staff = await getIncidentStaff(incident.id);
-            const staffHeader = document.createElement('h4');
-            staffHeader.textContent = 'Załoga incydentu';
-            detailsContent.appendChild(staffHeader);
-
-            if (staff.message.length === 0||staff.message==="Incident staff not found") {
-                const memberInfo = document.createElement('p');
-                memberInfo.textContent += "Brak przypisanej załogi";
-                detailsContent.appendChild(memberInfo);
-            } else {
-                // Wyświetlanie załogi incydentu
-                staff.message.forEach(member => {
-                    const memberInfo = document.createElement('p');
-                    memberInfo.textContent = `Name: ${member.full_name}, Specialties: ${member.specialties}`;
-                    detailsContent.appendChild(memberInfo);
-                });
-            }
+            detailsCellContent.appendChild(detailsContent);
+            detailsRow.appendChild(detailsCellContent);
+            tbody.appendChild(detailsRow);
         }
-        detailsCellContent.appendChild(detailsContent);
-        detailsRow.appendChild(detailsCellContent);
-        tbody.appendChild(detailsRow);
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        tableWrapper.appendChild(table);
+
+        const contentElement = document.getElementById('content');
+        contentElement.appendChild(tableWrapper);
     }
-
-    table.appendChild(thead);
-    table.appendChild(tbody);
-    tableWrapper.appendChild(table);
-
-    const contentElement = document.getElementById('content');
-    contentElement.appendChild(tableWrapper);
 }
 function toggleDetails(incidentId) {
     const detailsRow = document.querySelector(`.details-${incidentId}`);
