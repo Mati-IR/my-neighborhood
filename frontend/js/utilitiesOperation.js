@@ -92,7 +92,7 @@ async function displayUtilitiesData(data, containerId) {
         console.error('Wystąpił błąd podczas wyświetlania danych:', error.message);
     }
 }
-function displayChangeRatesForm(utilityid,utilityData) {
+function displayChangeRatesForm(utilityid, utilityData, billBase) {
     try {
         var container = document.getElementById("content");
 
@@ -113,7 +113,7 @@ function displayChangeRatesForm(utilityid,utilityData) {
         nameInput.classList.add("form-control");
         nameInput.setAttribute("type", "text");
         nameInput.setAttribute("id", "newName");
-        nameInput.setAttribute("placeholder", "Wprowadź nazwe");
+        nameInput.setAttribute("placeholder", "Wprowadź nazwę");
         nameFormGroup.appendChild(nameLabel);
         nameFormGroup.appendChild(nameInput);
 
@@ -138,36 +138,64 @@ function displayChangeRatesForm(utilityid,utilityData) {
         unitLabel.classList.add("form-label");
         unitLabel.setAttribute("for", "newUnit");
         unitLabel.textContent = "Jednostka:";
-        var unitInput = document.createElement("input");
-        unitInput.classList.add("form-control");
-        unitInput.setAttribute("type", "text");
-        unitInput.setAttribute("id", "newUnit");
-        unitInput.setAttribute("placeholder", "Wprowadź jednostkę");
-        
-        
-        var toApiMetode = 'POST';
+        var unitSelect = document.createElement("select");
+        unitSelect.classList.add("form-select");
+        unitSelect.setAttribute("id", "newUnit");
+        var defaultOption = document.createElement("option");
+        defaultOption.setAttribute("value", "");
+        defaultOption.textContent = "Wybierz jednostkę";
+        unitSelect.appendChild(defaultOption);
+        const billBase = [
+            {
+                "id": 1,
+                "opis": "Opłata za m2"
+            },
+            {
+                "id": 2,
+                "opis": "Opłata za osobę"
+            }
+        ];
+        if (Array.isArray(billBase)) {
+            billBase.forEach(element => {
+                var option = document.createElement("option");
+                option.setAttribute("value", element.id);
+                option.textContent = element.opis;
+                unitSelect.appendChild(option);
+            });
+        } else {
+            console.error("billBase nie jest tablicą.");
+        }
+
+        unitFormGroup.appendChild(unitLabel);
+        unitFormGroup.appendChild(unitSelect);
 
         var submitButton = document.createElement("button");
         submitButton.classList.add("btn", "btn-primary", "buttonDecoration");
         submitButton.setAttribute("type", "button");
         submitButton.textContent = "Dodaj";
-        submitButton.onclick = function() {
-            validateRatesForm(toApiMetode,utilityid);
+        submitButton.onclick = function () {
+            validateRatesForm(toApiMethod, utilityid);
         };
         submitButton.style.marginTop = "1.5rem";
         submitButton.style.width = "100%";
 
-        
+        var toApiMethod = 'POST';
+
         if (utilityData) {
             nameInput.value = utilityData.name;
             priceInput.value = utilityData.price_per_unit;
-            unitInput.value = utilityData.unit || '';
-            var toApiMetode = 'PUT'; 
+            var selectedUnit = utilityData.unit || '';
+            // Ustawienie wybranej jednostki w liście wyboru
+            for (let i = 0; i < unitSelect.options.length; i++) {
+                if (unitSelect.options[i].textContent === selectedUnit) {
+                    unitSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            toApiMethod = 'PUT';
             submitButton.textContent = "Edytuj";
         }
 
-        unitFormGroup.appendChild(unitLabel);
-        unitFormGroup.appendChild(unitInput);
         form.appendChild(nameFormGroup);
         form.appendChild(priceFormGroup);
         form.appendChild(unitFormGroup);
@@ -181,7 +209,7 @@ function displayChangeRatesForm(utilityid,utilityData) {
         var removeButton = document.createElement("button");
         removeButton.setAttribute("type", "button");
         removeButton.textContent = "Zamknij formularz";
-        removeButton.onclick = function() {
+        removeButton.onclick = function () {
             inputForm.remove();
         };
         removeButton.style.backgroundColor = "#cf4a4a";
@@ -195,6 +223,10 @@ function displayChangeRatesForm(utilityid,utilityData) {
         console.error('Wystąpił błąd podczas wyświetlania formularza:', error.message);
     }
 }
+
+
+
+
 function hideChangeRatesForm(utilityid,utilityData){
     var ImputForm= document.getElementById("inputForm");
     if(ImputForm != null){
@@ -282,12 +314,13 @@ function validateRatesForm(toApiMetode,utilityid) {
         price_per_unit: priceInput.value,
         unit: unitInput.value
     }
+    console.log(dataToSend)
     if(toApiMetode == 'PUT'){
         dataToSend.id = utilityid;
-        addEditUtilities(dataToSend,'PUT','/update_utility')
+        //addEditUtilities(dataToSend,'PUT','/update_utility')
     } 
     else{
-        addEditUtilities(dataToSend,'POST','/create_utility')
+        //addEditUtilities(dataToSend,'POST','/create_utility')
     }
         
 }

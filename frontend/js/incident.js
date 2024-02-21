@@ -21,7 +21,6 @@ async function displayIncidentSystem(){
         var servicemanData = await getServicemen();
         displayServicemanData(servicemanData, "content");
         var allIncident = await getAllIncident();
-        console.log(allIncident)
         const [state1, state2To5, state6] = segregateByState(allIncident.message);
         var ownerData = await getAllOwners();
         await generateIncidentTable(state1, category.message, state.message,"Zgłoszenia do obsłużenia",ownerData,servicemanData);
@@ -417,22 +416,35 @@ async function generateIncidentTable(incidents, category, state, headerText, use
         const tbody = document.createElement('tbody');
 
         const headerRow = document.createElement('tr');
-        ['ID', 'Tytuł', 'Kategoria', 'Data zgłoszenia', 'Stan', 'Szczegóły'].forEach(columnName => {
-            const th = document.createElement('th');
-            th.textContent = columnName;
-            headerRow.appendChild(th);
-        });
+        if(incidents.state < 6){
+            ['ID', 'Tytuł', 'Kategoria', 'Data zgłoszenia', 'Stan', 'Szczegóły'].forEach(columnName => {
+                const th = document.createElement('th');
+                th.textContent = columnName;
+                headerRow.appendChild(th);
+            });
+        } else {
+            ['ID', 'Tytuł', 'Kategoria', 'Data zamknięcia', 'Stan', 'Szczegóły'].forEach(columnName => {
+                const th = document.createElement('th');
+                th.textContent = columnName;
+                headerRow.appendChild(th);
+            });
+        }
         thead.appendChild(headerRow);
 
         for await (const incident of incidents) {
             const mainRow = document.createElement('tr');
-            ['id', 'title', 'category_id', 'creation_date', 'state'].forEach(key => {
+            var rowheader;
+            if(incident.state < 6)
+                rowheader = ['id', 'title', 'category_id', 'creation_date', 'state'];
+            else
+                rowheader = ['id', 'title', 'category_id', 'closure_date', 'state'];
+            rowheader.forEach(key => {
                 const cell = document.createElement('td');
                 if (key === 'category_id') {
                     cell.textContent = category.find(c => c.id === incident[key])?.name || 'Unknown';
                 } else if (key === 'state') {
                     cell.textContent = state.find(s => s.id === incident[key])?.name || 'Unknown';
-                } else if (key === 'creation_date') {
+                } else if (key === 'creation_date'||key === 'closure_date') {
                     const date = new Date(incident[key]);
                     const formattedDate = `${padZero(date.getDate())}-${padZero(date.getMonth() + 1)}-${date.getFullYear()} ${padZero(date.getHours())}:${padZero(date.getMinutes())}`;
                     cell.textContent = formattedDate;
@@ -519,21 +531,23 @@ async function generateIncidentTable(incidents, category, state, headerText, use
                         staffTable.appendChild(staffTbody);
                         detailsContent.appendChild(staffTable);
                     }
-                    const changeStateButton = document.createElement('button');
-                    changeStateButton.classList.add('btn', 'btn-primary');
-                    changeStateButton.textContent = 'Zmiana Stanu';
-                    changeStateButton.addEventListener('click', function () {
-                        hideStateChangeForm(incident.id, state)
-                    });
-                    detailsContent.appendChild(changeStateButton);
+                    if(incident.state < 6){
+                        const changeStateButton = document.createElement('button');
+                        changeStateButton.classList.add('btn', 'btn-primary');
+                        changeStateButton.textContent = 'Zmiana Stanu';
+                        changeStateButton.addEventListener('click', function () {
+                            hideStateChangeForm(incident.id, state)
+                        });
+                        detailsContent.appendChild(changeStateButton);
 
-                    const addLogButton = document.createElement('button');
-                    addLogButton.classList.add('btn', 'btn-success');
-                    addLogButton.textContent = 'Dodanie Zalogi';
-                    addLogButton.addEventListener('click', function () {
-                        hideAssignForm(incident.id, servicemanData);
-                    });
-                    detailsContent.appendChild(addLogButton);
+                        const addLogButton = document.createElement('button');
+                        addLogButton.classList.add('btn', 'btn-success');
+                        addLogButton.textContent = 'Dodanie Zalogi';
+                        addLogButton.addEventListener('click', function () {
+                            hideAssignForm(incident.id, servicemanData);
+                        });
+                        detailsContent.appendChild(addLogButton);
+                    }
                 } else {
                     detailsContent.textContent = "Owner data not found";
                 }
@@ -953,7 +967,8 @@ function displayStateChangeForm(serviceRequestId, state) {
         submitButton.onclick = function() {
             var dataToSend = {
                 id: serviceRequestId,
-                state: servicemanSelect.value
+                state_id: servicemanSelect.value,
+                admin_id: localStorage.getItem('id'),
             }
             sendChangeStateToApi(dataToSend)
         };
@@ -998,7 +1013,6 @@ async function sendChangeStateToApi(dataToSend){
         });
     
         const responseData = await response.json();
-    
         if (response.ok) {
             printApiResponse("apiInfoResponse","Pomyślnie dodano zgłoszenie.","levelSucces")
             displayIncidentSystem();
