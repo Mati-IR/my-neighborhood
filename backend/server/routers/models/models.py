@@ -124,6 +124,7 @@ class UtilityModel(BaseModel):
     name: str
     price_per_unit: float
     billing_basis_id: int
+    unit: str
 
 
 class GetUserModel(BaseModel):
