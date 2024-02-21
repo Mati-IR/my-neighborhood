@@ -116,6 +116,7 @@ class NewUtilityModel(BaseModel):
     name: str
     price_per_unit: float
     billing_basis_id: int
+    unit: str
 
 
 class UtilityModel(BaseModel):
@@ -194,4 +195,3 @@ class NewInvoiceModel(BaseModel):
     space_id: int
     year: int
     month: int
-    

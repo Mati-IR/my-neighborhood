@@ -68,7 +68,7 @@ def create_utility(utility_model: NewUtilityModel):
             message = "Utility with this name already exists"
             return code, message
         
-        if len(utility_model.name) > 40:
+        if len(utility_model.name) > 40 or len(utility_model.unit) > 15:
             code = RETURN_INCORRECT_LENGTH
             message = "Name of utility is too long"
             return code, message
@@ -84,7 +84,8 @@ def create_utility(utility_model: NewUtilityModel):
         logger.info(price_per_unit)
         utility = Utility(name=utility_model.name,
                           price_per_unit=price_per_unit,
-                          billing_basis=utility_model.billing_basis_id)
+                          billing_basis=utility_model.billing_basis_id,
+                          unit=utility_model.unit)
         session.add(utility)
         session.commit()
 

@@ -52,6 +52,7 @@ class Utility(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(40), nullable=False)
     price_per_unit = Column(Numeric(precision=6, scale=2), nullable=False)
+    unit = Column(String(15), nullable=False)
     billing_basis = Column(Integer, ForeignKey('billing_basis.id'))
     billing_basis_relation = relationship("BillingBasis", backref="utilities")
 
