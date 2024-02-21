@@ -180,3 +180,27 @@ def generate_new_random_invoice(new_invoice: NewInvoiceModel):
             session.commit()
         return code, return_utils
     
+def get_existing_invoice(invoice: NewInvoiceModel):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = []
+
+        invoice = session.query(Invoice).filter(Invoice.space_id == invoice.space_id, \
+                                                Invoice.month == invoice.month, \
+                                                Invoice.year == invoice.year).first()
+        if invoice is None:
+            return RETURN_FAILURE, "Invoice not found"
+        else:
+            invoice_positions = session.query(InvoicePosition).filter(InvoicePosition.invoice_id == invoice.id).all()
+            return_utils = []
+            for position in invoice_positions:
+                utility = session.query(Utility).filter(Utility.id == position.utility_id).first()
+                billing_basis = session.query(BillingBasis).filter(BillingBasis.id == utility.billing_basis).first()
+                return_utils.append({
+                    'id': utility.id,
+                    'name': utility.name,
+                    'price': float(position.price),
+                    'price_per_unit': float(utility.price_per_unit),
+                    'billing_basis': billing_basis.basis
+                })
+        return code, return_utils
