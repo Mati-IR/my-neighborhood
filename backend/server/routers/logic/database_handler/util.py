@@ -16,11 +16,11 @@ def get_database_session():
     DATABASE_PORT = os.getenv('DATABASE_PORT')
 
     # log all the environment variables
-    logger.info(f"DATABASE_USERNAME: {DATABASE_USERNAME}")
-    logger.info(f"DATABASE_PASSWORD: {DATABASE_PASSWORD}")
-    logger.info(f"DATABASE: {DATABASE}")
-    logger.info(f"DATABASE_HOST: {DATABASE_HOST}")
-    logger.info(f"DATABASE_PORT: {DATABASE_PORT}")
+    # logger.info(f"DATABASE_USERNAME: {DATABASE_USERNAME}")
+    # logger.info(f"DATABASE_PASSWORD: {DATABASE_PASSWORD}")
+    # logger.info(f"DATABASE: {DATABASE}")
+    # logger.info(f"DATABASE_HOST: {DATABASE_HOST}")
+    # logger.info(f"DATABASE_PORT: {DATABASE_PORT}")
 
     DATABASE_URL = f"mysql+pymysql://{DATABASE_USERNAME}:{DATABASE_PASSWORD}@{DATABASE_HOST}:{DATABASE_PORT}/{DATABASE}"
 

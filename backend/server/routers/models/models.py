@@ -115,14 +115,14 @@ class LeaseAgreementModel(BaseModel):
 class NewUtilityModel(BaseModel):
     name: str
     price_per_unit: float
-    unit: str
+    billing_basis_id: int
 
 
 class UtilityModel(BaseModel):
     id: int
     name: str
     price_per_unit: float
-    unit: str
+    billing_basis_id: int
 
 
 class GetUserModel(BaseModel):

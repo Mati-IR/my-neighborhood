@@ -35,7 +35,7 @@ CONSTRAINT `FK_15` FOREIGN KEY `FK_2` (`credentials_id`) REFERENCES `admin_crede
 );
 
 INSERT INTO `admin_credentials` (`email`, `password_hash`) VALUES ('admin@gmail.com', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918');
-
+INSERT INTO `admin` (`full_name`, `phone_number`, `salary`, `salary_currency`, `credentials_id`) VALUES ('Admin', '123456789', 1000, 'USD', 1);
 
 CREATE TABLE `building`
 (
@@ -218,7 +218,7 @@ CONSTRAINT `FK_25_1` FOREIGN KEY `FK_1` (`credentials_id`) REFERENCES `owner_cre
 );
 
 INSERT INTO `owner_credentials` (`email`, `password_hash`) VALUES ('owner@gmail.com', '4c1029697ee358715d3a14a2add817c4b01651440de808371f78165ac90dc581');
-
+INSERT INTO `owner` (`full_name`, `phone_number`, `full_address`, `credentials_id`) VALUES ('Test owner', '123456789', 'test street 1', 1);
 
 CREATE TABLE `owner_of_space`
 (

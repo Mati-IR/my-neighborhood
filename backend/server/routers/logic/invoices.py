@@ -3,7 +3,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import Invoice, InvoicePosition, InvoicesForSpace, Utility
+from .database_handler.tables_models import Invoice, InvoicePosition, InvoicesForSpace, Utility, BillingBasis
 from ..models import UtilityModel, NewUtilityModel
 from .database_handler.util import get_database_session
 import os
@@ -67,11 +67,24 @@ def create_utility(utility_model: NewUtilityModel):
             code = RETURN_BUILDING_ALREADY_EXISTS
             message = "Utility with this name already exists"
             return code, message
+        
+        if len(utility_model.name) > 40:
+            code = RETURN_INCORRECT_LENGTH
+            message = "Name of utility is too long"
+            return code, message
+        
+        billing_basis_ids = session.query(BillingBasis.id).all()
+        billing_basis_ids = [id[0] for id in billing_basis_ids]
+        if utility_model.billing_basis_id not in billing_basis_ids:
+            code = RETURN_FAILURE
+            message = "Billing basis not found"
+            return code, message
+
         price_per_unit = Decimal(utility_model.price_per_unit).quantize(Decimal('0.00'), rounding=ROUND_HALF_UP)
         logger.info(price_per_unit)
         utility = Utility(name=utility_model.name,
                           price_per_unit=price_per_unit,
-                          unit=utility_model.unit)
+                          billing_basis=utility_model.billing_basis_id)
         session.add(utility)
         session.commit()
 
