@@ -449,3 +449,13 @@ def get_spaces_of_owner(owner_id: int):
             space_info = session.query(Space).filter(Space.id == space.space_id).first()
             space_list.append(space_info.id)
         return RETURN_SUCCESS, space_list
+    
+def get_all_spaces_ids():
+    with get_database_session() as session:
+        spaces = session.query(Space).all()
+        if not spaces:
+            return RETURN_NOT_FOUND, "No spaces found"
+        space_list = []
+        for space in spaces:
+            space_list.append(space.id)
+        return RETURN_SUCCESS, space_list

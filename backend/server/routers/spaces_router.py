@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from .models import OccupantModel, SpaceModel, SpaceToOwnerModel, RemoveOwnerFromSpaceModel, NewLeaseAgreementModel, LeaseAgreementModel
 from .logic import (create_space as new_space, get_space_by_id, assign_space_to_owner as assign_space,
                     get_space_categories as get_all_space_categories, remove_space, remove_owner_from_space,
-                    get_owners_of_space, get_spaces_of_owner, get_occupants_for_space, create_lease_agreement, remove_lease_agreement,assign_occupant_to_space, get_lease_agreement, update_lease_agreement)
+                    get_owners_of_space, get_all_spaces_ids, get_spaces_of_owner, get_occupants_for_space, create_lease_agreement, remove_lease_agreement,assign_occupant_to_space, get_lease_agreement, update_lease_agreement)
 import logging
 import json
 
@@ -91,4 +91,10 @@ def occupants_for_space(space_id: int):
 @router.get('/spaces_of_owner/{owner_id}')
 def spaces_of_owner(owner_id: int):
     code, message = get_spaces_of_owner(owner_id)
+    return JSONResponse(status_code=code, content={"message": message})
+
+@router.get('/all_spaces_ids')
+def get_spaces_ids():
+    pass
+    code, message = get_all_spaces_ids()
     return JSONResponse(status_code=code, content={"message": message})
