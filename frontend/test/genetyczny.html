@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ice Cream Production Optimization</title>
+    <script>
+        // Wklej tutaj kod JavaScript
+        class Individual {
+            constructor(chocolate, vanilla, strawberry, cream) {
+                this.chocolate = chocolate;
+                this.vanilla = vanilla;
+                this.strawberry = strawberry;
+                this.cream = cream;
+                this.fitness = 0;
+            }
+        }
+
+        const MAX_CHOCOLATE = 150;
+        const MAX_OTHERS = 200;
+        const CROSSOVER_PROBABILITY = 0.5;
+        const MUTATION_PROBABILITY = 0.2;
+        const POPULATION_SIZE = 50;
+        const NUM_GENERATIONS = 1000;
+
+        function getRandomValue(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function calculateFitness(individual) {
+            const profitChocolate = individual.chocolate * (5 - 1);
+            console.log(profitChocolate)
+            const profitVanilla = individual.vanilla * (3 - 0.3);
+            const profitStrawberry = individual.strawberry * (4 - 0.5);
+            const profitCream = individual.cream * (3 - 0.3);
+            return profitChocolate + profitVanilla + profitStrawberry + profitCream;
+        }
+
+        function mutate(individual) {
+            if (Math.random() < MUTATION_PROBABILITY) {
+                individual.chocolate = getRandomValue(0, MAX_CHOCOLATE);
+            }
+            if (Math.random() < MUTATION_PROBABILITY) {
+                individual.vanilla = getRandomValue(0, MAX_OTHERS);
+            }
+            if (Math.random() < MUTATION_PROBABILITY) {
+                individual.strawberry = getRandomValue(0, MAX_OTHERS);
+            }
+            if (Math.random() < MUTATION_PROBABILITY) {
+                individual.cream = getRandomValue(0, MAX_OTHERS);
+            }
+        }
+
+        function initializePopulation() {
+            const population = [];
+            for (let i = 0; i < POPULATION_SIZE; i++) {
+                population.push(new Individual(
+                    getRandomValue(0, MAX_CHOCOLATE),
+                    getRandomValue(0, MAX_OTHERS),
+                    getRandomValue(0, MAX_OTHERS),
+                    getRandomValue(0, MAX_OTHERS)
+                ));
+            }
+            return population;
+        }
+
+        function evolvePopulation(population) {
+            for (let generation = 0; generation < NUM_GENERATIONS; generation++) {
+                population.forEach(individual => {
+                    individual.fitness = calculateFitness(individual);
+                });
+                const offspring = [];
+                while (offspring.length < POPULATION_SIZE) {
+                    const parent1 = selectParent(population);
+                    const parent2 = selectParent(population);
+                    const child1 = new Individual(parent1.chocolate, parent2.vanilla, parent1.strawberry, parent2.cream);
+                    const child2 = new Individual(parent2.chocolate, parent1.vanilla, parent2.strawberry, parent1.cream);
+                    if (Math.random() < CROSSOVER_PROBABILITY) {
+                        mutate(child1);
+                    }
+                    if (Math.random() < CROSSOVER_PROBABILITY) {
+                        mutate(child2);
+                    }
+                    offspring.push(child1, child2);
+                }
+                population.splice(0, population.length, ...offspring);
+            }
+        }
+
+        function selectParent(population) {
+            return population[Math.floor(Math.random() * population.length)];
+        }
+
+        function findBestIndividual(population) {
+            let bestIndividual = population[0];
+            for (let i = 1; i < population.length; i++) {
+                if (population[i].fitness > bestIndividual.fitness) {
+                    bestIndividual = population[i];
+                }
+            }
+            return bestIndividual;
+        }
+
+        function main() {
+            let population = initializePopulation();
+            evolvePopulation(population);
+            let bestIndividual = findBestIndividual(population);
+            console.log(`Best Individual: Chocolate: ${bestIndividual.chocolate}, Vanilla: ${bestIndividual.vanilla}, Strawberry: ${bestIndividual.strawberry}, Cream: ${bestIndividual.cream}, Profit: ${bestIndividual.fitness}`);
+        }
+
+        main();
+    </script>
+</head>
+<body>
+    <!-- Tutaj możesz dodać elementy HTML, np. wykresy lub interfejs użytkownika -->
+</body>
+</html>
