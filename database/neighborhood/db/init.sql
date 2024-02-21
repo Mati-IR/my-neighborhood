@@ -34,6 +34,8 @@ KEY `FK_2` (`credentials_id`),
 CONSTRAINT `FK_15` FOREIGN KEY `FK_2` (`credentials_id`) REFERENCES `admin_credentials` (`id`)
 );
 
+INSERT INTO `admin_credentials` (`email`, `password_hash`) VALUES ('admin@gmail.com', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918');
+
 
 CREATE TABLE `building`
 (
@@ -60,20 +62,28 @@ KEY `FK_1` (`building_id`),
 CONSTRAINT `FK_5` FOREIGN KEY `FK_1` (`building_id`) REFERENCES `building` (`id`) ON DELETE CASCADE
 );
 
+CREATE TABLE `billing_basis`
+(
+ `id`    int NOT NULL ,
+ `basis` varchar(20) NOT NULL ,
+
+PRIMARY KEY (`id`)
+);
+INSERT INTO `billing_basis` (`id`, `basis`) VALUES (1, 'Per square meter'), (2, 'Per opccupant');
 
 CREATE TABLE `utilities`
 (
  `id`             int NOT NULL AUTO_INCREMENT ,
  `name`           varchar(40) NOT NULL ,
- `price_per_unit` decimal(6, 2) NOT NULL ,
- `unit`           varchar(10) NULL ,
+ `price_per_unit` decimal NOT NULL ,
+ `billing_basis`  int NOT NULL ,
 
-PRIMARY KEY (`id`)
+PRIMARY KEY (`id`),
+KEY `FK_1` (`billing_basis`),
+CONSTRAINT `FK_27` FOREIGN KEY `FK_1` (`billing_basis`) REFERENCES `billing_basis` (`id`)
 );
 
-INSERT INTO `utilities` (`name`, `price_per_unit`, `unit`) VALUES ('Water', 1.5, 'm3'), ('Electricity', 0.2, 'kWh'),
-                                                                ('Heating', 0.8, 'm2'), ('Gas', 0.5, 'm3'),
-                                                                ('Garbage', 5, 'month');
+INSERT INTO `utilities` (`name`, `price_per_unit`, `billing_basis`) VALUES ('Rent', 10, 1), ('Garbage', 5, 2), ('Renovation', 10, 1), ('Management', 10, 1);
 
 
 CREATE TABLE `invoice_position`
@@ -207,6 +217,8 @@ KEY `FK_1` (`credentials_id`),
 CONSTRAINT `FK_25_1` FOREIGN KEY `FK_1` (`credentials_id`) REFERENCES `owner_credentials` (`id`)
 );
 
+INSERT INTO `owner_credentials` (`email`, `password_hash`) VALUES ('owner@gmail.com', '4c1029697ee358715d3a14a2add817c4b01651440de808371f78165ac90dc581');
+
 
 CREATE TABLE `owner_of_space`
 (
@@ -333,11 +345,12 @@ CREATE TABLE `incident_staff`
  `serviceman_id` int NOT NULL ,
 
 PRIMARY KEY (`id`),
-KEY `FK_1` (`serviceman_id`),
-CONSTRAINT `FK_3` FOREIGN KEY `FK_1` (`serviceman_id`) REFERENCES `serviceman` (`id`),
 KEY `FK_2` (`incident_id`),
-CONSTRAINT `FK_4` FOREIGN KEY `FK_2` (`incident_id`) REFERENCES `incident` (`id`)
+CONSTRAINT `FK_4` FOREIGN KEY `FK_2` (`incident_id`) REFERENCES `incident` (`id`) ON DELETE CASCADE,
+KEY `FK_2_1` (`serviceman_id`),
+CONSTRAINT `FK_25` FOREIGN KEY `FK_2_1` (`serviceman_id`) REFERENCES `serviceman` (`id`) ON DELETE CASCADE
 );
+
 
 INSERT INTO `space_type` (`type_name`) VALUES ('Apartment'), ('Office'), ('Storage'), ('Garage'),
                                               ('Gym'), ('Commercial'), ('Other');
