@@ -319,7 +319,7 @@ def get_incident_staff(incident_id):
         code = RETURN_SUCCESS
         message = []
         # staff joined with serviceman
-        staff = session.query(IncidentStaff).join(Serviceman).filter(IncidentStaff.incident_id == incident_id, Serviceman.id == IncidentStaff.id).all()
+        staff = session.query(IncidentStaff).filter(IncidentStaff.incident_id == incident_id).all()
 
         if not staff:
             code = RETURN_NOT_FOUND
