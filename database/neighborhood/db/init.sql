@@ -76,6 +76,7 @@ CREATE TABLE `utilities`
  `id`             int NOT NULL AUTO_INCREMENT ,
  `name`           varchar(40) NOT NULL ,
  `price_per_unit` decimal NOT NULL ,
+ `unit`           varchar(15) NOT NULL ,
  `billing_basis`  int NOT NULL ,
 
 PRIMARY KEY (`id`),
@@ -83,32 +84,7 @@ KEY `FK_1` (`billing_basis`),
 CONSTRAINT `FK_27` FOREIGN KEY `FK_1` (`billing_basis`) REFERENCES `billing_basis` (`id`)
 );
 
-INSERT INTO `utilities` (`name`, `price_per_unit`, `billing_basis`) VALUES ('Rent', 10, 1), ('Garbage', 5, 2), ('Renovation', 10, 1), ('Management', 10, 1);
-
-
-CREATE TABLE `invoice_position`
-(
- `id`      int NOT NULL AUTO_INCREMENT ,
- `utility` int NOT NULL ,
- `price`   decimal NOT NULL ,
-
-PRIMARY KEY (`id`),
-KEY `FK_1` (`utility`),
-CONSTRAINT `FK_20` FOREIGN KEY `FK_1` (`utility`) REFERENCES `utilities` (`id`)
-);
-
-
-
-CREATE TABLE `invoice`
-(
- `id`    int NOT NULL AUTO_INCREMENT ,
- `date`  date NOT NULL ,
- `bills` int NOT NULL ,
-
-PRIMARY KEY (`id`),
-KEY `FK_1` (`bills`),
-CONSTRAINT `FK_21` FOREIGN KEY `FK_1` (`bills`) REFERENCES `invoice_position` (`id`)
-);
+INSERT INTO `utilities` (`name`, `price_per_unit`, `billing_basis`, `unit`) VALUES ('Rent', 10, 1, 'm2'), ('Garbage', 5, 2, 'person'), ('Renovation', 10, 1, 'm2'), ('Management', 10, 1, 'm2');
 
 
 
@@ -134,6 +110,33 @@ CONSTRAINT `FK_9` FOREIGN KEY `FK_1` (`space_type`) REFERENCES `space_type` (`id
 );
 
 
+
+
+CREATE TABLE `invoice`
+(
+ `id`    int NOT NULL AUTO_INCREMENT ,
+ `space_id` int NOT NULL ,
+ `year`  int NOT NULL ,
+ `month` int NOT NULL ,
+
+PRIMARY KEY (`id`),
+KEY `FK_1` (`space_id`),
+CONSTRAINT `FK_21` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `invoice_position`
+(
+ `id`         int NOT NULL AUTO_INCREMENT ,
+ `utility_id`    int NOT NULL ,
+ `price`      decimal NOT NULL ,
+ `invoice_id` int NOT NULL ,
+
+PRIMARY KEY (`id`),
+KEY `FK_1` (`utility_id`),
+CONSTRAINT `FK_20` FOREIGN KEY `FK_1` (`utility_id`) REFERENCES `utilities` (`id`),
+KEY `FK_2` (`invoice_id`),
+CONSTRAINT `FK_27_1` FOREIGN KEY `FK_2` (`invoice_id`) REFERENCES `invoice` (`id`)
+);
 
 CREATE TABLE `invoices_for_space`
 (

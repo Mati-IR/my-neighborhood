@@ -3,8 +3,8 @@ from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import Invoice, InvoicePosition, InvoicesForSpace, Utility, BillingBasis
-from ..models import UtilityModel, NewUtilityModel
+from .database_handler.tables_models import Invoice, InvoicePosition, InvoicesForSpace, Utility, BillingBasis, Space, InvoicesForSpace
+from ..models import UtilityModel, NewUtilityModel, NewInvoiceModel
 from .database_handler.util import get_database_session
 import os
 import logging
@@ -136,4 +136,47 @@ def remove_utility(utility_id: int):
         return code, message
 
 
+def generate_new_random_invoice(new_invoice: NewInvoiceModel):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = []
+
+        utilies = session.query(Utility).all()
+
+        return_utils = []
+        if not utilies:
+           return RETURN_FAILURE, "Utilities not found"
+        elif session.query(Space).filter(Space.id == new_invoice.space_id).first() is None:
+            return RETURN_FAILURE, "Space not found"
+        elif session.query(Invoice).filter(Invoice.space_id == new_invoice.space_id, \
+                                           Invoice.month == new_invoice.month, \
+                                           Invoice.year == new_invoice.year).first() is not None:
+            return RETURN_BUILDING_ALREADY_EXISTS, "Invoice for this space and month already exists"
+
+        else:
+            # create new invoice
+            new_invoice = Invoice(year=new_invoice.year, month=new_invoice.month, space_id=new_invoice.space_id)
+            session.add(new_invoice)
+            session.commit()
+
+            # populate invoice with random utilities
+            for utility in utilies:
+                billing_basis = session.query(BillingBasis).filter(BillingBasis.id == utility.billing_basis).first()
+                import random
+                return_utils.append({
+                    'id': utility.id,
+                    'name': utility.name,
+                    'amount': random.randint(1, 100),
+                    'price_per_unit': float(utility.price_per_unit),
+                    'billing_basis': billing_basis.basis
+                })
+                new_invoice_position = InvoicePosition(utility_id=utility.id, \
+                                                       invoice_id=new_invoice.id, \
+                                                       price=float(utility.price_per_unit) * return_utils[-1]['amount'])
+                session.add(new_invoice_position)
+                session.commit()
+            association = InvoicesForSpace(space_id=new_invoice.space_id, invoice_id=new_invoice.id)
+            session.add(association)
+            session.commit()
+        return code, return_utils
     

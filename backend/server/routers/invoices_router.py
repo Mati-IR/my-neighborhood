@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from .models import NewUtilityModel, UtilityModel
-from .logic import get_all_utilities,create_utility, update_utility, remove_utility
+from .models import NewUtilityModel, UtilityModel, NewInvoiceModel
+from .logic import get_all_utilities,create_utility, update_utility, remove_utility, generate_new_random_invoice
 import logging
 import json
 
@@ -31,4 +31,10 @@ def update_util(utility: UtilityModel):
 @router.delete("/utility/{utility_id}")
 def delete_utility(utility_id: int):
     code, message = remove_utility(utility_id)
+    return JSONResponse(status_code=code, content={"message": message})
+
+@router.get('/new_random_invoice/{space_id}/{year}/{month}')
+# http gets cannot have a body, so we are using path parameters
+def new_random_invoice(space_id: int, year: int, month: int):
+    code, message = generate_new_random_invoice(NewInvoiceModel(space_id=space_id, year=year, month=month))
     return JSONResponse(status_code=code, content={"message": message})

@@ -59,24 +59,30 @@ class Utility(Base):
 class BillingBasis(Base):
     __tablename__ = 'billing_basis'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(20), nullable=False)
+    basis = Column(String(20), nullable=False)
 
 
 class InvoicePosition(Base):
     __tablename__ = 'invoice_position'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    utility = Column(Integer, ForeignKey('utilities.id'))
+    utility_id = Column(Integer, ForeignKey('utilities.id'), nullable=False)
     price = Column(DECIMAL, nullable=False)
-    utility_relation = relationship("Utility", backref="invoice_positions")
-
+    invoice_id = Column(Integer, ForeignKey('invoice.id', ondelete='CASCADE'), nullable=False)
+    
+    # Relationship to Utility
+    utility = relationship("Utility", backref="invoice_positions")
+    
 
 class Invoice(Base):
     __tablename__ = 'invoice'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    date = Column(Date, nullable=False)
-    bills = Column(Integer, ForeignKey('invoice_position.id'))
-    invoice_position = relationship("InvoicePosition", backref="invoices")
-
+    space_id = Column(Integer, ForeignKey('space.id', ondelete='CASCADE'), nullable=False)
+    year = Column(Integer, nullable=False)
+    month = Column(Integer, nullable=False)
+    
+    # Define a one-to-many relationship with InvoicePosition
+    positions = relationship("InvoicePosition", backref="invoice")
+    
 
 class SpaceType(Base):
     __tablename__ = 'space_type'

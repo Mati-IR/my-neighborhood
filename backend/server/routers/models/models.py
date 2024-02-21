@@ -188,3 +188,10 @@ class OccupantModel(BaseModel):
     name: str
     surname: str
     space_id: int
+
+
+class NewInvoiceModel(BaseModel):
+    space_id: int
+    year: int
+    month: int
+    
