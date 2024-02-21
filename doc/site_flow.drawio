@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-02-18T19:45:46.215Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="44tmxbJg7NQQmfgmPDjn" version="23.1.5" type="device">
+<mxfile host="app.diagrams.net" modified="2024-02-21T13:21:41.355Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36" etag="7gbwLsUYc3N5J3wylhhu" version="23.1.5" type="device">
   <diagram name="Strona-1" id="-Ldg9SIxWEaMv2h-fhzh">
     <mxGraphModel dx="3088" dy="746" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -129,16 +129,8 @@
         <mxCell id="-0zjHkO4cwcMO9rpGIld-25" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="-0zjHkO4cwcMO9rpGIld-22" target="-0zjHkO4cwcMO9rpGIld-24" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="-350" y="390" />
-              <mxPoint x="-350" y="390" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="-0zjHkO4cwcMO9rpGIld-29" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="-0zjHkO4cwcMO9rpGIld-22" target="-0zjHkO4cwcMO9rpGIld-28" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="-430" y="340" />
-              <mxPoint x="-430" y="340" />
+              <mxPoint x="-390" y="370" />
+              <mxPoint x="-390" y="370" />
             </Array>
           </mxGeometry>
         </mxCell>
@@ -146,13 +138,10 @@
           <mxGeometry x="-450" y="240" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="-0zjHkO4cwcMO9rpGIld-24" value="Przypisanie załogi/&lt;br&gt;edycja personelu remontowego&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="-370" y="410" width="120" height="60" as="geometry" />
+          <mxGeometry x="-450" y="410" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="-0zjHkO4cwcMO9rpGIld-26" value="Edycja" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="380" y="410" width="120" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="-0zjHkO4cwcMO9rpGIld-28" value="Edycja kategori" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="-520" y="410" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="-0zjHkO4cwcMO9rpGIld-30" value="Raporty" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="-810" y="250" width="120" height="60" as="geometry" />

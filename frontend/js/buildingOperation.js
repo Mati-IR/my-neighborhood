@@ -259,17 +259,24 @@ function hideOwnerForm(spaceId){
         asignOwnerFormGenerate(spaceId)
     }
 }
-function hideOwnerDetails(spaceId, message){
+function hideOwnerDetails(spaceId, messageforlease,messageforoccupant){
     var spaceTable= document.getElementById("ownerForSpaceTable_"+spaceId);
     var leaseTable= document.getElementById("leaseAgreementForSpaceTable_"+spaceId);
+    var occupantTable= document.getElementById("occupantForSpaceTable_"+spaceId);
+    console.log(messageforlease)
+    console.log(messageforoccupant.message)
     if(spaceTable != null){
         spaceTable.remove();
-        if(message!="Lease agreement not found.")
+        if(messageforlease!="Lease agreement not found.")
             leaseTable.remove();
+        if(messageforoccupant.message!="No occupants found for space")
+            occupantTable.remove();
     }else{
         displayOwners(spaceId);
-        if(message!="Lease agreement not found.")
-            displayLeaseAgreement(spaceId,message);
+        if(messageforlease!="Lease agreement not found.")
+            displayLeaseAgreement(spaceId,messageforlease);
+        if(messageforoccupant.message!="No occupants found for space")
+            displayOccupant(spaceId,messageforoccupant);
     }
 }
 function hideLeaseForm(spaceId,leaseData){
@@ -559,14 +566,16 @@ async function generateBuildingDetailsTable(buildingDetails) {
     for (const floor of buildingDetails.building_details.floors) {
         for (const space of floor.spaces) {
             const spaceTypeName = spaceCategories.get(space.space_type) || '';
-            var message;
+            var messageforlease;
+            var messageforoccupant;
             try {
-                message = await getLeaseAgreement(space.id);
+                messageforlease = await getLeaseAgreement(space.id);
+                messageforoccupant = await getOccupantById(space.id);
             } catch (error) {
                 console.error("Error occurred while fetching lease agreement:", error);
             }
             detailsHTML += `<tr><td>${floor.floor_number}</td><td>${space.space_number}</td><td>${space.area} m2</td><td>${spaceTypeName}</td>`;
-            if(message === "Lease agreement not found."){
+            if(messageforlease === "Lease agreement not found."){
                 detailsHTML += `<td style="background-color: #43b652; cursor: pointer;" onclick="hideLeaseForm(${space.id})">Wolne</td>`
             }
             else{
@@ -574,8 +583,9 @@ async function generateBuildingDetailsTable(buildingDetails) {
             }
             detailsHTML +=`<td><button class="btn btn-light buttonDecoration" onclick="deleteSpaceById(${space.id})"><i class="bi bi-trash-fill" style="color:#cf4a4a"></i></button></td>
             <td><button class="btn btn-light buttonDecoration" onclick="hideOwnerForm(${space.id})"><i class="bi bi-person-fill-add"></i></button></td>
-            <td><button class="btn btn-light buttonDecoration" onclick='hideOwnerDetails(${space.id}, ${JSON.stringify(message)})'><i class="bi bi-caret-down-fill"></i></button></td></tr>
+            <td><button class="btn btn-light buttonDecoration" onclick='hideOwnerDetails(${space.id}, ${JSON.stringify(messageforlease)},${JSON.stringify(messageforoccupant)})'><i class="bi bi-caret-down-fill"></i></button></td></tr>
             <tr id="ownerForSpace_${space.id}"></tr>
+            <tr id="occupantForSpace_${space.id}"></tr>
             <tr id="leaseAgreementForSpace_${space.id}"></tr>`;
         }
     }
@@ -1103,6 +1113,49 @@ async function displayLeaseAgreement(spaceId,leaseData) {
     tableContainer.appendChild(innerTable);
     ownerForSpace.appendChild(tableContainer);
 }
+async function displayOccupant(spaceId, leaseData) {
+    console.log(leaseData);
+    var ownerForSpace = document.getElementById("occupantForSpace_" + spaceId);
+    var tableContainer = document.createElement("td");
+    tableContainer.colSpan = 8;
+    tableContainer.id = "occupantForSpaceTable_" + spaceId;
+
+    var tableHeader = document.createElement("h3");
+    var text = document.createTextNode("Tabela mieszkańców");
+    tableHeader.appendChild(text);
+    tableContainer.appendChild(tableHeader);
+
+    var innerTable = document.createElement("table");
+    innerTable.classList.add("table", "table-bordered", "table-striped");
+
+    var innerThead = document.createElement("thead");
+    var innerHeaderRow = document.createElement("tr");
+    var headers = ["ID", "Imię", "Nazwisko"]; // Nagłówki dla danych z nowego formatu
+    headers.forEach(function (headerText) {
+        var th = document.createElement("th");
+        th.textContent = headerText;
+        innerHeaderRow.appendChild(th);
+    });
+    innerThead.appendChild(innerHeaderRow);
+    innerTable.appendChild(innerThead);
+
+    var innerTbody = document.createElement("tbody");
+
+    // Pętla przez dane i tworzenie wierszy
+    leaseData.message.forEach(function (person) {
+        var row = document.createElement("tr");
+        var detailsHTML = `<td>${person.id}</td><td>${person.name}</td><td>${person.surname}</td>`;
+        row.innerHTML = detailsHTML;
+        innerTbody.appendChild(row);
+    });
+
+    innerTable.appendChild(innerTbody);
+
+    ownerForSpace.innerHTML = "";
+    tableContainer.appendChild(innerTable);
+    ownerForSpace.appendChild(tableContainer);
+}
+
 function generateEditLeaseForm(spaceId,leaseData) {
     hideApiResponse("apiInfoResponse");
 
