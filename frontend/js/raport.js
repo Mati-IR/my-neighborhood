@@ -80,7 +80,7 @@ async function generateUtilitiesPDF() {
   const blob = new Blob([pdfBytes], { type: "application/pdf" });
   const link = document.createElement("a");
   link.href = window.URL.createObjectURL(blob);
-  link.download = "Utiliries list.pdf";
+  link.download = "Utilities list.pdf";
   link.click();
   function drawTableRow(page, y, rowData, columnWidths, isHeader, font) {
     const rowHeight = 20;
