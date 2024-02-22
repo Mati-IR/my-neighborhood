@@ -75,7 +75,7 @@ CREATE TABLE `utilities`
 (
  `id`             int NOT NULL AUTO_INCREMENT ,
  `name`           varchar(40) NOT NULL ,
- `price_per_unit` decimal NOT NULL ,
+ `price_per_unit` decimal(6,2) NOT NULL ,
  `unit`           varchar(15) NOT NULL ,
  `billing_basis`  int NOT NULL ,
 

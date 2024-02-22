@@ -3,7 +3,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import Invoice, InvoicePosition, InvoicesForSpace, Utility, BillingBasis, Space, InvoicesForSpace
+from .database_handler.tables_models import Invoice, InvoicePosition, InvoicesForSpace, Utility, BillingBasis, Space, InvoicesForSpace, OccupantsOfSpace
 from ..models import UtilityModel, NewUtilityModel, NewInvoiceModel
 from .database_handler.util import get_database_session
 import os
@@ -163,13 +163,23 @@ def generate_new_random_invoice(new_invoice: NewInvoiceModel):
             # populate invoice with random utilities
             for utility in utilies:
                 billing_basis = session.query(BillingBasis).filter(BillingBasis.id == utility.billing_basis).first()
+                
+                basis_multiplier = 0
+                if billing_basis is None:
+                    return RETURN_FAILURE, "Billing basis not found"
+                elif billing_basis.basis == 'Per square meter':
+                    basis_multiplier = float(session.query(Space).filter(Space.id == new_invoice.space_id).first().area)
+                elif billing_basis.basis == 'Per opccupant':
+                    basis_multiplier = session.query(OccupantsOfSpace).filter(OccupantsOfSpace.space_id == new_invoice.space_id).count()
                 import random
                 return_utils.append({
                     'id': utility.id,
                     'name': utility.name,
-                    'amount': random.randint(1, 100),
+                    'amount': float(basis_multiplier),
                     'price_per_unit': float(utility.price_per_unit),
-                    'billing_basis': billing_basis.basis
+                    'billing_basis': billing_basis.basis,
+                    'price': float(utility.price_per_unit) * basis_multiplier
+
                 })
                 new_invoice_position = InvoicePosition(utility_id=utility.id, \
                                                        invoice_id=new_invoice.id, \
@@ -205,3 +215,4 @@ def get_existing_invoice(invoice: NewInvoiceModel):
                     'billing_basis': billing_basis.basis
                 })
         return code, return_utils
+    

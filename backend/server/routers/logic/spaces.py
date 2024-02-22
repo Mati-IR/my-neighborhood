@@ -69,6 +69,7 @@ def create_space(space: SpaceModel):
         session.add(new_space)
         session.flush()
 
+        # TODO: check if floor exists
         # create space for floor
         floor_id = session.query(FloorForBuilding.floor_id) \
             .filter(FloorForBuilding.building_id == space.building_id,
