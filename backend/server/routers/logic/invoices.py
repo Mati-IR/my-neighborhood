@@ -212,7 +212,8 @@ def get_existing_invoice(invoice: NewInvoiceModel):
                     'name': utility.name,
                     'price': float(position.price),
                     'price_per_unit': float(utility.price_per_unit),
-                    'billing_basis': billing_basis.basis
+                    'billing_basis': billing_basis.basis,
+                    'amount': round(float(position.price) / float(utility.price_per_unit), 2)
                 })
         return code, return_utils
     
