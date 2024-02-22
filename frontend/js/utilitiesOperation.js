@@ -8,6 +8,8 @@ async function displayUtilities(){
     const isAdmin = localStorage.getItem('admin');
 
     if(isAdmin==="true"){
+        var allSpaceID =await getAllSpaceID();
+        console.log(allSpaceID)
         headerTextChange("Zarządzanie opłatami");
         var showUtilitiesFormButton = document.createElement("button");
         showUtilitiesFormButton.setAttribute("type", "button");
@@ -16,8 +18,24 @@ async function displayUtilities(){
             hideChangeRatesForm();
         };
         contentContainer.appendChild(showUtilitiesFormButton);
+
+        var GenerateInvoiceButton = document.createElement("button");
+        GenerateInvoiceButton.setAttribute("type", "button");
+        GenerateInvoiceButton.textContent = "Generuj faktury dla obecnego miesiąca";
+        GenerateInvoiceButton.onclick = function() {
+            generateInvoiceForAllID(allSpaceID);
+        };
+        contentContainer.appendChild(GenerateInvoiceButton);
     }
     else{
+        var generateListRaportButton = document.createElement("button");
+        generateListRaportButton.setAttribute("type", "button");
+        generateListRaportButton.textContent = "Generuj liste opłat w pdf";
+        generateListRaportButton.onclick = function() {
+            generateUtilitiesPDF();
+        };
+        contentContainer.appendChild(generateListRaportButton);
+
         const header = document.createElement("h2");
         header.classList.add("text-center");
         header.innerHTML = 'Faktury';
@@ -530,4 +548,42 @@ async function generateInvoice(year, month, flat) {
 
     invoiceDiv.appendChild(table)
     content.appendChild(invoiceDiv);
+}
+async function getAllSpaceID(){
+    try {
+        const response = await fetch(apiBaseUrl+'/all_spaces_ids', {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData.message;
+        }
+    } catch (error) {
+        console.error('Wystąpił błąd podczas pobierania opłat:', error.message);
+        throw error;
+    }
+}
+async function generateInvoiceForAllID(ids){
+    const currentDate = new Date();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+    
+    for (const space_id of ids) {
+        try {
+            const response = await fetch(apiBaseUrl+'/new_random_invoice/'+space_id+'/'+year+'/'+month, {
+                method: 'GET'
+            });
+            const responseData = await response.json();
+            if (responseData.message==="Invoice for this space and month already exists") {
+                printApiResponse("apiInfoResponse", 'Faktury dla obecnego miesiąca zostały już wygenerowane', "levelWarning");
+            }
+            else{
+                printApiResponse("apiInfoResponse", 'Pomyślnie wygenerowano faktury dla osiedla', "levelSucces");
+            }
+        } catch (error) {
+            printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas generowania opłat: ' + error.message, "levelWarning");
+            console.error('Wystąpił błąd podczas generowania opłat:', error.message);
+            throw error;
+        }
+    }
 }

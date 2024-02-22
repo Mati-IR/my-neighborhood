@@ -9,15 +9,11 @@ async function displayRaportSystem(){
     
   let row;
   const isAdmin = localStorage.getItem('admin');
-  var buttonData;
-  if(isAdmin != 'true')
-    buttonData = buttonDataUser
-  else
-    buttonData = buttonDataAdmin
+  var buttonData = buttonDataAdmin;
   for (let i = 0; i < buttonData.length; i++) {
-    if (i % 4 === 0) {
+    if (i % 3 === 0) {
       row = document.createElement("div");
-      row.classList.add("row", "row-cols-1", "row-cols-md-4", "g-4");
+      row.classList.add("row", "row-cols-1", "row-cols-md-3", "g-3");
       container.appendChild(row);
     }
 
@@ -60,7 +56,7 @@ async function generateUtilitiesPDF() {
   const tableTopY = page.getHeight() - 50;
   const columnWidths = [50, 150, 150, 100];
   const rowHeight = 20;
-  const tableHeader = ['ID', 'Nazwa', 'Cena za jednostkę', 'Jednostka'];
+  const tableHeader = ['ID', 'Nazwa', 'Cena za jednostkę', 'Podstawa rozliczenia'];
 
   // Pobierz czcionkę zawierającą polskie znaki
   const fontBytes = await fetch('resources/font/Roboto-Regular.ttf').then((res) => res.arrayBuffer());

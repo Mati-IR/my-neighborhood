@@ -24,7 +24,6 @@ async function generateSidebar(accountType) {
             { text: "Rachunki", onclick: "displayUtilities()" },
             { text: "Głosowania", onclick: "displayVotingSystem()" },
             { text: "Zgłoś usterke", onclick: "displayIncidentSystem()" },
-            { text: "Raporty", onclick: "displayRaportSystem()" }
         ];
     }
     items.forEach(item => {
