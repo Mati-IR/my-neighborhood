@@ -280,8 +280,11 @@ def create_lease_agreement(lease_agreement: NewLeaseAgreementModel):
                 message = "Start date is after end date"
                 return code, message
 
+            import datetime
             if session.query(LeaseAgreement).filter(
-                    LeaseAgreement.space_id == lease_agreement.space_id).first() is not None:
+                    LeaseAgreement.space_id == lease_agreement.space_id).first() is not None \
+                and datetime.datetime.now() > lease_agreement.start_date \
+                and datetime.datetime.now() < lease_agreement.end_date:
                 code = RETURN_USER_ALREADY_EXISTS
                 message = "Lease agreement for this space already exists"
                 return code, message
