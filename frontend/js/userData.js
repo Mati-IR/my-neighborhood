@@ -303,10 +303,17 @@ function generateChangePasswordForm(email) {
     contentContainer.appendChild(PasswordForm);
     PasswordForm.scrollIntoView({ behavior: 'smooth' });
 }
-function validateChangePasswordForm(email) {
+async function validateChangePasswordForm(email) {
     var currentPassword = document.getElementById("currentPassword").value;
     var newPassword = document.getElementById("newPassword").value;
     var confirmPassword = document.getElementById("confirmPassword").value;
+
+    var response = await login(email,sha256(currentPassword))
+    console.log(response)
+    if(response.message==='Credentials incorrect'){
+        printApiResponse("apiInfoResponse", "Stare hasło jest niepoprawne", "levelWarning");
+        return false;
+    }
 
     if (currentPassword === ""||newPassword === ""||confirmPassword === "") {
         printApiResponse("apiInfoResponse", "Proszę uzupełnić wszystkie pola", "levelWarning");
@@ -395,4 +402,26 @@ async function editCredentials(dataToSend){
           printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
           console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
       }
+}
+async function login(email, password) {
+    const url = apiBaseUrl + '/login';
+
+    const requestData = {
+        email: email,
+        password_hash: password
+    };
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        }); 
+        const responseData = await response.json();
+        return responseData;
+    } catch (error) {
+        console.error('Wystąpił błąd podczas wysyłania żądania:', error);
+        return { error: 'Wystąpił błąd podczas wysyłania żądania' };
+    }
 }
