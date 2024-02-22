@@ -309,7 +309,6 @@ async function validateChangePasswordForm(email) {
     var confirmPassword = document.getElementById("confirmPassword").value;
 
     var response = await login(email,sha256(currentPassword))
-    console.log(response)
     if(response.message==='Credentials incorrect'){
         printApiResponse("apiInfoResponse", "Stare hasło jest niepoprawne", "levelWarning");
         return false;

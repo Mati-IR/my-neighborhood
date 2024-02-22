@@ -35,12 +35,8 @@ async function displayRaportSystem(){
   contentContainer.appendChild(container);
   
 }
-function handleButtonClick(buttonName) {
-  console.log(`Clicked ${buttonName}`);
-}
 async function generateUtilitiesPDF() {
   var products = await getAllUtilities();
-  console.log(products);
   const { PDFDocument } = PDFLib;
 
   // Pobierz fontkit i zarejestruj go
@@ -104,7 +100,6 @@ async function generateUtilitiesPDF() {
 }
 async function generateOwnersPDF() {
   var messages = await getAllOwners();
-  console.log(messages);
   const { PDFDocument } = PDFLib;
 
   // Fetch and evaluate fontkit

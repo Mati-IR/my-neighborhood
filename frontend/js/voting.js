@@ -7,7 +7,7 @@ async function displayVotingSystem(){
     const isAdmin = localStorage.getItem('admin');
 
     var voting = await getAllVotings(userId);
-    const { activeVotings, endedVotings } = splitVotingsByStatus(voting);
+    const { activeVotings, endedVotings, inactiveVotings } = splitVotingsByStatus(voting);
     if(isAdmin==='true'){
         var showServicemanFormButton = document.createElement("button");
         showServicemanFormButton.setAttribute("type", "button");
@@ -16,6 +16,16 @@ async function displayVotingSystem(){
             hideVoteForm();
         };
         contentContainer.appendChild(showServicemanFormButton);
+
+        var inactiveHeader = document.createElement("h2");
+            inactiveHeader.classList.add("accountHeader");
+            inactiveHeader.innerHTML = "Aktywne Nieaktywne"
+            contentContainer.appendChild(inactiveHeader);
+        var inactivecontainer = document.createElement("div");
+            inactivecontainer.setAttribute("id", "inactiveVoting-container");
+            inactivecontainer.classList.add("inactiveVoting-container");
+            contentContainer.appendChild(inactivecontainer);
+        generateVotingView(inactiveVotings,currentPage,"inactiveVoting-container");
     }
     var activeHeader = document.createElement("h2");
         activeHeader.classList.add("accountHeader");
@@ -226,9 +236,11 @@ function generateVotingView(data, page, elementId) {
                 const seconds = Math.floor(timeDifference / 1000) % 60;
                 const minutes = Math.floor(timeDifference / (1000 * 60)) % 60;
                 const hours = Math.floor(timeDifference / (1000 * 60 * 60)) % 24;
-
-                remainingTimeElement.textContent = `${prefix}${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            
+                remainingTimeElement.textContent = `${prefix}${days} dni ${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
             }
+            
         }
 
         updateRemainingTime();
@@ -437,20 +449,24 @@ function splitVotingsByStatus(votingsData) {
 
     const activeVotings = [];
     const endedVotings = [];
+    const inactiveVotings = [];
 
     votingsData.votings.forEach(voting => {
         const endDate = new Date(voting.end_date);
 
-        if (endDate > currentDate) {
+        if (voting.active) {
             activeVotings.push(voting);
-        } else {
+        } else if (endDate < currentDate) {
             endedVotings.push(voting);
+        } else {
+            inactiveVotings.push(voting);
         }
     });
 
     return {
         activeVotings: { message: votingsData.message, votings: activeVotings },
-        endedVotings: { message: votingsData.message, votings: endedVotings }
+        endedVotings: { message: votingsData.message, votings: endedVotings },
+        inactiveVotings: { message: votingsData.message, votings: inactiveVotings }
     };
 }
 async function postVote(dataToSend){

@@ -263,8 +263,6 @@ function hideOwnerDetails(spaceId, messageforlease,messageforoccupant){
     var spaceTable= document.getElementById("ownerForSpaceTable_"+spaceId);
     var leaseTable= document.getElementById("leaseAgreementForSpaceTable_"+spaceId);
     var occupantTable= document.getElementById("occupantForSpaceTable_"+spaceId);
-    console.log(messageforlease)
-    console.log(messageforoccupant.message)
     if(spaceTable != null){
         spaceTable.remove();
         if(messageforlease!="Lease agreement not found.")
@@ -568,6 +566,7 @@ async function generateBuildingDetailsTable(buildingDetails) {
             const spaceTypeName = spaceCategories.get(space.space_type) || '';
             var messageforlease;
             var messageforoccupant;
+            const currentDate = new Date();
             try {
                 messageforlease = await getLeaseAgreement(space.id);
                 messageforoccupant = await getOccupantById(space.id);
@@ -578,8 +577,11 @@ async function generateBuildingDetailsTable(buildingDetails) {
             if(messageforlease === "Lease agreement not found."){
                 detailsHTML += `<td style="background-color: #43b652; cursor: pointer;" onclick="hideLeaseForm(${space.id})">Wolne</td>`
             }
+            else if(new Date(messageforlease.end_date)<currentDate){
+                detailsHTML += `<td style="background-color: #FFC107;">Wygasła</td>`
+            }
             else{
-                detailsHTML += `<td style="background-color: #cf4a4a;">Wynajete</td>`
+                detailsHTML += `<td style="background-color: #cf4a4a;">Wynajęte</td>`
             }
             detailsHTML +=`<td><button class="btn btn-light buttonDecoration" onclick="deleteSpaceById(${space.id})"><i class="bi bi-trash-fill" style="color:#cf4a4a"></i></button></td>
             <td><button class="btn btn-light buttonDecoration" onclick="hideOwnerForm(${space.id})"><i class="bi bi-person-fill-add"></i></button></td>
@@ -1114,7 +1116,6 @@ async function displayLeaseAgreement(spaceId,leaseData) {
     ownerForSpace.appendChild(tableContainer);
 }
 async function displayOccupant(spaceId, leaseData) {
-    console.log(leaseData);
     var ownerForSpace = document.getElementById("occupantForSpace_" + spaceId);
     var tableContainer = document.createElement("td");
     tableContainer.colSpan = 8;
@@ -1155,7 +1156,6 @@ async function displayOccupant(spaceId, leaseData) {
     tableContainer.appendChild(innerTable);
     ownerForSpace.appendChild(tableContainer);
 }
-
 function generateEditLeaseForm(spaceId,leaseData) {
     hideApiResponse("apiInfoResponse");
 

@@ -23,13 +23,13 @@ async function displayIncidentSystem(){
         var allIncident = await getAllIncident();
         const [state1, state2To5, state6] = segregateByState(allIncident.message);
         var ownerData = await getAllOwners();
-        await generateIncidentTable(state1, category.message, state.message,"Zgłoszenia do obsłużenia",ownerData,servicemanData);
-        await generateIncidentTable(state2To5, category.message, state.message,"Aktywne zgłoszenia",ownerData,servicemanData);
-        await generateIncidentTable(state6, category.message, state.message,"Zamknięte zgłoszenia",ownerData,servicemanData);
+        await generateIncidentTable(1,state1, category.message, state.message,"Zgłoszenia do obsłużenia",ownerData,servicemanData);
+        await generateIncidentTable(1,state2To5, category.message, state.message,"Aktywne zgłoszenia",ownerData,servicemanData);
+        await generateIncidentTable(2,state6, category.message, state.message,"Zamknięte zgłoszenia",ownerData,servicemanData);
     }else{
         var showIncidentFormButton = document.createElement("button");
         showIncidentFormButton.setAttribute("type", "button");
-        showIncidentFormButton.textContent = "Zgłoś usterke";
+        showIncidentFormButton.textContent = "Zgłoś usterkę";
         showIncidentFormButton.onclick = function() {
             hideIncidentForm(category.message);
         };
@@ -37,8 +37,8 @@ async function displayIncidentSystem(){
         var userIncident = await getIncidentForUser(userId);
         const [state1, state2To5, state6] = segregateByState(userIncident.message);
         var merged = state1.concat(state2To5);
-        await generateIncidentTable(merged, category.message, state.message,"Twoje aktywne zgłoszenia");
-        await generateIncidentTable(state6, category.message, state.message,"Twoje zamknięte zgłoszenia");
+        await generateIncidentTable(1,merged, category.message, state.message,"Twoje aktywne zgłoszenia");
+        await generateIncidentTable(2,state6, category.message, state.message,"Twoje zamknięte zgłoszenia");
     }
 }
 function segregateByState(data) {
@@ -398,7 +398,7 @@ async function getIncidentCategory(){
         throw error;
     }
 }
-async function generateIncidentTable(incidents, category, state, headerText, userData, servicemanData) {
+async function generateIncidentTable(stateInfo,incidents, category, state, headerText, userData, servicemanData) {
     if (incidents.length > 0) {
         const isAdmin = localStorage.getItem('admin');
         const tableWrapper = document.createElement('div');
@@ -414,9 +414,8 @@ async function generateIncidentTable(incidents, category, state, headerText, use
 
         const thead = document.createElement('thead');
         const tbody = document.createElement('tbody');
-
         const headerRow = document.createElement('tr');
-        if(incidents.state < 6){
+        if(stateInfo === 1){
             ['ID', 'Tytuł', 'Kategoria', 'Data zgłoszenia', 'Stan', 'Szczegóły'].forEach(columnName => {
                 const th = document.createElement('th');
                 th.textContent = columnName;

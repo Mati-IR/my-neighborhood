@@ -10,7 +10,6 @@ async function spaceInfoDisplay(){
     const spaceCategories = await getSpaceCategories();
     const buildinginfo = await getAllBuildings();
     var spaceNumber=1
-    console.log(spaceInfo)
     if(spaceInfo.message != "No spaces found for owner"){
         for (const item of spaceInfo.message) {
             var header = document.createElement("h2");

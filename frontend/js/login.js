@@ -91,10 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 body: JSON.stringify(requestData)
             });
-            
-            console.log("LOGOWANIE")
             const responseData = await response.json();
-            console.log(responseData)
             return responseData;
         } catch (error) {
             console.error('Wystąpił błąd podczas wysyłania żądania:', error);

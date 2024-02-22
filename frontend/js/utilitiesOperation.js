@@ -9,7 +9,6 @@ async function displayUtilities(){
 
     if(isAdmin==="true"){
         var allSpaceID =await getAllSpaceID();
-        console.log(allSpaceID)
         headerTextChange("Zarządzanie opłatami");
         var showUtilitiesFormButton = document.createElement("button");
         showUtilitiesFormButton.setAttribute("type", "button");
@@ -410,9 +409,6 @@ async function addEditUtilities(dataToSend,toApiMetode,ApiMetode){
 }
 async function getInvoice(space_id,year,month){
     try {
-        console.log(space_id)
-        console.log(year)
-        console.log(month)
         const response = await fetch(apiBaseUrl+'/invoice/'+space_id+'/'+year+'/'+month, {
             method: 'GET'
         });
@@ -500,7 +496,6 @@ async function generateInvoice(year, month, flat) {
     table.classList.add("table");
 
     const invoices = await getInvoice(year, month,flat);
-    console.log(invoices)
     if (invoices === "Invoice not found") {
         const noInvoiceRow = document.createElement("tr");
         noInvoiceRow.innerHTML = `
@@ -521,7 +516,6 @@ async function generateInvoice(year, month, flat) {
         <tbody>
     `;
         invoices.forEach(item => {
-            console.log(item)
             const subtotal = item.price;
             total += subtotal;
 
