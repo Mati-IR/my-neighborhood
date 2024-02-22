@@ -6,7 +6,7 @@ function generateNewUserRadio() {
     apiInfoResponse.setAttribute("id", "apiInfoResponse");
     contentContainer.appendChild(apiInfoResponse);
 
-    headerTextChange("Tworzenie nowego konta")
+    headerTextChange("Kreator kont")
 
     var header = document.createElement("p");
     header.textContent = "Wybierz typ konta do utworzenia";

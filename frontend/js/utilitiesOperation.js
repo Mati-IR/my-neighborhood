@@ -8,6 +8,7 @@ async function displayUtilities(){
     const isAdmin = localStorage.getItem('admin');
 
     if(isAdmin==="true"){
+        headerTextChange("Zarządzanie opłatami");
         var showUtilitiesFormButton = document.createElement("button");
         showUtilitiesFormButton.setAttribute("type", "button");
         showUtilitiesFormButton.textContent = "Dodaj opłate";
@@ -15,6 +16,37 @@ async function displayUtilities(){
             hideChangeRatesForm();
         };
         contentContainer.appendChild(showUtilitiesFormButton);
+    }
+    else{
+        const header = document.createElement("h2");
+        header.classList.add("text-center");
+        header.innerHTML = 'Faktury';
+        contentContainer.appendChild(header);
+
+        const spaceCheck = await getSpaceForOwenr(localStorage.getItem('id'));
+        if(spaceCheck.message != "No spaces found for owner"){
+            await generateDateSelection();
+
+            document.getElementById('year').addEventListener('change',async function() {
+                await generateInvoice(parseInt(document.getElementById('flat').value),document.getElementById('year').value, document.getElementById('month').value);
+            });
+
+            document.getElementById('month').addEventListener('change',async function() {
+                await generateInvoice(parseInt(document.getElementById('flat').value),document.getElementById('year').value, document.getElementById('month').value);
+            });
+
+            const currentDate = new Date();
+            document.getElementById('year').value = currentDate.getFullYear();
+            document.getElementById('month').value = currentDate.getMonth() + 1; // Month is zero-based
+            const defaultFlat = document.getElementById('flat').value;
+            await generateInvoice(parseInt(defaultFlat),currentDate.getFullYear(), currentDate.getMonth() + 1);
+        }
+        else{
+            const header2 = document.createElement("h2");
+            header2.classList.add("text-center");
+            header2.innerHTML = 'Nie posiadasz żadnego mieszkania';
+            contentContainer.appendChild(header2);
+        }
     }
 }
 async function displayUtilitiesData(data, containerId) {
@@ -145,16 +177,6 @@ function displayChangeRatesForm(utilityid, utilityData, billBase) {
         defaultOption.setAttribute("value", "");
         defaultOption.textContent = "Wybierz jednostkę";
         unitSelect.appendChild(defaultOption);
-        const billBase = [
-            {
-                "id": 1,
-                "opis": "Opłata za m2"
-            },
-            {
-                "id": 2,
-                "opis": "Opłata za osobę"
-            }
-        ];
         if (Array.isArray(billBase)) {
             billBase.forEach(element => {
                 var option = document.createElement("option");
@@ -223,16 +245,12 @@ function displayChangeRatesForm(utilityid, utilityData, billBase) {
         console.error('Wystąpił błąd podczas wyświetlania formularza:', error.message);
     }
 }
-
-
-
-
 function hideChangeRatesForm(utilityid,utilityData){
     var ImputForm= document.getElementById("inputForm");
     if(ImputForm != null){
         ImputForm.remove();
     }else{
-        displayChangeRatesForm(utilityid,utilityData)
+        displayChangeRatesForm(utilityid,utilityData,billBase)
     }
 }
 async function deleteRateById(utility_id){
@@ -312,15 +330,18 @@ function validateRatesForm(toApiMetode,utilityid) {
     var dataToSend = {
         name: nameInput.value,
         price_per_unit: priceInput.value,
-        unit: unitInput.value
+        billing_basis_id: unitInput.value
     }
-    console.log(dataToSend)
+    if(unitInput.value === "1")
+        dataToSend.unit = "m2"
+    else
+        dataToSend.unit = "person"
     if(toApiMetode == 'PUT'){
         dataToSend.id = utilityid;
-        //addEditUtilities(dataToSend,'PUT','/update_utility')
+        addEditUtilities(dataToSend,'PUT','/update_utility')
     } 
     else{
-        //addEditUtilities(dataToSend,'POST','/create_utility')
+        addEditUtilities(dataToSend,'POST','/create_utility')
     }
         
 }
@@ -368,4 +389,145 @@ async function addEditUtilities(dataToSend,toApiMetode,ApiMetode){
           printApiResponse("apiInfoResponse",('Wystąpił błąd podczas wysyłania żądania:', error.message),"levelWarning")
           console.error('Wystąpił błąd podczas wysyłania żądania:', error.message);
       }
+}
+async function getInvoice(space_id,year,month){
+    try {
+        console.log(space_id)
+        console.log(year)
+        console.log(month)
+        const response = await fetch(apiBaseUrl+'/invoice/'+space_id+'/'+year+'/'+month, {
+            method: 'GET'
+        });
+        const responseData = await response.json();
+        if (responseData.message) {
+            return responseData.message;
+        }
+    } catch (error) {
+        printApiResponse("apiInfoResponse", 'Wystąpił błąd podczas pobierania opłat: ' + error.message, "levelWarning");
+        console.error('Wystąpił błąd podczas pobierania opłat:', error.message);
+        throw error;
+    }
+}
+async function generateDateSelection() {
+    const dateSelection = document.getElementById("content");
+
+    const dateSelectionDiv = document.createElement("div");
+    dateSelectionDiv.classList.add("row");
+    dateSelectionDiv.setAttribute('id',"dateSelection");
+
+
+    const yearDiv = document.createElement("div");
+    yearDiv.classList.add("col-md-4");
+    yearDiv.innerHTML = `
+        <label for="year">Wybierz rok:</label>
+        <input type="number" id="year" class="form-control">
+    `;
+    dateSelectionDiv.appendChild(yearDiv);
+
+    const monthDiv = document.createElement("div");
+    monthDiv.classList.add("col-md-4");
+    monthDiv.innerHTML = `
+        <label for="month">Wybierz miesiąc:</label>
+        <select id="month" class="form-select">
+            <option value="1">Styczeń</option>
+            <option value="2">Luty</option>
+            <option value="3">Marzec</option>
+            <option value="4">Kwiecień</option>
+            <option value="5">Maj</option>
+            <option value="6">Czerwiec</option>
+            <option value="7">Lipiec</option>
+            <option value="8">Sierpień</option>
+            <option value="9">Wrzesień</option>
+            <option value="10">Październik</option>
+            <option value="11">Listopad</option>
+            <option value="12">Grudzień</option>
+        </select>
+    `;
+
+    dateSelectionDiv.appendChild(monthDiv);
+
+    const flatDiv = document.createElement("div");
+        flatDiv.classList.add("col-md-4");
+        flatDiv.innerHTML = `
+            <label for="flat">Wybierz mieszkanie:</label>
+            <select id="flat" class="form-select">
+            </select>
+        `;
+        dateSelectionDiv.appendChild(flatDiv);
+        dateSelection.appendChild(dateSelectionDiv)
+
+        const flatOptions = await getSpaceForOwenr(localStorage.getItem('id'))
+        const flatSelect = document.getElementById('flat');
+        flatOptions.message.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = option;
+            flatSelect.appendChild(optionElement);
+        });
+        flatSelect.addEventListener('change', async function() {
+            await generateInvoice(parseInt(parseInt(flatSelect.value),document.getElementById('year').value), parseInt(document.getElementById('month').value));
+        });
+}
+async function generateInvoice(year, month, flat) {
+    const content = document.getElementById("content");
+    const oldInvoiceDiv = document.getElementById("invoiceDiv");
+    if(oldInvoiceDiv)
+        oldInvoiceDiv.remove();
+    const invoiceDiv = document.createElement("div");
+    invoiceDiv.setAttribute('id',"invoiceDiv");
+
+    let total = 0;
+
+    const table = document.createElement("table");
+    table.classList.add("table");
+
+    const invoices = await getInvoice(year, month,flat);
+    console.log(invoices)
+    if (invoices === "Invoice not found") {
+        const noInvoiceRow = document.createElement("tr");
+        noInvoiceRow.innerHTML = `
+            <td colspan="4"><b>Nie znaleziono faktur na wybrany termin i mieszkanie.</b></td>
+        `;
+        table.appendChild(noInvoiceRow);
+    } else {
+        table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Ilość</th>
+                <th>Cena za jednostke</th>
+                <th>Podstawa rozliczenia</th>
+                <th>Suma</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+        invoices.forEach(item => {
+            console.log(item)
+            const subtotal = item.price;
+            total += subtotal;
+
+            table.innerHTML += `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.amount}</td>
+                    <td>${item.price_per_unit} zł</td>
+                    <td>${item.billing_basis}</td>
+                    <td>${item.price} zł</td>
+                </tr>
+            `;
+        });
+        table.innerHTML += `
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="4"><b>Suma rachunku:</b></td>
+                <td><b>${total} zł</b></td>
+            </tr>
+        </tfoot>
+    `;
+    }
+
+    invoiceDiv.appendChild(table)
+    content.appendChild(invoiceDiv);
 }

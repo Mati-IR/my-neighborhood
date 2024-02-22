@@ -3,12 +3,9 @@ async function displayUserData() {
         contentContainer.innerHTML = '';
     const isAdmin = localStorage.getItem('admin');
     const userId = localStorage.getItem('id');
-    console.log(isAdmin)
-    console.log(userId)
     var userData = await getUserData(userId,isAdmin);
-    console.log(userData);
 
-    headerTextChange("Informacje o użytkowniku");
+    headerTextChange("Dane użytkownika");
 
     var div = document.createElement("div");
     var userDataHtml = `

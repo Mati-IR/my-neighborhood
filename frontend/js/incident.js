@@ -1027,21 +1027,23 @@ async function sendChangeStateToApi(dataToSend){
 }
 async function countElementsWithStateOne() {
     var data = await getAllIncident();
-    const elementsWithStateOne = data.message.filter(item => item.state === 1);
-    const count = elementsWithStateOne.length;
-    const resultElement = document.createElement('div');
-    if(count>0){
-        resultElement.innerText = `Masz zgłoszenia do obsłużenia`;
-        resultElement.style.textAlign = 'center';
-        resultElement.style.color = 'red';
-        resultElement.style.fontSize = '24px';
-    }
-    else{
-        resultElement.innerText = `Nie masz żadnych zgłoszeń do obsłużenia`;
-        resultElement.style.textAlign = 'center';
-        resultElement.style.color = 'black';
-        resultElement.style.fontSize = '24px';
-    }
-    const contentElement = document.getElementById('content');
-    contentElement.appendChild(resultElement);
+    if(data.message!='Incidents not found'){
+        const elementsWithStateOne = data.message.filter(item => item.state === 1);
+        const count = elementsWithStateOne.length;
+        const resultElement = document.createElement('div');
+        if(count>0){
+            resultElement.innerText = `Masz zgłoszenia do obsłużenia`;
+            resultElement.style.textAlign = 'center';
+            resultElement.style.color = 'red';
+            resultElement.style.fontSize = '24px';
+        }
+        else{
+            resultElement.innerText = `Nie masz żadnych zgłoszeń do obsłużenia`;
+            resultElement.style.textAlign = 'center';
+            resultElement.style.color = 'black';
+            resultElement.style.fontSize = '24px';
+        }
+        const contentElement = document.getElementById('content');
+        contentElement.appendChild(resultElement);
+    } 
 }

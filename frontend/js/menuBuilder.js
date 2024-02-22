@@ -1,14 +1,14 @@
-function generateSidebar(accountType) {
+async function generateSidebar(accountType) {
     const sidebar = document.getElementById("sidebar");
 
     const ul = document.createElement("ul");
     var items;
     if(accountType==="true"){
         items = [
-            { text: "Utwórz konto", onclick: "generateNewUserRadio()" },
+            { text: "Kreator kont", onclick: "generateNewUserRadio()" },
             { text: "Kreator osiedla", onclick: "generateBuildingPanel()" },
             { text: "Dane użytkownika", onclick: "displayUserData()" },
-            { text: "Zmiana stawek", onclick: "displayUtilities()" },
+            { text: "Zarządzanie opłatami", onclick: "displayUtilities()" },
             { text: "Ogłoszenia", onclick: "displayNews()" },
             { text: "Głosowania", onclick: "displayVotingSystem()" },
             { text: "Obsługa usterek", onclick: "displayIncidentSystem()" },
@@ -21,7 +21,7 @@ function generateSidebar(accountType) {
             { text: "Dane użytkownika", onclick: "displayUserData()" },
             { text: "Twoje mieszkanie", onclick: "spaceInfoDisplay()" },
             { text: "Ogłoszenia", onclick: "displayNews()" },
-            { text: "Aktualne stawki opłat", onclick: "displayUtilities()" },
+            { text: "Rachunki", onclick: "displayUtilities()" },
             { text: "Głosowania", onclick: "displayVotingSystem()" },
             { text: "Zgłoś usterke", onclick: "displayIncidentSystem()" },
             { text: "Raporty", onclick: "displayRaportSystem()" }

@@ -142,7 +142,6 @@ async function displaySpaceData(item,spaceData, categories, buildings, occupants
     div.innerHTML = spaceDataHtml;
     contentContainer.appendChild(div);
 }
-
 function hideOcupantForm(space_id){
     var inputForm= document.getElementById("inputForm");
     if(inputForm != null){
