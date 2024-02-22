@@ -19,7 +19,7 @@ async function displayVotingSystem(){
 
         var inactiveHeader = document.createElement("h2");
             inactiveHeader.classList.add("accountHeader");
-            inactiveHeader.innerHTML = "Aktywne Nieaktywne"
+            inactiveHeader.innerHTML = "Nieaktywne głosowania"
             contentContainer.appendChild(inactiveHeader);
         var inactivecontainer = document.createElement("div");
             inactivecontainer.setAttribute("id", "inactiveVoting-container");
