@@ -38,6 +38,12 @@ def new_voting(new_voting: NewVotingModel):
             code = RETURN_FAILURE
             message = "Start date is greater than end date"
             return code, message
+        
+        import datetime
+        if new_voting.end_date < datetime.datetime.now():
+            code = RETURN_FAILURE
+            message = "End date is in the past"
+            return code, message
 
         admin = session.query(Admin).filter(Admin.id == new_voting.creator_id).first()
         if admin is None:
