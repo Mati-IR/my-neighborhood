@@ -69,6 +69,7 @@ def get_all_votings(requester_id: int):
             code = RETURN_FAILURE
             message = "Votings not found"
         else:
+            import datetime
             for voting in votings:
                 # did the requester already vote?
                 vote = session.query(Vote).filter(Vote.voter_id == requester_id, Vote.voting_id == voting.id).first()
@@ -81,7 +82,8 @@ def get_all_votings(requester_id: int):
                     'description': voting.description,
                     'start_date': voting.start_date.isoformat(),
                     'end_date': voting.end_date.isoformat(),
-                    'voted': voted
+                    'voted': voted,
+                    'active': datetime.datetime.now() > voting.start_date and datetime.datetime.now() < voting.end_date
                 })
         return code, message, return_votings
 
@@ -117,6 +119,17 @@ def cast_vote(vote: VoteModel):
         if prev_vote is not None:
             code = RETURN_FAILURE
             message = "Vote already casted"
+            return code, message
+        
+        import datetime
+        if datetime.datetime.now() > voting.end_date:
+            code = RETURN_FAILURE
+            message = "Voting has ended"
+            return code, message
+        
+        if datetime.datetime.now() < voting.start_date:
+            code = RETURN_FAILURE
+            message = "Voting has not started"
             return code, message
 
 
