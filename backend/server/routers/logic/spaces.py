@@ -392,8 +392,8 @@ def get_all_spaces_of_owner(owner_id: int):
     try:
         with get_database_session() as session:
             logger.info(f"Attempting to retrieve all spaces for owner with ID {owner_id}")
-            owner_spaces = session.query(OwnerOfSpace).filter_by(owner_id=owner_id).all()
-            owner_of_space = session.query(OwnerOfSpace).filter_by(id=owner_id).all()
+            owner_spaces = session.query(OwnerOfSpace).filter_by(space_id=owner_id).all()
+            owner_of_space = session.query(OwnerOfSpace).filter_by(owner_id=owner_id).all()
             if owner_spaces and owner_of_space:
                 space_list = []
                 for space in owner_spaces:
