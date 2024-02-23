@@ -286,7 +286,7 @@ def create_lease_agreement(lease_agreement: NewLeaseAgreementModel):
                 and  ((existing_lease_agreement.start_date >= lease_agreement.start_date and existing_lease_agreement.start <= lease_agreement.end_date) \
                 or (existing_lease_agreement.end_date >= lease_agreement.start_date and existing_lease_agreement.end_date <= lease_agreement.end_date)) :
                 code = RETURN_USER_ALREADY_EXISTS
-                message = "Lease agreement for this space already exists"
+                message = "Lease agreement for this space already exists at this time period"
                 return code, message
 
             space = session.query(Space).filter(Space.id == lease_agreement.space_id).first()
