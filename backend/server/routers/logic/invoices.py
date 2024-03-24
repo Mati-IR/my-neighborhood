@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from .database_handler.tables_models import Invoice, InvoicePosition, InvoicesForSpace, Utility, BillingBasis, Space, InvoicesForSpace, OccupantsOfSpace
-from ..models import UtilityModel, NewUtilityModel, NewInvoiceModel
+from ..models import UtilityModel, NewUtilityModel, NewInvoiceModel, WaterMeterReading
 from .database_handler.util import get_database_session
 import os
 import logging

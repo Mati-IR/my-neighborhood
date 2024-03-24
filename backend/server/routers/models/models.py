@@ -1,6 +1,7 @@
 from datetime import datetime, date
+from typing import Literal, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, validator
 
 
 class SignInRequestModel(BaseModel):
@@ -196,3 +197,16 @@ class NewInvoiceModel(BaseModel):
     space_id: int
     year: int
     month: int
+
+class WaterMeterReading(BaseModel):
+    id: Optional[int] = None
+    space_id: int
+    date: date
+    is_cold_water: Literal[0, 1] = Field(..., description="If 1, then meter reading is about cold water, otherwise it's about warm water.")
+    liters_reading: int
+
+    @validator('is_cold_water')
+    def is_cold_water_must_be_boolean(cls, v):
+        if v not in [0, 1]:
+            raise ValueError('is_cold_water must be 0 or 1')
+        return v

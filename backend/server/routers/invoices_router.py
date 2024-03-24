@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from .models import NewUtilityModel, UtilityModel, NewInvoiceModel
+
+from .models import NewUtilityModel, UtilityModel, NewInvoiceModel, WaterMeterReading
 from .logic import get_all_utilities,create_utility, get_existing_invoice, update_utility, remove_utility, generate_new_random_invoice
 import logging
 import json
@@ -39,9 +40,25 @@ def new_random_invoice(space_id: int, year: int, month: int):
     code, message = generate_new_random_invoice(NewInvoiceModel(space_id=space_id, year=year, month=month))
     return JSONResponse(status_code=code, content={"message": message})
 
-
 @router.get('/invoice/{space_id}/{year}/{month}')
 def get_invoice(space_id: int, year: int, month: int):
     pass
     code, message = get_existing_invoice(NewInvoiceModel(space_id=space_id, year=year, month=month))
     return JSONResponse(status_code=code, content={"message": message})
+
+# CRUD for water meter readings
+@router.post('/water_meter_reading')
+def new_water_meter_reading(water_meter_reading: WaterMeterReading):
+    pass
+
+@router.put('/water_meter_reading')
+def update_water_meter_reading(water_meter_reading: WaterMeterReading):
+    pass
+
+@router.delete('/water_meter_reading/{water_meter_reading_id}')
+def delete_water_meter_reading(water_meter_reading_id: int):
+    pass
+
+@router.get('/water_meter_readings/{space_id}')
+def get_water_meter_reading(space_id: int):
+    pass

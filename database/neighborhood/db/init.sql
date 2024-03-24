@@ -69,7 +69,7 @@ CREATE TABLE `billing_basis`
 
 PRIMARY KEY (`id`)
 );
-INSERT INTO `billing_basis` (`id`, `basis`) VALUES (1, 'Per square meter'), (2, 'Per opccupant');
+INSERT INTO `billing_basis` (`id`, `basis`) VALUES (1, 'Per square meter'), (2, 'Per opccupant'), (3, 'Monthly advance payment'), (4, 'Per cubic meter');
 
 CREATE TABLE `utilities`
 (
@@ -84,9 +84,18 @@ KEY `FK_1` (`billing_basis`),
 CONSTRAINT `FK_27` FOREIGN KEY `FK_1` (`billing_basis`) REFERENCES `billing_basis` (`id`)
 );
 
-INSERT INTO `utilities` (`name`, `price_per_unit`, `billing_basis`, `unit`) VALUES ('Rent', 10, 1, 'm2'), ('Garbage', 5, 2, 'person'), ('Renovation', 10, 1, 'm2'), ('Management', 10, 1, 'm2');
+INSERT INTO `utilities` (`name`, `price_per_unit`, `billing_basis`, `unit`) VALUES ('Rent', 10, 1, 'm2'), ('Garbage', 5, 2, 'person'), ('Renovation', 10, 1, 'm2'), ('Management', 10, 1, 'm2'), ('Warm water advance payment', 200, 3, 'month'), ('Cold water advance payment', 200, 3, 'month'), ('Warm water', 4, 4, 'm3'), ('Cold water', 2, 4, 'm3');
 
+CREATE TABLE `water_meter_reading`
+(
+ `space_id`       int NOT NULL ,
+ `date`           date NOT NULL ,
+ `is_cold_water`  tinyint NOT NULL COMMENT 'If 1, then meter reading is about cold water, otherwise it''s about warm water.' ,
+ `liters_reading` bigint NOT NULL ,
 
+KEY `FK_1` (`space_id`),
+CONSTRAINT `FK_27_2` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`)
+);
 
 CREATE TABLE `space_type`
 (
