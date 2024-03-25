@@ -3,7 +3,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from .database_handler.tables_models import Invoice, InvoicePosition, InvoicesForSpace, Utility, BillingBasis, Space, InvoicesForSpace, OccupantsOfSpace
+from .database_handler.tables_models import WaterMeterReading, Invoice, InvoicePosition, InvoicesForSpace, Utility, BillingBasis, Space, InvoicesForSpace, OccupantsOfSpace
 from ..models import UtilityModel, NewUtilityModel, NewInvoiceModel, WaterMeterReading
 from .database_handler.util import get_database_session
 import os
@@ -171,7 +171,7 @@ def generate_new_random_invoice(new_invoice: NewInvoiceModel):
                     basis_multiplier = float(session.query(Space).filter(Space.id == new_invoice.space_id).first().area)
                 elif billing_basis.basis == 'Per opccupant':
                     basis_multiplier = session.query(OccupantsOfSpace).filter(OccupantsOfSpace.space_id == new_invoice.space_id).count()
-                import random
+                
                 return_utils.append({
                     'id': utility.id,
                     'name': utility.name,

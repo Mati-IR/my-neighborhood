@@ -92,10 +92,12 @@ CREATE TABLE `water_meter_reading`
  `date`           date NOT NULL ,
  `is_cold_water`  tinyint NOT NULL COMMENT 'If 1, then meter reading is about cold water, otherwise it''s about warm water.' ,
  `liters_reading` bigint NOT NULL ,
+ `is_in_bill`     tinyint NOT NULL ,
 
 KEY `FK_1` (`space_id`),
 CONSTRAINT `FK_27_2` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`)
 );
+
 
 CREATE TABLE `space_type`
 (
