@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
 from .models import NewUtilityModel, UtilityModel, NewInvoiceModel, WaterMeterReading
-from .logic import get_all_utilities,create_utility, get_existing_invoice, update_utility, remove_utility, generate_new_random_invoice
+from .logic import get_all_utilities,create_utility, get_existing_invoice, update_utility, remove_utility, generate_new_random_invoice, update_water_meter_reading, delete_water_meter_reading, get_water_meter_readings, update_water_meter_reading
 import logging
 import json
 
@@ -42,23 +42,26 @@ def new_random_invoice(space_id: int, year: int, month: int):
 
 @router.get('/invoice/{space_id}/{year}/{month}')
 def get_invoice(space_id: int, year: int, month: int):
-    pass
     code, message = get_existing_invoice(NewInvoiceModel(space_id=space_id, year=year, month=month))
     return JSONResponse(status_code=code, content={"message": message})
 
 # CRUD for water meter readings
 @router.post('/water_meter_reading')
 def new_water_meter_reading(water_meter_reading: WaterMeterReading):
-    pass
+    code, message = new_water_meter_reading(water_meter_reading)
+    return JSONResponse(status_code=code, content={"message": message})
 
 @router.put('/water_meter_reading')
 def update_water_meter_reading(water_meter_reading: WaterMeterReading):
-    pass
+    code, message = update_water_meter_reading(water_meter_reading)
+    return JSONResponse(status_code=code, content={"message": message})
 
 @router.delete('/water_meter_reading/{water_meter_reading_id}')
 def delete_water_meter_reading(water_meter_reading_id: int):
-    pass
+    code, message = delete_water_meter_reading(water_meter_reading_id)
+    return JSONResponse(status_code=code, content={"message": message})
 
 @router.get('/water_meter_readings/{space_id}')
 def get_water_meter_reading(space_id: int):
-    pass
+    code, message = get_water_meter_readings(space_id)
+    return JSONResponse(status_code=code, content={"message": message})

@@ -217,3 +217,104 @@ def get_existing_invoice(invoice: NewInvoiceModel):
                 })
         return code, return_utils
     
+def new_water_meter_reading(water_meter_reading: WaterMeterReading):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Water meter reading created"
+
+        if None in water_meter_reading.__dict__.values() or "" in water_meter_reading.__dict__.values():
+            code = RETURN_FAILURE
+            message = "Please fill all the fields"
+            return code, message
+
+        if water_meter_reading.date is None:
+            code = RETURN_FAILURE
+            message = "Please provide date"
+            return code, message
+
+        if water_meter_reading.is_cold_water not in [0, 1]:
+            code = RETURN_FAILURE
+            message = "is_cold_water must be 0 or 1"
+            return code, message
+
+        if session.query(Space).filter(Space.id == water_meter_reading.space_id).first() is None:
+            code = RETURN_FAILURE
+            message = "Space not found"
+            return code, message
+
+        water_meter_reading = WaterMeterReading(space_id=water_meter_reading.space_id, \
+                                                date=water_meter_reading.date, \
+                                                is_cold_water=water_meter_reading.is_cold_water)
+        session.add(water_meter_reading)
+        session.commit()
+
+        return code, message
+
+def update_water_meter_reading(water_meter_reading: WaterMeterReading):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Water meter reading updated"
+
+        if None in water_meter_reading.__dict__.values() or "" in water_meter_reading.__dict__.values():
+            code = RETURN_FAILURE
+            message = "Please fill all the fields"
+            return code, message
+
+        if water_meter_reading.date is None:
+            code = RETURN_FAILURE
+            message = "Please provide date"
+            return code, message
+
+        if water_meter_reading.is_cold_water not in [0, 1]:
+            code = RETURN_FAILURE
+            message = "is_cold_water must be 0 or 1"
+            return code, message
+
+        water_meter_reading = session.query(WaterMeterReading).filter(WaterMeterReading.id == water_meter_reading.id).first()
+        if water_meter_reading is None:
+            code = RETURN_FAILURE
+            message = "Water meter reading not found"
+            return code, message
+
+        water_meter_reading.date = water_meter_reading.date
+        water_meter_reading.is_cold_water = water_meter_reading.is_cold_water
+        session.commit()
+
+        return code, message
+    
+def delete_water_meter_reading(water_meter_reading_id: int):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = "Water meter reading deleted"
+
+        water_meter_reading = session.query(WaterMeterReading).filter(WaterMeterReading.id == water_meter_reading_id).first()
+        if water_meter_reading is None:
+            code = RETURN_FAILURE
+            message = "Water meter reading not found"
+            return code, message
+
+        session.delete(water_meter_reading)
+        session.commit()
+
+        return code, message
+    
+def get_water_meter_readings(space_id: int):
+    with get_database_session() as session:
+        code = RETURN_SUCCESS
+        message = []
+
+        water_meter_readings = session.query(WaterMeterReading).filter(WaterMeterReading.space_id == space_id).all()
+        return_utils = []
+        if not water_meter_readings:
+            return RETURN_FAILURE, "Water meter readings not found"
+        else:
+            for reading in water_meter_readings:
+                return_utils.append({
+                    'id': reading.id,
+                    'space_id': reading.space_id,
+                    'date': reading.date,
+                    'is_cold_water': reading.is_cold_water,
+                    'liters_reading': reading.liters_reading
+                })
+        return code, return_utils
+    
