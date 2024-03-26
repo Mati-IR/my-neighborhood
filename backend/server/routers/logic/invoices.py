@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from .database_handler.tables_models import WaterMeterReading, Invoice, InvoicePosition, InvoicesForSpace, Utility, BillingBasis, Space, InvoicesForSpace, OccupantsOfSpace
-from ..models import UtilityModel, NewUtilityModel, NewInvoiceModel, WaterMeterReading
+from ..models import UtilityModel, NewUtilityModel, NewInvoiceModel, WaterMeterReadingModel
 from .database_handler.util import get_database_session
 import os
 import logging
@@ -172,14 +172,20 @@ def generate_new_random_invoice(new_invoice: NewInvoiceModel):
                 elif billing_basis.basis == 'Per opccupant':
                     basis_multiplier = session.query(OccupantsOfSpace).filter(OccupantsOfSpace.space_id == new_invoice.space_id).count()
                 
+                unpaid_water_meter_readings = session.query(WaterMeterReading).filter(WaterMeterReading.space_id == new_invoice.space_id, \
+                                                                                        WaterMeterReading.is_in_bill == 0).all()
+                are_unpaid_water_meter_readings = unpaid_water_meter_readings is not None and len(unpaid_water_meter_readings) > 0
+
                 return_utils.append({
                     'id': utility.id,
                     'name': utility.name,
                     'amount': float(basis_multiplier),
                     'price_per_unit': float(utility.price_per_unit),
                     'billing_basis': billing_basis.basis,
-                    'price': float(utility.price_per_unit) * basis_multiplier
-
+                    'price': float(utility.price_per_unit) * basis_multiplier,
+                    'unpaid_water_meter_readings': unpaid_water_meter_readings if are_unpaid_water_meter_readings is True else None,
+                    'warm_water_advance_payment': get_all_utilities()['Warm water advance payment'] if not are_unpaid_water_meter_readings else None,
+                    'cold_water_advance_payment': get_all_utilities()['Cold water advance payment'] if not are_unpaid_water_meter_readings else None
                 })
                 new_invoice_position = InvoicePosition(utility_id=utility.id, \
                                                        invoice_id=new_invoice.id, \
@@ -217,7 +223,7 @@ def get_existing_invoice(invoice: NewInvoiceModel):
                 })
         return code, return_utils
     
-def new_water_meter_reading(water_meter_reading: WaterMeterReading):
+def new_water_meter_reading(water_meter_reading: WaterMeterReadingModel):
     with get_database_session() as session:
         code = RETURN_SUCCESS
         message = "Water meter reading created"
@@ -244,40 +250,10 @@ def new_water_meter_reading(water_meter_reading: WaterMeterReading):
 
         water_meter_reading = WaterMeterReading(space_id=water_meter_reading.space_id, \
                                                 date=water_meter_reading.date, \
-                                                is_cold_water=water_meter_reading.is_cold_water)
+                                                warm_water_liters=water_meter_reading.warm_water_liters, \
+                                                cold_water_liters=water_meter_reading.cold_water_liters, \
+                                                is_in_bill=0)
         session.add(water_meter_reading)
-        session.commit()
-
-        return code, message
-
-def update_water_meter_reading(water_meter_reading: WaterMeterReading):
-    with get_database_session() as session:
-        code = RETURN_SUCCESS
-        message = "Water meter reading updated"
-
-        if None in water_meter_reading.__dict__.values() or "" in water_meter_reading.__dict__.values():
-            code = RETURN_FAILURE
-            message = "Please fill all the fields"
-            return code, message
-
-        if water_meter_reading.date is None:
-            code = RETURN_FAILURE
-            message = "Please provide date"
-            return code, message
-
-        if water_meter_reading.is_cold_water not in [0, 1]:
-            code = RETURN_FAILURE
-            message = "is_cold_water must be 0 or 1"
-            return code, message
-
-        water_meter_reading = session.query(WaterMeterReading).filter(WaterMeterReading.id == water_meter_reading.id).first()
-        if water_meter_reading is None:
-            code = RETURN_FAILURE
-            message = "Water meter reading not found"
-            return code, message
-
-        water_meter_reading.date = water_meter_reading.date
-        water_meter_reading.is_cold_water = water_meter_reading.is_cold_water
         session.commit()
 
         return code, message
@@ -287,7 +263,7 @@ def delete_water_meter_reading(water_meter_reading_id: int):
         code = RETURN_SUCCESS
         message = "Water meter reading deleted"
 
-        water_meter_reading = session.query(WaterMeterReading).filter(WaterMeterReading.id == water_meter_reading_id).first()
+        water_meter_reading = session.query(WaterMeterReadingModel).filter(WaterMeterReadingModel.id == water_meter_reading_id).first()
         if water_meter_reading is None:
             code = RETURN_FAILURE
             message = "Water meter reading not found"
@@ -303,7 +279,7 @@ def get_water_meter_readings(space_id: int):
         code = RETURN_SUCCESS
         message = []
 
-        water_meter_readings = session.query(WaterMeterReading).filter(WaterMeterReading.space_id == space_id).all()
+        water_meter_readings = session.query(WaterMeterReadingModel).filter(WaterMeterReadingModel.space_id == space_id).all()
         return_utils = []
         if not water_meter_readings:
             return RETURN_FAILURE, "Water meter readings not found"
@@ -313,8 +289,9 @@ def get_water_meter_readings(space_id: int):
                     'id': reading.id,
                     'space_id': reading.space_id,
                     'date': reading.date,
-                    'is_cold_water': reading.is_cold_water,
-                    'liters_reading': reading.liters_reading
+                    'warm_water_liters': reading.warm_water_liters,
+                    'cold_water_liters': reading.cold_water_liters,
+                    'is_in_bill': reading.is_in_bill
                 })
         return code, return_utils
     

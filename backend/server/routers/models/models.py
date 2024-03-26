@@ -198,15 +198,9 @@ class NewInvoiceModel(BaseModel):
     year: int
     month: int
 
-class WaterMeterReading(BaseModel):
+class WaterMeterReadingModel(BaseModel):
     id: Optional[int] = None
     space_id: int
     date: date
-    is_cold_water: Literal[0, 1] = Field(..., description="If 1, then meter reading is about cold water, otherwise it's about warm water.")
-    liters_reading: int
-
-    @validator('is_cold_water')
-    def is_cold_water_must_be_boolean(cls, v):
-        if v not in [0, 1]:
-            raise ValueError('is_cold_water must be 0 or 1')
-        return v
+    cold_water: float
+    hot_water: float

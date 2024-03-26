@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
 
-from .models import NewUtilityModel, UtilityModel, NewInvoiceModel, WaterMeterReading
-from .logic import get_all_utilities,create_utility, get_existing_invoice, update_utility, remove_utility, generate_new_random_invoice, update_water_meter_reading, delete_water_meter_reading, get_water_meter_readings, update_water_meter_reading
+from .models import NewUtilityModel, UtilityModel, NewInvoiceModel, WaterMeterReadingModel
+from .logic import get_all_utilities,create_utility, get_existing_invoice, update_utility, remove_utility, generate_new_random_invoice, delete_water_meter_reading, get_water_meter_readings
 import logging
 import json
 
@@ -47,13 +47,8 @@ def get_invoice(space_id: int, year: int, month: int):
 
 # CRUD for water meter readings
 @router.post('/water_meter_reading')
-def new_water_meter_reading(water_meter_reading: WaterMeterReading):
+def new_water_meter_reading(water_meter_reading: WaterMeterReadingModel):
     code, message = new_water_meter_reading(water_meter_reading)
-    return JSONResponse(status_code=code, content={"message": message})
-
-@router.put('/water_meter_reading')
-def update_water_meter_reading(water_meter_reading: WaterMeterReading):
-    code, message = update_water_meter_reading(water_meter_reading)
     return JSONResponse(status_code=code, content={"message": message})
 
 @router.delete('/water_meter_reading/{water_meter_reading_id}')

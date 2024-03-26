@@ -244,14 +244,16 @@ class IncidentStaff(Base):
     incident = relationship("Incident", backref="incident_staffs")
     serviceman = relationship("Serviceman", backref="incident_staffs")
 
-#CREATE TABLE `water_meter_reading`
+##CREATE TABLE `water_meter_reading`
 #(
-# `space_id`       int NOT NULL ,
-# `date`           date NOT NULL ,
-# `is_cold_water`  tinyint NOT NULL COMMENT 'If 1, then meter reading is about cold water, otherwise it''s about warm water.' ,
-# `liters_reading` bigint NOT NULL ,
-# `is_in_bill`     tinyint NOT NULL ,
+# `id`                int NOT NULL ,
+# `space_id`          int NOT NULL ,
+# `date`              date NOT NULL ,
+# `warm_water_liters` decimal NOT NULL ,
+# `cold_water_liters` decimal NOT NULL ,
+# `is_in_bill`        tinyint NOT NULL ,
 #
+#PRIMARY KEY (`id`),
 #KEY `FK_1` (`space_id`),
 #CONSTRAINT `FK_27_2` FOREIGN KEY `FK_1` (`space_id`) REFERENCES `space` (`id`)
 #);
@@ -261,7 +263,7 @@ class WaterMeterReading(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     space_id = Column(Integer, ForeignKey('space.id'))
     date = Column(Date, nullable=False)
-    is_cold_water = Column(SmallInteger, nullable=False, comment="If 1, then meter reading is about cold water, otherwise it's about warm water.")
-    liters_reading = Column(Integer, nullable=False)
+    warm_water_liters = Column(DECIMAL, nullable=False)
+    cold_water_liters = Column(DECIMAL, nullable=False)
     is_in_bill = Column(SmallInteger, nullable=False)
     space = relationship("Space", backref="water_meter_readings")
