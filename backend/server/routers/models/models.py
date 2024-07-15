@@ -1,6 +1,7 @@
 from datetime import datetime, date
+from typing import Literal, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, validator
 
 
 class SignInRequestModel(BaseModel):
@@ -196,3 +197,10 @@ class NewInvoiceModel(BaseModel):
     space_id: int
     year: int
     month: int
+
+class WaterMeterReadingModel(BaseModel):
+    id: Optional[int] = None
+    space_id: int
+    date: date
+    cold_water: float
+    hot_water: float
